@@ -1,0 +1,2 @@
+git remote -v add heroku git@heroku.com:mjolner.git
+git subtree push --prefix=bifrost heroku master
