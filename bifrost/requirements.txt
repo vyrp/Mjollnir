@@ -1,6 +1,10 @@
 Flask==0.10.1
+Flask-Login==0.2.9
+Flask-Stormpath==0.0.1
 Jinja2==2.7.2
 MarkupSafe==0.19
 Werkzeug==0.9.4
 gunicorn==18.0
 itsdangerous==0.23
+requests==2.2.1
+stormpath==1.0.1
