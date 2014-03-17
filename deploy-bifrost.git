@@ -1,2 +1,4 @@
 git remote -v add heroku git@heroku.com:mjolner.git
-git subtree push --prefix=bifrost heroku master
+git subtree split --prefix=bifrost --branch bifrost-deploy
+git push -f heroku bifrost-deploy:master
+git branch -D bifrost-deploy
