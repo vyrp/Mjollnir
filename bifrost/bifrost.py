@@ -7,6 +7,8 @@
 """
 
 from os import environ
+import os
+
 from flask import (
     Flask,
     redirect,
@@ -53,10 +55,6 @@ def index():
 def register():
     """
     This view allows a user to register for the site.
-
-
-    This will create a new User in Stormpath, and then log the user into their
-    new account immediately (no email verification required).
     """
     if request.method == 'GET':
         return render_template('register.html')
@@ -77,8 +75,7 @@ def register():
         return render_template('register.html', error=err.message)
 
 
-    login_user(_user, remember=True)
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('.login', x='verifymail'))
 
 
 
