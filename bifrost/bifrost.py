@@ -148,3 +148,10 @@ def logout():
     """
     logout_user()
     return redirect(url_for('index'))
+
+
+
+
+if __name__ == "__main__":
+    if os.name == 'nt':
+        app.run(host = '0.0.0.0', port = 80, debug = True)
