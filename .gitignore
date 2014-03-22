@@ -65,6 +65,16 @@ Desktop.ini
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 
+# Thrift auto generated files (add new rules when needed)
+gen-cpp/
+gen-html/
+
+# Gedit save files
+*.*~
+
+# Windows executable files
+*.exe
+
 # Windows Installer files
 *.cab
 *.msi
