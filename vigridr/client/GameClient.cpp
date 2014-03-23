@@ -1,8 +1,3 @@
-/**
- * Copyright 2014 ITA
- * @author Luiz Filipe Martins Ramos (luizmramos@gmail.com)
- */
- 
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/time.h>
