@@ -8,6 +8,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
+obj/
 bin/
 build/
 develop-eggs/
@@ -71,6 +72,7 @@ gen-html/
 
 # Gedit save files
 *.*~
+Makefile~
 
 # Windows executable files
 *.exe
