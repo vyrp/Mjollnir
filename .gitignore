@@ -70,13 +70,6 @@ Desktop.ini
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 
-# Thrift auto generated files (add new rules when needed)
-gen-cpp/
-gen-html/
-
-# Gedit save files
-*.*~
-
 # Windows executable files
 *.exe
 
@@ -113,3 +106,30 @@ obj/
 # Executables
 *.out
 *.app
+
+###
+### Thrift 
+###
+
+# Thrift auto generated folders
+gen-cpp/
+gen-html/
+
+# Thrift auto generated files
+*.skeleton.cpp
+*_types.cpp
+*_types.h
+*_constants.cpp
+*_constants.h
+
+###
+### Editors
+###
+
+# Gedit save files
+*.*~
+
+# Sublime project files
+*.sublime-project
+*.sublime-workspace
+
