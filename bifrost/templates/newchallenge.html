@@ -5,14 +5,17 @@
 {{ pagedown.html_head() }}
 <style>
 .flask-pagedown-input {
-    color: #000000;
+  color: #000000;
+}
+input {
+  color: #000000;
 }
 </style>
 {% endblock %}
 
 
 {% block body %}
-  <div class="newproblem">
+  <div class="newchallenge">
     <div class="row">
       <div class="col-lg-6 col-lg-offset-3">
         <form class="bs-example form-horizontal" method="post" action="">
@@ -24,17 +27,18 @@
                 {{ error }}
               </div>
             {% endif %}
-            <div class="form-group">
-              <label for="pname" class="col-lg-4 control-label">Challenge name</label>
-              <div class="col-lg-4">
-                <input type="pname" class="form-control" id="pname" name="pname" placeholder="tic-tac-toe" autofocus>
-              </div>
-            </div>
             <div style="width: 500px;">
                 <form method = "POST">
                     <div>
-                        <b>{{ form.pagedown.label }}</b>:
-                        {{ form.pagedown(rows = 10, style = 'width:100%') }}
+                      <b>{{ form.name.label }}</b>:
+                      <br>
+                      {{ form.name() }}
+                    </div>
+                    <br>
+                    <br>
+                    <div>
+                      <b>{{ form.pagedown.label }}</b>:
+                      {{ form.pagedown(rows = 10, style = 'width:100%') }}
                     </div>
                 </form>
             </div>

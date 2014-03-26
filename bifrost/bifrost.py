@@ -26,37 +26,50 @@ from flask.ext.stormpath import (
     user,
 )
 from flask.ext.pagedown import PageDown
-from flask.ext.wtf import Form
 from flask.ext.pagedown.fields import PageDownField
+from flask.ext.wtf import Form
 from stormpath.error import Error as StormpathError
 from extensions.flask_stormpath import groups_allowed
 from extensions.flask_stormpath import is_active_user_in
-from wtforms.fields import SubmitField
+from wtforms.fields import TextField
+from wtforms.validators import DataRequired
+
+from pymongo import MongoClient
+from pymongo.errors import PyMongoError
 
 
 
 
 ##### Forms
 class ChallengeDescriptionForm(Form):
-    pagedown = PageDownField('Challenge description')
+    name = TextField('Challenge name', validators=[DataRequired()])
+    pagedown = PageDownField('Challenge description', validators=[DataRequired()])
 
 
 
 
 ##### Initialization
 app = Flask(__name__)
+
 app.config['SECRET_KEY'] = environ.get('STORMPATH_SECRET_KEY')
 app.config['STORMPATH_API_KEY_ID'] = environ.get('STORMPATH_API_KEY_ID')
 app.config['STORMPATH_API_KEY_SECRET'] = environ.get('STORMPATH_API_KEY_SECRET')
 app.config['STORMPATH_APPLICATION'] = environ.get('STORMPATH_APPLICATION')
+app.config['MONGOLAB_URI'] = environ.get('MONGOLAB_URI')
+
 app.jinja_env.globals.update(is_active_user_in=is_active_user_in)
+
 
 stormpath_manager = StormpathManager(app)
 stormpath_manager.login_view = '.login'
 
+
 pagedown = PageDown(app)
 
 
+mongo_client = MongoClient(app.config['MONGOLAB_URI'])
+mongodb = mongo_client['mjollnir-db']
+challenges_collection = mongodb.challenges
 
 
 ##### Website
@@ -176,14 +189,31 @@ def newchallenge():
     Allows a user in the "Dev" admin group to submit a new challenge.
     """
     form = ChallengeDescriptionForm(csrf_enabled = False)
-    form.pagedown.data = '#Hey!\nEnter the <i>challenge description</i> using **Markdown**!'
+
+    if not form.pagedown.data:
+        form.pagedown.data = '#Hey!\nEnter the <i>challenge description</i> using **Markdown**!'
+
+    if request.method == 'GET':
+        return render_template('newchallenge.html', form = form)
 
     if form.validate_on_submit():
-        description = form.pagedown.data
+        challenge_name = request.form.get('cname')
+        challenge_description = form.pagedown.data
         challenge_id = uuid4()
-        return redirect(url_for('.challenge', i = challenge_id))
 
-    return render_template('newchallenge.html', form = form)
+        document = { 'cid': str(challenge_id),
+                     'name': challenge_name,
+                     'description': challenge_description }
+
+        try:
+            challenges_collection.insert(document)
+        except PyMongoError as err:
+            return render_template('newchallenge.html', form = form, error = err.message)
+
+        return redirect(url_for('.challenge', i = challenge_id))
+        
+    else:
+        return render_template('newchallenge.html', form = form, error = "Please enter all the required information.")
 
 
 

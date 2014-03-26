@@ -9,5 +9,6 @@ WTForms==1.0.5
 Werkzeug==0.9.4
 gunicorn==18.0
 itsdangerous==0.23
+pymongo==2.6.3
 requests==2.2.1
 stormpath==1.0.1
