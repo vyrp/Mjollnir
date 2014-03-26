@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     std::cout << "Invalid port number." << std::endl;
     return 0;
   }
-  GameLogic gameLogic;
+  GameLogic gameLogic(port1, port2);
   auto service = [&](int32_t port) {  
     boost::shared_ptr<GameService> handler(new GameService(gameLogic, port));
     boost::shared_ptr<TProcessor> processor(new GameProcessor(handler));
