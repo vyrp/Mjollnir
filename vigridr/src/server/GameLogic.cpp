@@ -4,8 +4,11 @@
 
 namespace mjollnir { namespace vigridr {
 
-void GameLogic::update(Command command) {
-  printf("Updating...\n");
+GameLogic::GameLogic(int32_t playerId1, int32_t playerId2) {
+}
+
+void GameLogic::update(Command command, int32_t playerId) {
+  printf("Updating... player %d\n", playerId);
   return;
 }
 

@@ -8,7 +8,8 @@ namespace mjollnir { namespace vigridr {
 
 class GameLogic {
  public:
-  void update(Command command);
+  GameLogic(int32_t playerId1, int32_t playerId2);
+  void update(Command command, int32_t playerId);
   WorldModel getWorldModel();
 };
 

@@ -1,3 +1,6 @@
+#include <thread>
+#include <functional>
+
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TSimpleServer.h>
 #include <thrift/transport/TServerSocket.h>
@@ -18,19 +21,38 @@ using ::apache::thrift::transport::TTransportFactory;
 using namespace mjollnir::vigridr;
 
 int main(int argc, char **argv) {
-  int port = 9090;
-  boost::shared_ptr<GameService> handler(new GameService());
-  boost::shared_ptr<TProcessor> processor(new GameProcessor(handler));
-  boost::shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
-  boost::shared_ptr<TTransportFactory> transportFactory(
-  	new TBufferedTransportFactory());
-  boost::shared_ptr<TProtocolFactory> protocolFactory(
-  	new TBinaryProtocolFactory());
+  if (argc <= 2) {
+    std::cout << "No port specified." << std::endl;
+    return 0;
+  }
+  int32_t port1, port2;
+  try {
+    port1 = std::stoi(argv[1]);
+    port2 = std::stoi(argv[2]);
+  } catch (const std::exception& e) {
+    std::cout << "Invalid port number." << std::endl;
+    return 0;
+  }
+  GameLogic gameLogic;
+  auto service = [&](int32_t port) {  
+    boost::shared_ptr<GameService> handler(new GameService(gameLogic, port));
+    boost::shared_ptr<TProcessor> processor(new GameProcessor(handler));
+    boost::shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
+    boost::shared_ptr<TTransportFactory> transportFactory(
+      new TBufferedTransportFactory());
+    boost::shared_ptr<TProtocolFactory> protocolFactory(
+      new TBinaryProtocolFactory());
 
-  TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
-  printf("Starting server...\n");
-  server.serve();
-  printf("Done");
+    TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
+    printf("Starting server...\n");
+    server.serve();
+    printf("Done");  
+  };
+  std::thread a(std::bind(service, port1));
+  std::thread b(std::bind(service, port2));
+  a.join();
+  b.join();
+  
   return 0;
 }
 

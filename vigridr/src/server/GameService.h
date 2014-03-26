@@ -8,10 +8,12 @@ namespace mjollnir { namespace vigridr {
 
 class GameService : virtual public GameIf {
  public:
+  GameService(GameLogic gameLogic, int32_t playerId);
   void gameInfo(GameInfo& gameInfo) override;
   CommandStatus update(const Command& command) override;
  private:
   GameLogic gameLogic_;
+  int32_t playerId_;
 };
 
 }}  // namespaces
