@@ -1,3 +1,5 @@
+include "WorldModel.thrift"
+
 namespace cpp mjollnir.vigridr
 
 enum GameStatus {
@@ -6,13 +8,13 @@ enum GameStatus {
 }
 
 enum CommandStatus {
-	SUCCESS = 1,
-	ERROR = 2
+  SUCCESS = 1,
+  ERROR = 2
 }
 
 struct GameInfo {
 	1: GameStatus gameStatus,
-	2: i32 waitingTimeMiliseconds,
-	3: optional CommandStatus commandStatus,
-	4: optional string description
+  2: WorldModel.WorldModel worldModel,
+	3: i32 waitingTimeMiliseconds,
+	4: optional string description  // for debugging purposes
 }

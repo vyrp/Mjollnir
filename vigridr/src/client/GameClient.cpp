@@ -7,7 +7,6 @@
 #include <thrift/transport/TTransportUtils.h>
 
 #include "../server/gen-cpp/Game.h"
-#include "../server/gen-cpp/GameModel_types.h"
 
 using ::apache::thrift::protocol::TBinaryProtocol;
 using ::apache::thrift::protocol::TProtocol;
@@ -26,6 +25,8 @@ int main(int argc, char** argv) {
     transport->open();
     mjollnir::vigridr::GameInfo gameInfo;
     client.gameInfo(gameInfo);
+    mjollnir::vigridr::Command command;
+    client.update(command);
     printf("It worked!\n");
     transport->close();
   } catch (TException &tx) {
