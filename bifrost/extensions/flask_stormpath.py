@@ -33,3 +33,9 @@ def groups_allowed(groups=None):
         return decorated_view
 
     return decorator
+
+def is_active_user_in(group):
+    """
+    Verifies if the current user is in a specific group.
+    """
+    return group in [group.name for group in current_user.groups]

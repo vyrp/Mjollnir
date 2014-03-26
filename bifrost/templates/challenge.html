@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+
+{% block body %}
+  <div class="dashboard">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="jumbotron">
+          <h1>{{ challenge_name }}</h1>
+          {% if error %}
+            <div class="alert alert-dismissable alert-danger register-fail">
+              <button type="button" class="close" data-dismiss="alert">&times;</button>
+              {{ error }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -6,6 +6,7 @@
     that reaches between Midgard (the world) and Asgard, the realm of the gods.
 """
 
+from uuid import uuid4
 from os import environ
 import os
 
@@ -24,7 +25,20 @@ from flask.ext.stormpath import (
     logout_user,
     user,
 )
+from flask.ext.pagedown import PageDown
+from flask.ext.wtf import Form
+from flask.ext.pagedown.fields import PageDownField
 from stormpath.error import Error as StormpathError
+from extensions.flask_stormpath import groups_allowed
+from extensions.flask_stormpath import is_active_user_in
+from wtforms.fields import SubmitField
+
+
+
+
+##### Forms
+class ChallengeDescriptionForm(Form):
+    pagedown = PageDownField('Challenge description')
 
 
 
@@ -35,9 +49,12 @@ app.config['SECRET_KEY'] = environ.get('STORMPATH_SECRET_KEY')
 app.config['STORMPATH_API_KEY_ID'] = environ.get('STORMPATH_API_KEY_ID')
 app.config['STORMPATH_API_KEY_SECRET'] = environ.get('STORMPATH_API_KEY_SECRET')
 app.config['STORMPATH_APPLICATION'] = environ.get('STORMPATH_APPLICATION')
+app.jinja_env.globals.update(is_active_user_in=is_active_user_in)
 
 stormpath_manager = StormpathManager(app)
 stormpath_manager.login_view = '.login'
+
+pagedown = PageDown(app)
 
 
 
@@ -148,6 +165,36 @@ def logout():
     """
     logout_user()
     return redirect(url_for('index'))
+
+
+
+
+@app.route('/newchallenge', methods=['GET', 'POST'])
+@groups_allowed(['Dev'])
+def newchallenge():
+    """
+    Allows a user in the "Dev" admin group to submit a new challenge.
+    """
+    form = ChallengeDescriptionForm(csrf_enabled = False)
+    form.pagedown.data = '#Hey!\nEnter the <i>challenge description</i> using **Markdown**!'
+
+    if form.validate_on_submit():
+        description = form.pagedown.data
+        challenge_id = uuid4()
+        return redirect(url_for('.challenge', i = challenge_id))
+
+    return render_template('newchallenge.html', form = form)
+
+
+
+
+@app.route('/challenge')
+def challenge():
+    """
+    Page to display a challenge.
+    """
+    challenge_id = request.args.get('i')
+    return render_template('challenge.html', error = "No problem found for id " + challenge_id)
 
 
 
