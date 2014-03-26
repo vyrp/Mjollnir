@@ -5,7 +5,7 @@ all: $(THRIFTSGEN) client server
 
 $(THRIFTSGEN): ../obj/thrift
 	rm -rf $(THRIFTSGEN)
-	$(foreach file, $(THRIFTS), thrift --gen cpp -o $(shell dirname $(file)) $(file);)
+	$(foreach file, $(THRIFTS), thrift --gen cpp:pure_enums -o $(shell dirname $(file)) $(file);)
 	$(foreach folder, $(THRIFTSGEN), rm -f $(folder)/*.skeleton.cpp; mkdir -p ../obj/$(folder);)
 
 ../obj/thrift: $(THRIFTS)
