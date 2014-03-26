@@ -6,9 +6,10 @@
     that reaches between Midgard (the world) and Asgard, the realm of the gods.
 """
 
-from uuid import uuid4
-from os import environ
+import markdown
 import os
+from os import environ
+from uuid import uuid4
 
 from flask import (
     Flask,
@@ -16,6 +17,7 @@ from flask import (
     render_template,
     request,
     url_for,
+    Markup,
 )
 from flask.ext.stormpath import (
     StormpathManager,
@@ -28,14 +30,17 @@ from flask.ext.stormpath import (
 from flask.ext.pagedown import PageDown
 from flask.ext.pagedown.fields import PageDownField
 from flask.ext.wtf import Form
-from stormpath.error import Error as StormpathError
+
 from extensions.flask_stormpath import groups_allowed
 from extensions.flask_stormpath import is_active_user_in
-from wtforms.fields import TextField
-from wtforms.validators import DataRequired
 
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
+
+from stormpath.error import Error as StormpathError
+
+from wtforms.fields import TextField
+from wtforms.validators import DataRequired
 
 
 
@@ -59,17 +64,22 @@ app.config['MONGOLAB_URI'] = environ.get('MONGOLAB_URI')
 
 app.jinja_env.globals.update(is_active_user_in=is_active_user_in)
 
+def markdown_to_html(content):
+    return Markup(markdown.markdown(content))
+
+app.jinja_env.globals.update(markdown_to_html=markdown_to_html)
+
 
 stormpath_manager = StormpathManager(app)
 stormpath_manager.login_view = '.login'
 
 
-pagedown = PageDown(app)
-
-
 mongo_client = MongoClient(app.config['MONGOLAB_URI'])
 mongodb = mongo_client['mjollnir-db']
 challenges_collection = mongodb.challenges
+
+
+pagedown = PageDown(app)
 
 
 ##### Website
@@ -188,6 +198,9 @@ def newchallenge():
     """
     Allows a user in the "Dev" admin group to submit a new challenge.
     """
+    # This is potentially unsafe since there is no sanitizing on the markdown submitted to the db
+    # Won't be a problem while admins are the only ones with access to submit challenges though
+    #
     form = ChallengeDescriptionForm(csrf_enabled = False)
 
     if not form.pagedown.data:
@@ -197,7 +210,7 @@ def newchallenge():
         return render_template('newchallenge.html', form = form)
 
     if form.validate_on_submit():
-        challenge_name = request.form.get('cname')
+        challenge_name = form.name.data
         challenge_description = form.pagedown.data
         challenge_id = uuid4()
 
@@ -207,11 +220,12 @@ def newchallenge():
 
         try:
             challenges_collection.insert(document)
+        # Might want to remove this if we give page access to non admins
         except PyMongoError as err:
             return render_template('newchallenge.html', form = form, error = err.message)
 
         return redirect(url_for('.challenge', i = challenge_id))
-        
+
     else:
         return render_template('newchallenge.html', form = form, error = "Please enter all the required information.")
 
@@ -224,7 +238,13 @@ def challenge():
     Page to display a challenge.
     """
     challenge_id = request.args.get('i')
-    return render_template('challenge.html', error = "No problem found for id " + challenge_id)
+
+    challenge = challenges_collection.find_one({"cid": challenge_id})
+
+    if challenge:
+        return render_template('challenge.html', challenge=challenge)
+    else:
+        return render_template('challenge.html', error = "No problem found for id " + challenge_id)
 
 
 
