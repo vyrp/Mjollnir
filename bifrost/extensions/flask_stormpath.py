@@ -8,6 +8,7 @@
 from functools import wraps
 from flask import current_app
 from flask.ext.login import current_user
+from flask.ext.login import AnonymousUserMixin
 
 def groups_allowed(groups=None):
     """
@@ -38,4 +39,7 @@ def is_active_user_in(group):
     """
     Verifies if the current user is in a specific group.
     """
+    if not current_user.is_authenticated():
+        return False
+
     return group in [group.name for group in current_user.groups]

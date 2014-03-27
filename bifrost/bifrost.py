@@ -216,7 +216,8 @@ def newchallenge():
 
         document = { 'cid': str(challenge_id),
                      'name': challenge_name,
-                     'description': challenge_description }
+                     'description': challenge_description,
+                     'dev_only': True }
 
         try:
             challenges_collection.insert(document)
@@ -224,7 +225,7 @@ def newchallenge():
         except PyMongoError as err:
             return render_template('newchallenge.html', form = form, error = err.message)
 
-        return redirect(url_for('.challenge', i = challenge_id))
+        return redirect(url_for('.challenge', cid = challenge_id))
 
     else:
         return render_template('newchallenge.html', form = form, error = "Please enter all the required information.")
@@ -237,11 +238,14 @@ def challenge():
     """
     Page to display a challenge.
     """
-    challenge_id = request.args.get('i')
+    challenge_id = request.args.get('cid')
+
+    if not challenge_id:
+        return redirect(url_for('.index'))
 
     challenge = challenges_collection.find_one({"cid": challenge_id})
 
-    if challenge:
+    if challenge and ( is_active_user_in('Dev') or not challenge['dev_only'] ):
         return render_template('challenge.html', challenge=challenge)
     else:
         return render_template('challenge.html', error = "No problem found for id " + challenge_id)
