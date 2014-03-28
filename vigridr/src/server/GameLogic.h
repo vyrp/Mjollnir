@@ -9,8 +9,14 @@ namespace mjollnir { namespace vigridr {
 class GameLogic {
  public:
   GameLogic(int32_t playerId1, int32_t playerId2);
-  void update(Command command, int32_t playerId);
+  bool update(Command command, int32_t playerId);
   WorldModel getWorldModel();
+ private:
+  bool checkLines(WorldModel wm, Marker player);
+  bool checkColumns(WorldModel wm, Marker player);
+  bool checkDiagonals(WorldModel wm, Marker player);
+  WorldModel worldModel;
+  int32_t player1, player2;
 };
 
 }}  // namespaces 
