@@ -1,5 +1,6 @@
-#include <thread>
+#include <memory>
 #include <functional>
+#include <thread>
 
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TSimpleServer.h>
@@ -33,7 +34,7 @@ int main(int argc, char **argv) {
     std::cout << "Invalid port number." << std::endl;
     return 0;
   }
-  GameLogic gameLogic(port1, port2);
+  auto gameLogic = std::make_shared<GameLogic>(port1, port2);
   auto service = [&](int32_t port) {  
     boost::shared_ptr<GameService> handler(new GameService(gameLogic, port));
     boost::shared_ptr<TProcessor> processor(new GameProcessor(handler));
@@ -43,11 +44,13 @@ int main(int argc, char **argv) {
     boost::shared_ptr<TProtocolFactory> protocolFactory(
       new TBinaryProtocolFactory());
 
-    TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
+    TSimpleServer server(processor, serverTransport, 
+                         transportFactory, protocolFactory);
     printf("Starting server...\n");
     server.serve();
     printf("Done");  
   };
+  printf("%d %d\n",port1, port2);
   std::thread a(std::bind(service, port1));
   std::thread b(std::bind(service, port2));
   a.join();
