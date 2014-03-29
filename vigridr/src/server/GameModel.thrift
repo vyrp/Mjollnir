@@ -15,6 +15,8 @@ enum CommandStatus {
 struct GameInfo {
 	1: required GameStatus gameStatus,
   2: required WorldModel.WorldModel worldModel,
-	3: required i32 waitingTimeMiliseconds,
-	4: optional string description  // for debugging purposes
+  3: required i32 cycle,
+	4: required i32 updateTimeLimitMs,
+	5: required i32 nextWorldModelTimeEstimateMs,
+  6: optional string description  // for debugging purposes
 }

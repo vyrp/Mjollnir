@@ -8,6 +8,7 @@
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
 
+#include "GameManager.h"
 #include "GameService.h"
 #include "gen-cpp/Game.h"
 
@@ -34,9 +35,9 @@ int main(int argc, char **argv) {
   gflags::SetUsageMessage(kUsageMessage);
   gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-  auto gameLogic = std::make_shared<GameLogic>(FLAGS_port1, FLAGS_port2);
+  auto gameManager = std::make_shared<GameManager>(FLAGS_port1, FLAGS_port2);
   auto service = [&](int32_t port) {  
-    boost::shared_ptr<GameService> handler(new GameService(gameLogic, port));
+    boost::shared_ptr<GameService> handler(new GameService(gameManager, port));
     boost::shared_ptr<TProcessor> processor(new GameProcessor(handler));
     boost::shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
     boost::shared_ptr<TTransportFactory> transportFactory(
