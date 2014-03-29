@@ -16,7 +16,7 @@ BINARY   = $(TARGET)
 
 CC       = g++
 # compiling flags here
-CFLAGS   = -std=c++0x -Wall -I/usr/local/include/thrift
+CFLAGS   = -std=c++0x -Wall -Werror -I/usr/local/include/thrift
 
 LINKER   = g++ -o
 # linking flags here
