@@ -1,0 +1,4 @@
+#!/bin/sh
+rm -rf /etc/apparmor.d/mjollnir/
+mkdir /etc/apparmor.d/mjollnir/
+cp client /etc/apparmor.d/mjollnir/client

@@ -133,3 +133,11 @@ gen-html/
 *.sublime-project
 *.sublime-workspace
 
+##
+## Yggdrasil
+##
+
+# Tests
+yggdrasil/tests/compilation/src/templates.cpp
+yggdrasil/tests/runtime/files/created.txt
+yggdrasil/tests/results
