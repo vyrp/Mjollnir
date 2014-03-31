@@ -11,6 +11,14 @@
 #                thanks to http://stackoverflow.com/users/128940/beta
 # ------------------------------------------------
 
+# directories
+SRCDIR = .
+OBJDIR   = ../../obj/$(TARGET)
+BINDIR   = ../../bin
+
+# objects
+OBJECTS  = $(SOURCES:%.cpp=$(OBJDIR)/%.o)
+
 # project name (generate executable with this name)
 BINARY   = $(TARGET)
 
