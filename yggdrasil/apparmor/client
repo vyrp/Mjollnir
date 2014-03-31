@@ -1,5 +1,5 @@
 #include <tunables/global>
 
-/root/Documents/CPP/runtests/bin/* {
+/Mjollnir/yggdrasil/tests/runtime/bin/* {
     #include <abstractions/base>
 }
