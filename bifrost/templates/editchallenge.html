@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+
+{% block head %}
+{{ pagedown.html_head() }}
+<style>
+.flask-pagedown-input {
+  color: #000000;
+}
+input {
+  color: #000000;
+}
+</style>
+{% endblock %}
+
+
+{% block body %}
+  <div class="newchallenge">
+    <div class="row">
+      <div class="col-lg-6 col-lg-offset-3">
+        <form class="bs-example form-horizontal" method="post" action="">
+          <fieldset>
+            <legend>Edit a challenge</legend>
+            {% if error %}
+              <div class="alert alert-dismissable alert-danger register-fail">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ error }}
+              </div>
+            {% endif %}
+            <div style="width: 500px;">
+                <form method = "POST">
+                    <div>
+                      <b>{{ form.name.label }}</b>:
+                      <br>
+                      {{ form.name() }}
+                    </div>
+                    <br>
+                    <div>
+                      {{ form.dev_only }} <b>{{ form.dev_only.label }}</b>
+                    </div>
+                    <br>
+                    <div>
+                      <b>{{ form.pagedown.label }}</b>:
+                      {{ form.pagedown(rows = 10, style = 'width:100%') }}
+                    </div>
+                </form>
+            </div>
+            <br>
+            <br>
+            <div class="form-group">
+              <div class="col-lg-10 col-lg-offset-4">
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </div>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

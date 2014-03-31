@@ -40,6 +40,7 @@ from pymongo.errors import PyMongoError
 from stormpath.error import Error as StormpathError
 
 from wtforms.fields import TextField
+from wtforms.fields import BooleanField
 from wtforms.validators import DataRequired
 
 
@@ -48,6 +49,7 @@ from wtforms.validators import DataRequired
 ##### Forms
 class ChallengeDescriptionForm(Form):
     name = TextField('Challenge name', validators=[DataRequired()])
+    dev_only = BooleanField('Dev only')
     pagedown = PageDownField('Challenge description', validators=[DataRequired()])
 
 
@@ -229,6 +231,55 @@ def newchallenge():
 
     else:
         return render_template('newchallenge.html', form = form, error = "Please enter all the required information.")
+
+
+
+
+@app.route('/editchallenge', methods=['GET', 'POST'])
+@groups_allowed(['Dev'])
+def editchallenge():
+    """
+    Allows a user in the "Dev" admin group to edit an existing challenge.
+    """
+    challenge_id = request.args.get('cid')
+
+    if not challenge_id:
+        return redirect(url_for('.index'))
+
+    query = { 'cid': challenge_id }
+    challenge = challenges_collection.find_one(query)
+
+    if not challenge:
+        return redirect(url_for('.index'))
+
+    form = ChallengeDescriptionForm(csrf_enabled = False)
+
+    if request.method == 'GET':
+        form.name.data = challenge.name
+        form.dev_only.data = challenge.dev_only
+        form.pagedown.data = challenge.description
+        return render_template('editchallenge.html', form = form)
+
+    if form.validate_on_submit():
+        challenge_name = form.name.data
+        challenge_description = form.pagedown.data
+        challenge_dev_only = form.dev_only.data
+
+        document = { 'cid': challenge_id,
+                     'name': challenge_name,
+                     'description': challenge_description,
+                     'dev_only': challenge_dev_only }
+
+        try:
+            challenges_collection.update(query, document)
+        # Might want to remove this if we give page access to non admins
+        except PyMongoError as err:
+            return render_template('editchallenge.html', form = form, error = err.message)
+
+        return redirect(url_for('.challenge', cid = challenge_id))
+
+    else:
+        return render_template('editchallenge.html', form = form, error = "Please enter all the required information.")
 
 
 
