@@ -35,6 +35,11 @@ $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 	@echo "Compiled "$<" successfully!"
 
+$(INCLUDES:%.h=%.cpp): $(SRCDIR)/%.cpp : $(SRCDIR)/%.h
+	@touch -c $@
+
+$(INCLUDES):
+
 .PHONY: clean
 clean:
 	$(rm) $(OBJECTS)

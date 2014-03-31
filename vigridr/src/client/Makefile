@@ -2,9 +2,9 @@ TARGET = client
 SRCDIR = .
 OBJDIR   = ../../obj/$(TARGET)
 BINDIR   = ../../bin
-SOURCES  := $(wildcard $(SRCDIR)/*.cpp ./../server/gen-cpp/*.cpp)
-INCLUDES := $(wildcard $(SRCDIR)/*.h ./../server/gen-cpp/*.h)
-OBJECTS  := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+SOURCES  := $(wildcard *.cpp ../server/gen-cpp/*.cpp)
+INCLUDES := $(wildcard *.h ../server/gen-cpp/*.h)
+OBJECTS  := $(SOURCES:%.cpp=$(OBJDIR)/%.o)
 
 include ../Makefile.inc
 
