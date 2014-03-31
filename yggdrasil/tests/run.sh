@@ -1,6 +1,6 @@
 #!/bin/sh
 RUNTIME_DIR=/Mjollnir/yggdrasil/tests/runtime
-RESULTS=$RUNTIME_DIR/../results
+RESULTS=/Mjollnir/yggdrasil/tests/results
 
 if [[ ($# -eq  1) && ($1 == "--clean" || $1 == "-C") ]]; then
     echo -e "=== Cleaning ===\n"
