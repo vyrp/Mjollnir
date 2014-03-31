@@ -1,7 +1,7 @@
 THRIFTS =  $(shell find . -type f -name *.thrift)
 THRIFTSGEN = $(shell echo $(THRIFTS) | sed s,/[^/]*\.thrift,/gen-cpp,g | sed s,\\s,\\n,g | sort -u)
 
-all: $(THRIFTSGEN) client server
+all: $(THRIFTSGEN) client server buildtests
 
 $(THRIFTSGEN): ../obj/thrift
 	rm -rf $(THRIFTSGEN)
@@ -18,6 +18,14 @@ client:
 .PHONY: server
 server:
 	@$(MAKE) $(MFLAGS) -C server
+
+.PHONY: test
+test:
+	@$(MAKE) $(MFLAGS) test -C test
+
+.PHONY: buildtests
+buildtests:
+	@$(MAKE) $(MFLAGS) -C test
 
 .PHONY: clean
 clean:
