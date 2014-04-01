@@ -1,6 +1,5 @@
 BIN=$(MAKEFILE_DIR)/bin
 SRC=$(MAKEFILE_DIR)/src
-FILES=$(MAKEFILE_DIR)/files
 
 FULL_SOURCES=$(shell ls $(SRC)/*.cpp)
 SOURCES=$(foreach file, $(FULL_SOURCES), $(shell basename $(file)))
@@ -12,9 +11,8 @@ $(BIN):
 	mkdir -p $(BIN)
 
 $(BINARIES): $(BIN)/% : $(SRC)/%.cpp
-	g++ -Wall $< -o $@
+	g++ -Wall -std=c++11 $< -o $@ -lpthread
 	
 clean:
 	rm -rf $(BIN)
-	rm -rf $(FILES)/created.txt
     

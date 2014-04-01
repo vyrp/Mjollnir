@@ -1,0 +1,9 @@
+#include <abstractions/base>
+
+set rlimit as <= 50M,
+set rlimit data <= 50M,
+set rlimit fsize <= 10K,
+set rlimit locks <= 0,
+set rlimit nofile <= 64,
+set rlimit nproc <= 1,
+

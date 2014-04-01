@@ -1,5 +1,5 @@
 #include <tunables/global>
 
 /Mjollnir/yggdrasil/tests/runtime/bin/* {
-    #include <abstractions/base>
+	#include "client.base"
 }
