@@ -10,10 +10,10 @@ INITIAL_RATING = 1500
 MIN_RD = 30
 MAX_RD = 350
 
-# DECAY_PERIOD is the number of inactive games player needs to go from RD1 to RD2
+# DECAY_PERIOD is the number of inactive time periods player needs to go from RD1 to RD2
 RD1 = 50
 RD2 = 100
-DECAY_PERIOD = 250
+DECAY_PERIOD = 86400
 
 q = math.log(10) / 400
 C = (RD2**2 - RD1**2) / float(DECAY_PERIOD)
