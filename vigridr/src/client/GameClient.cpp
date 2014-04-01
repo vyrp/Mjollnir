@@ -23,8 +23,30 @@ using ::mjollnir::vigridr::Coordinate;
 using ::mjollnir::vigridr::GameClient;
 using ::mjollnir::vigridr::GameInfo;
 using ::mjollnir::vigridr::WorldModel;
-
 using ::mjollnir::vigridr::Marker;
+
+void printWorldModel(const WorldModel& wm) {
+  for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+          char toPrint;
+          switch(wm.table[i][j]) {
+            case Marker::X:
+              toPrint = 'X'; break;
+            case Marker::O:
+              toPrint = 'O';break;
+            default:
+              toPrint = '-';break;
+          }
+          std::cout << toPrint << " ";
+        }
+        std::cout << "\n\n";
+  }
+}
+
+/*void decidePlay(int& x, int& y, const WorldModel& wm) {
+  scanf("%d %d", &x, &y);
+  std::cout << std::endl;
+}*/
 
 void playGame(GameClient& client) {
   int x, y;
@@ -32,22 +54,11 @@ void playGame(GameClient& client) {
     GameInfo gameInfo;
     client.gameInfo(gameInfo);
     WorldModel wm = gameInfo.worldModel;
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) {
-        char toPrint;
-        switch(wm.table[i][j]) {
-          case Marker::X:
-            toPrint = 'X'; break;
-          case Marker::O:
-            toPrint = 'O';break;
-          default:
-            toPrint = '-';break;
-        }
-        std::cout << toPrint << " ";
-      }
-      std::cout << "\n\n";
-    }
+    printWorldModel(wm);
+    std::cout << "With x,y E [0,2], insert (x,y), integers, ";
+    std::cout << "from TicTacToe Table: ";
     auto status = scanf("%d %d", &x, &y);
+    //decidePlay(x, y, wm);
     std::cout << std::endl;
     if(x > 2 || x < 0 || y > 2 || y < 0 || status != 2) { continue; } 
     Command command;
