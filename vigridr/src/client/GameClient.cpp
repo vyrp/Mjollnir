@@ -1,8 +1,10 @@
+#include <chrono>
 #include <exception>
 #include <iostream>
 #include <stdio.h>
 #include <string>
 #include <sys/time.h>
+#include <thread>
 #include <unistd.h>
 
 #include <thrift/protocol/TBinaryProtocol.h>
@@ -10,6 +12,7 @@
 #include <thrift/transport/TTransportUtils.h>
 
 #include "../server/gen-cpp/Game.h"
+#include "../server/GameConfig.h"
 
 using ::apache::thrift::protocol::TBinaryProtocol;
 using ::apache::thrift::protocol::TProtocol;
@@ -19,9 +22,11 @@ using ::apache::thrift::transport::TSocket;
 using ::apache::thrift::transport::TTransport;
 
 using ::mjollnir::vigridr::Command;
+using ::mjollnir::vigridr::config::cycleWaitMs;
 using ::mjollnir::vigridr::Coordinate;
 using ::mjollnir::vigridr::GameClient;
 using ::mjollnir::vigridr::GameInfo;
+using ::mjollnir::vigridr::GameStatus;
 using ::mjollnir::vigridr::WorldModel;
 using ::mjollnir::vigridr::Marker;
 
@@ -42,30 +47,47 @@ void printWorldModel(const WorldModel& wm) {
         std::cout << "\n\n";
   }
 }
+#include <stdlib.h>
+#include <time.h>
+Command playTurn(const WorldModel& wm) {
+  Command command;
+  while(true) {
+    size_t x = rand()%3;
+    size_t y = rand()%3;
+    if (wm.table[x][y] == Marker::UNMARKED) {
+      command.coordinate.x = x;
+      command.coordinate.y = y;
+      break;
+    }
+  }
+  return command;
+}
 
-/*void decidePlay(int& x, int& y, const WorldModel& wm) {
-  scanf("%d %d", &x, &y);
-  std::cout << std::endl;
-}*/
+void synchronize(int32_t t) {
+  auto sleeptime = std::chrono::high_resolution_clock::now() + 
+    std::chrono::milliseconds(t);
+  std::this_thread::sleep_until(sleeptime);
+}
 
 void playGame(GameClient& client) {
-  int x, y;
+  srand(time(NULL));
+  GameInfo gameInfo;
+  client.ready(gameInfo);
   while (true) {
-    GameInfo gameInfo;
+    synchronize(gameInfo.nextWorldModelTimeEstimateMs);
     client.gameInfo(gameInfo);
-    WorldModel wm = gameInfo.worldModel;
+    const WorldModel& wm = gameInfo.worldModel;
     printWorldModel(wm);
-    std::cout << "With x,y E [0,2], insert (x,y), integers, ";
-    std::cout << "from TicTacToe Table: ";
-    auto status = scanf("%d %d", &x, &y);
-    //decidePlay(x, y, wm);
-    std::cout << std::endl;
-    if(x > 2 || x < 0 || y > 2 || y < 0 || status != 2) { continue; } 
-    Command command;
-    command.coordinate.x = x;
-    command.coordinate.y = y;
-    client.update(command);
+    if (gameInfo.gameStatus == GameStatus::FINISHED) {
+      break;
+    }
+    printf("%d\n", gameInfo.isMyTurn);
+    if (gameInfo.isMyTurn) {
+      Command command = playTurn(wm);
+      client.update(command);
+    }
   }
+
 }
 
 int main(int argc, char** argv) {

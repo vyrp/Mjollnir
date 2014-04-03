@@ -13,6 +13,7 @@ class GameService : virtual public GameIf {
  public:
   GameService(std::shared_ptr<GameManager> gameManager, int32_t playerId);
   void gameInfo(GameInfo& gameInfo) override;
+  void ready(GameInfo& gameInfo) override;
   CommandStatus update(const Command& command) override;
  private:
   std::mutex updating;

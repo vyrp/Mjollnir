@@ -7,6 +7,9 @@
 
 namespace mjollnir { namespace vigridr {
 
+constexpr std::chrono::milliseconds kWorldModelUpdateMsStep1(2);
+constexpr std::chrono::milliseconds kWorldModelUpdateMsStep2(1);
+
 void PlayerTurnData::init(int32_t id) {
   setId(id);
   resetCommand();
@@ -26,6 +29,11 @@ void PlayerTurnData::setIsTurn(bool isTurn) {
   isTurn_ = isTurn;
 }
 
+void GameManager::updateTime(const std::chrono::milliseconds& d) {
+  nextUpdateTime_ = game_clock::now() + d;
+  nextWorldModelTime_ = nextUpdateTime_ + config::updateTimeUpperBoundMs;
+}
+
 void GameManager::init() {
   std::unique_lock<std::mutex> lock0(playerMutex_[0], std::defer_lock);
   std::unique_lock<std::mutex> lock1(playerMutex_[1], std::defer_lock);
@@ -37,12 +45,11 @@ void GameManager::init() {
     playerTurnData_[1].setIsTurn(false);
   }
   gameInfo_.cycle = 0;
-  gameInfo_.worldModel = gameLogic_.getWorldModel();
-  nextUpdateTime_ = game_clock::now() + config::firstCicleWaitS;
+  updateTime(config::firstCicleWaitS);
 }
 
 void GameManager::nextTurn() {
-  std::this_thread::sleep_until(nextWorldModelTime_);
+  std::this_thread::sleep_until(nextWorldModelTime_ - kWorldModelUpdateMsStep1);
   std::unique_lock<std::mutex> lock0(playerMutex_[0], std::defer_lock);
   std::unique_lock<std::mutex> lock1(playerMutex_[1], std::defer_lock);
   std::unique_lock<std::mutex> lock2(gameInfoMutex_, std::defer_lock);
@@ -52,10 +59,12 @@ void GameManager::nextTurn() {
         playerTurnData_[i].setIsTurn(!playerTurnData_[i].isTurn());   
     } 
   }
-  gameInfo_.worldModel = gameLogic_.getWorldModel();
   gameInfo_.cycle++;
-  nextUpdateTime_ = game_clock::now() + config::cycleWaitMs;
-  nextWorldModelTime_ = nextUpdateTime_ + config::updateTimeUpperBoundMs;
+  gameInfo_.gameStatus = GameStatus::RUNNING;
+  std::this_thread::sleep_until(nextWorldModelTime_ - kWorldModelUpdateMsStep2);
+  gameInfo_.worldModel = gameLogic_.getWorldModel();
+  std::this_thread::sleep_until(nextWorldModelTime_);
+  updateTime(config::cycleWaitMs);
 }
 
 void GameManager::execute(const PlayerTurnData& turnData) {
@@ -65,6 +74,7 @@ void GameManager::execute(const PlayerTurnData& turnData) {
 
 void GameManager::updaterTask() {
   while (true) {
+    nextTurn();
     std::this_thread::sleep_until(nextUpdateTime_);
     std::cout << "Updater task" << std::endl;
     std::array<PlayerTurnData, kMaxPlayers> turns;
@@ -74,12 +84,12 @@ void GameManager::updaterTask() {
       std::lock(lock0, lock1);
       if(playerTurnData_[0].isTurn() &&
          !playerTurnData_[0].isCommandSet()) {
-        std::cout << "No command set for player 0" << std::endl;
+        throw std::runtime_error("No command set for player 0\n");
         // TODO(luizmramos): handle this case
       } 
       if(playerTurnData_[1].isTurn() &&
          !playerTurnData_[1].isCommandSet()) {
-        std::cout << "No command set for player 1" << std::endl;
+        throw std::runtime_error("No command set for player 1\n");
         // TODO(luizmramos): handle this case
       }
       if (playerTurnData_[0].getLastUpdatedTime() < 
@@ -97,7 +107,11 @@ void GameManager::updaterTask() {
     for (auto& turn : turns) {
       execute(turn);
     }
-    nextTurn();
+    if (gameLogic_.isFinished()) {
+      gameInfo_.gameStatus = GameStatus::FINISHED;
+      gameInfo_.worldModel = gameLogic_.getWorldModel();
+      break;
+    }
   }
 }
 
@@ -109,7 +123,9 @@ GameManager::GameManager(int32_t playerId0, int32_t playerId1)
   playerTurnData_[1].init(playerId1);
   gameInfo_.gameStatus = GameStatus::WAITING;
   init();
-  updaterThread_ = std::thread([this]() { updaterTask(); });
+  updaterThread_ = std::thread([this]() { 
+    updaterTask(); 
+  });
 }
 
 CommandStatus GameManager::update(const Command& command, int32_t playerId) {
@@ -133,7 +149,7 @@ CommandStatus GameManager::update(const Command& command, int32_t playerId) {
   return CommandStatus::SUCCESS;
 }
 
-void GameManager::getGameInfo(GameInfo& gameInfo) {
+void GameManager::getGameInfo(GameInfo& gameInfo, int32_t playerId) {
   std::unique_lock<std::mutex> lock(gameInfoMutex_);
   gameInfo = gameInfo_;
   gameInfo.updateTimeLimitMs = 
@@ -142,6 +158,15 @@ void GameManager::getGameInfo(GameInfo& gameInfo) {
   gameInfo.nextWorldModelTimeEstimateMs = 
     std::chrono::duration_cast<std::chrono::milliseconds>(
       nextWorldModelTime_-game_clock::now()).count();
+  {
+    auto it = idToIdx_.find(playerId);
+    if (it == idToIdx_.end()) {
+      throw std::runtime_error("Unknown player");
+    }
+    size_t idx = it->second;
+    std::unique_lock<std::mutex> lock1(playerMutex_[idx], std::defer_lock);
+    gameInfo.isMyTurn = playerTurnData_[idx].isTurn();
+  }
   printf("%d %d\n", 
          gameInfo.updateTimeLimitMs, gameInfo.nextWorldModelTimeEstimateMs);
 }  

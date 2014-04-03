@@ -6,12 +6,10 @@
 #include "GameType.h"
 
 namespace mjollnir { namespace vigridr { namespace config {
-constexpr std::chrono::milliseconds cycleWaitMs(10000);
-constexpr std::chrono::seconds firstCicleWaitS(1);
-constexpr std::chrono::milliseconds updateTimeUpperBoundMs(10);
+constexpr std::chrono::milliseconds cycleWaitMs(3);
+constexpr std::chrono::seconds firstCicleWaitS(10);
+constexpr std::chrono::milliseconds updateTimeUpperBoundMs(1);
 constexpr GameType gameType = GameType::TURN;
 }}}
-
-
 
 #endif

@@ -4,7 +4,8 @@ namespace cpp mjollnir.vigridr
 
 enum GameStatus {
   RUNNING = 1,
-  WAITING = 2
+  WAITING = 2,
+  FINISHED = 3
 }
 
 enum CommandStatus {
@@ -18,5 +19,5 @@ struct GameInfo {
   3: required i32 cycle,
 	4: required i32 updateTimeLimitMs,
 	5: required i32 nextWorldModelTimeEstimateMs,
-  6: optional string description  // for debugging purposes
+  6: required bool isMyTurn
 }

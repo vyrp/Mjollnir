@@ -44,7 +44,7 @@ class GameManager {
  public:
   GameManager(int32_t playerId0, int32_t playerId1);
   CommandStatus update(const Command& command, int32_t playerId);
-  void getGameInfo(GameInfo& gameInfo);
+  void getGameInfo(GameInfo& gameInfo, int32_t playerId);
 
  protected:
   GameInfo gameInfo_;
@@ -64,6 +64,7 @@ class GameManager {
  private:
   void execute(const PlayerTurnData& turnData);
   void updaterTask();
+  void updateTime(const std::chrono::milliseconds& d);
 
   GameLogic gameLogic_;
   std::thread updaterThread_;
