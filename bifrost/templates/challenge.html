@@ -14,6 +14,9 @@
           {% endif %}
           {% if challenge %}
             <h1>{{ challenge.name }}</h1>
+            {% if is_active_user_in('Dev') %}
+              <p align="right"><a href="{{ url_for('editchallenge', cid = challenge.cid) }}">Edit Challenge</a></p>
+            {% endif %}            
             <br>
             {{ markdown_to_html(challenge.description) }}
           {% endif %}

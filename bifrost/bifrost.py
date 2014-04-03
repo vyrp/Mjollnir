@@ -255,9 +255,9 @@ def editchallenge():
     form = ChallengeDescriptionForm(csrf_enabled = False)
 
     if request.method == 'GET':
-        form.name.data = challenge.name
-        form.dev_only.data = challenge.dev_only
-        form.pagedown.data = challenge.description
+        form.name.data = challenge.get('name')
+        form.dev_only.data = challenge.get('dev_only')
+        form.pagedown.data = challenge.get('description')
         return render_template('editchallenge.html', form = form)
 
     if form.validate_on_submit():
