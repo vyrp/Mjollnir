@@ -76,11 +76,9 @@ app.jinja_env.globals.update(format_exc = traceback.format_exc)
 stormpath_manager = StormpathManager(app)
 stormpath_manager.login_view = '.login'
 
-
 mongo_client = MongoClient(app.config['MONGOLAB_URI'])
 mongodb = mongo_client['mjollnir-db']
 challenges_collection = mongodb.challenges
-
 
 pagedown = PageDown(app)
 
@@ -90,7 +88,7 @@ pagedown = PageDown(app)
 ### Error Handlers
 @app.errorhandler(404)
 def page_not_found(error):
-    return render_template('error.html', '404: Not Found :(', error), 404
+    return render_template('error.html', description = '404: Not Found :(', error = error), 404
 
 
 @app.errorhandler(Exception)
@@ -99,7 +97,7 @@ def exception_handler(error):
         # In debug mode we already use don't panic
         raise error
     
-    return render_template('error.html', '500: Internal Server Error :(', error), 500
+    return render_template('error.html', description = '500: Internal Server Error :(', error = error), 500
 
 
 ### Webpage Handlers

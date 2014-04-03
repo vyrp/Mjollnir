@@ -20,16 +20,16 @@
     <div class="container">
       <div class="header">
         <ul class="nav nav-pills pull-right">
-          <li {% if 'index' in request.endpoint %}class="active"{% endif %}><a href="{{ url_for('index') }}">Home</a></li>
+          <li {% if request.endpoint == 'index' %}class="active"{% endif %}><a href="{{ url_for('index') }}">Home</a></li>
           {% if user.is_authenticated() %}
-            <li {% if 'dashboard' in request.endpoint %}class="active"{% endif %}><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li {% if request.endpoint == 'dashboard' %}class="active"{% endif %}><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
             {% if is_active_user_in('Dev') %}
-              <li><a href="{{ url_for('newchallenge') }}">New Challenge</a></li>
+              <li {% if request.endpoint == 'newchallenge' %}class="active"{% endif %}><a href="{{ url_for('newchallenge') }}">New Challenge</a></li>
             {% endif %}
             <li><a href="{{ url_for('logout') }}">Logout</a></li>
           {% else %}
-            <li {% if 'login' in request.endpoint %}class="active"{% endif %}><a href="{{ url_for('login') }}">Login</a></li>
-            <li {% if 'register' in request.endpoint %}class="active"{% endif %}><a href="{{ url_for('register') }}">Register</a></li>
+            <li {% if request.endpoint == 'login' %}class="active"{% endif %}><a href="{{ url_for('login') }}">Login</a></li>
+            <li {% if request.endpoint == 'register' %}class="active"{% endif %}><a href="{{ url_for('register') }}">Register</a></li>
           {% endif %}
         </ul>
         <h3 class="text-muted">Mjöllnir</h3>
