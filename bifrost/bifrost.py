@@ -8,11 +8,13 @@
 
 import markdown
 import os
+import traceback
 from os import environ
 from uuid import uuid4
 
 from flask import (
     Flask,
+    abort,
     redirect,
     render_template,
     request,
@@ -64,13 +66,12 @@ app.config['STORMPATH_API_KEY_SECRET'] = environ.get('STORMPATH_API_KEY_SECRET')
 app.config['STORMPATH_APPLICATION'] = environ.get('STORMPATH_APPLICATION')
 app.config['MONGOLAB_URI'] = environ.get('MONGOLAB_URI')
 
-app.jinja_env.globals.update(is_active_user_in=is_active_user_in)
-
 def markdown_to_html(content):
     return Markup(markdown.markdown(content))
 
 app.jinja_env.globals.update(markdown_to_html=markdown_to_html)
-
+app.jinja_env.globals.update(is_active_user_in=is_active_user_in)
+app.jinja_env.globals.update(format_exc = traceback.format_exc)
 
 stormpath_manager = StormpathManager(app)
 stormpath_manager.login_view = '.login'
@@ -85,6 +86,23 @@ pagedown = PageDown(app)
 
 
 ##### Website
+
+### Error Handlers
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('error.html', '404: Not Found :(', error), 404
+
+
+@app.errorhandler(Exception)
+def exception_handler(error):
+    if app.debug:
+        # In debug mode we already use don't panic
+        raise error
+    
+    return render_template('error.html', '500: Internal Server Error :(', error), 500
+
+
+### Webpage Handlers
 @app.route('/')
 def index():
     """Basic home page."""
@@ -221,12 +239,8 @@ def newchallenge():
                      'description': challenge_description,
                      'dev_only': True }
 
-        try:
-            challenges_collection.insert(document)
-        # Might want to remove this if we give page access to non admins
-        except PyMongoError as err:
-            return render_template('newchallenge.html', form = form, error = err.message)
-
+        challenges_collection.insert(document)
+        
         return redirect(url_for('.challenge', cid = challenge_id))
 
     else:
@@ -244,13 +258,13 @@ def editchallenge():
     challenge_id = request.args.get('cid')
 
     if not challenge_id:
-        return redirect(url_for('.index'))
+        abort(404)
 
     query = { 'cid': challenge_id }
     challenge = challenges_collection.find_one(query)
 
     if not challenge:
-        return redirect(url_for('.index'))
+        abort(404)
 
     form = ChallengeDescriptionForm(csrf_enabled = False)
 
@@ -270,12 +284,8 @@ def editchallenge():
                      'description': challenge_description,
                      'dev_only': challenge_dev_only }
 
-        try:
-            challenges_collection.update(query, document)
-        # Might want to remove this if we give page access to non admins
-        except PyMongoError as err:
-            return render_template('editchallenge.html', form = form, error = err.message)
-
+        challenges_collection.update(query, document)
+        
         return redirect(url_for('.challenge', cid = challenge_id))
 
     else:
@@ -292,14 +302,14 @@ def challenge():
     challenge_id = request.args.get('cid')
 
     if not challenge_id:
-        return redirect(url_for('.index'))
+        abort(404)
 
     challenge = challenges_collection.find_one({"cid": challenge_id})
 
     if challenge and ( is_active_user_in('Dev') or not challenge['dev_only'] ):
         return render_template('challenge.html', challenge=challenge)
     else:
-        return render_template('challenge.html', error = "No problem found for id " + challenge_id)
+        abort(404)
 
 
 
