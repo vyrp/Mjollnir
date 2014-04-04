@@ -29,7 +29,7 @@ def E(player, opp):
     den = 1 + 10**(-g(opp.RD)*(player.rating-opp.rating)/400)
     return 1./den
 
-def RD_factor(score, player, opp):
+def RD_factor(player, opp):
     """
     Returns a constant that gives the decrease factor for player's RD after a match.
     Note that the return value of this function is not the exact absolute RD decrease.
@@ -43,7 +43,7 @@ def rating_change(score, player, opp):
     Score is given from player's point of view.
     """
     
-    d = RD_factor(score, player, opp)
+    d = RD_factor(player, opp)
     expected = E(player, opp)
     return q * g(opp.RD) * (score - expected) / (1./player.RD**2 + d)
 
@@ -65,7 +65,7 @@ class GlickoPlayer:
         if score < 0 or score > 1:
             raise ValueError('score should be between 0 and 1')
 
-        d = RD_factor(score, self, opp)
+        d = RD_factor(self, opp)
         rating_delta = rating_change(score, self, opp)
         
         self.rating = int( self.rating + rating_delta + 0.5 )
