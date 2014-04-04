@@ -7,12 +7,19 @@
 #include <thread>
 #include <unistd.h>
 
+#include <gflags/gflags.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TSocket.h>
 #include <thrift/transport/TTransportUtils.h>
 
 #include "../server/gen-cpp/Game.h"
 #include "../server/GameConfig.h"
+
+DEFINE_int32(port, 9090, "Port used to connect with the server.");
+
+const char* const kVersion = "v1.1";
+const char* const kUsageMessage = 
+  "This program is the client for mjollnir matches";
 
 using ::apache::thrift::protocol::TBinaryProtocol;
 using ::apache::thrift::protocol::TProtocol;
@@ -47,6 +54,7 @@ void printWorldModel(const WorldModel& wm) {
         std::cout << "\n\n";
   }
 }
+
 #include <stdlib.h>
 #include <time.h>
 Command playTurn(const WorldModel& wm) {
@@ -91,19 +99,11 @@ void playGame(GameClient& client) {
 }
 
 int main(int argc, char** argv) {
-  if (argc <= 1) {
-    std::cout << "No port specified." << std::endl;
-    return 0;
-  }
-  int32_t port;
-  try {
-    port = std::stoi(argv[1]);
-  } catch (const std::exception& e) {
-    std::cout << "Invalid port number." << std::endl;
-    return 0;
-  }
+  gflags::SetVersionString(kVersion);
+  gflags::SetUsageMessage(kUsageMessage);
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-  boost::shared_ptr<TTransport> socket(new TSocket("localhost", port));
+  boost::shared_ptr<TTransport> socket(new TSocket("localhost", FLAGS_port));
   boost::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
   boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
   GameClient client(protocol);

@@ -15,6 +15,10 @@
 DEFINE_int32(port1, 9090, "Port used by the first client.");
 DEFINE_int32(port2, 9091, "Port used by the second client.");
 
+const char* const kVersion = "v1.1";
+const char* const kUsageMessage = 
+  "This program is the server for mjollnir matches";
+
 using ::apache::thrift::protocol::TBinaryProtocolFactory;
 using ::apache::thrift::protocol::TProtocolFactory;
 using ::apache::thrift::server::TProcessor;
@@ -25,10 +29,6 @@ using ::apache::thrift::transport::TServerTransport;
 using ::apache::thrift::transport::TTransportFactory;
 
 using namespace mjollnir::vigridr;
-
-const char* const kVersion = "v1.1";
-const char* const kUsageMessage = 
-  "This program is the server for mjollnir matches";
 
 int main(int argc, char **argv) {
   gflags::SetVersionString(kVersion);
