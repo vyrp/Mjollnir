@@ -13,7 +13,6 @@
 #include <thrift/transport/TTransportUtils.h>
 
 #include "../server/gen-cpp/Game.h"
-#include "../server/GameConfig.h"
 
 DEFINE_int32(port, 9090, "Port used to connect with the server.");
 
@@ -29,7 +28,6 @@ using ::apache::thrift::transport::TSocket;
 using ::apache::thrift::transport::TTransport;
 
 using ::mjollnir::vigridr::Command;
-using ::mjollnir::vigridr::config::cycleWaitMs;
 using ::mjollnir::vigridr::Coordinate;
 using ::mjollnir::vigridr::GameClient;
 using ::mjollnir::vigridr::GameInfo;
@@ -83,16 +81,15 @@ void playGame(GameClient& client) {
   client.ready(gameInfo);
   while (true) {
     synchronize(gameInfo.nextWorldModelTimeEstimateMs);
-    client.gameInfo(gameInfo);
+    client.getGameInfo(gameInfo);
     const WorldModel& wm = gameInfo.worldModel;
     printWorldModel(wm);
     if (gameInfo.gameStatus == GameStatus::FINISHED) {
       break;
     }
-    printf("%d\n", gameInfo.isMyTurn);
     if (gameInfo.isMyTurn) {
       Command command = playTurn(wm);
-      client.update(command);
+      client.sendCommand(command);
     }
   }
 

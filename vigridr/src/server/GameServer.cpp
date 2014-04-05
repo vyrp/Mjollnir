@@ -28,7 +28,9 @@ using ::apache::thrift::transport::TServerSocket;
 using ::apache::thrift::transport::TServerTransport;
 using ::apache::thrift::transport::TTransportFactory;
 
-using namespace mjollnir::vigridr;
+using mjollnir::vigridr::GameManager;
+using mjollnir::vigridr::GameProcessor;
+using mjollnir::vigridr::GameService;
 
 int main(int argc, char **argv) {
   gflags::SetVersionString(kVersion);
@@ -36,10 +38,11 @@ int main(int argc, char **argv) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);
 
   auto gameManager = std::make_shared<GameManager>(FLAGS_port1, FLAGS_port2);
-  auto service = [&](int32_t port) {  
+  auto serviceInit = [&](int32_t port) {  
     boost::shared_ptr<GameService> handler(new GameService(gameManager, port));
     boost::shared_ptr<TProcessor> processor(new GameProcessor(handler));
-    boost::shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
+    boost::shared_ptr<TServerTransport> serverTransport(
+      new TServerSocket(port));
     boost::shared_ptr<TTransportFactory> transportFactory(
       new TBufferedTransportFactory());
     boost::shared_ptr<TProtocolFactory> protocolFactory(
@@ -51,11 +54,10 @@ int main(int argc, char **argv) {
     server.serve();
     printf("Done");  
   };
-  std::thread a(service, FLAGS_port1);
-  std::thread b(service, FLAGS_port2);
-  a.join();
-  b.join();
-  
+  std::thread player1Service(serviceInit, FLAGS_port1);
+  std::thread player2Service(serviceInit, FLAGS_port2);
+  player1Service.join();
+  player2Service.join();
   return 0;
 }
 

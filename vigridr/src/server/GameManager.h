@@ -8,6 +8,7 @@
 #include <thread>
 
 #include "GameLogic.h"
+#include "GameTimer.h"
 #include "gen-cpp/Command_types.h"
 #include "gen-cpp/WorldModel_types.h"
 #include "gen-cpp/GameModel_types.h"
@@ -15,19 +16,20 @@
 namespace mjollnir { namespace vigridr {
 
 constexpr size_t kMaxPlayers = 2;
-typedef std::chrono::high_resolution_clock game_clock;
-typedef std::chrono::time_point<game_clock> game_time;
 
+/*
+ *  Data structure with the information about the player's command in a turn
+ */
 class PlayerTurnData {
  public:
   void init(int32_t id);
-  void setCommand(Command command, game_time time);  
-  void resetCommand();
+  void setCommand(Command command, time_point time);  
+  void clearCommand();
   void setIsTurn(bool isTurn);
 
   Command getCommand() const { return command_; }
   bool isCommandSet() const { return isCommandSet_; }
-  game_time getLastUpdatedTime() const { return lastUpdateTime_; };
+  time_point getLastUpdatedTime() const { return lastUpdateTime_; };
   bool isTurn() const { return isTurn_; }
   int32_t getId() const { return id_; }
  private:
@@ -36,35 +38,42 @@ class PlayerTurnData {
   int32_t id_;
   Command command_;
   bool isCommandSet_;
-  game_time lastUpdateTime_;
+  time_point lastUpdateTime_;
   bool isTurn_;
 };
 
+/**
+ *  The GameManager gets the requests from both player, and synchronizes them.
+ *  Protocol: 
+ *  1- Clients say ready() and get gameInfo with first world model time in ms.
+ *  2- Clients ask for gameInfo() when world model is ready.
+ *  3- Clients proccess gameInfo and make decision before updateTimeLimitMs.
+ *  4- Clients inform the decision via sendMessage().
+ *  5- Server update world model using clients command.
+ *  6- Clients get next world model after nextWorldModelTime via gameInfo()
+ */
 class GameManager {
  public:
   GameManager(int32_t playerId0, int32_t playerId1);
   CommandStatus update(const Command& command, int32_t playerId);
   void getGameInfo(GameInfo& gameInfo, int32_t playerId);
 
- protected:
+ private:
+  void updaterTask();
+  void updateTime(const std::chrono::milliseconds& d);
+  void nextTurn();
+  void initializeGame(int32_t playerId0, int32_t playerId1);
+  void finalizeGame(bool success);
+
   GameInfo gameInfo_;
   std::array<PlayerTurnData, kMaxPlayers> playerTurnData_;
-  std::map<int32_t, size_t> idToIdx_;
-  std::array<int32_t, kMaxPlayers> idxToId_;
+  std::map<int32_t, size_t> idToIdx_;  // from id to index
+  std::array<int32_t, kMaxPlayers> idxToId_;  // from index to id
 
   std::mutex gameInfoMutex_;
   std::array<std::mutex, kMaxPlayers> playerMutex_;
 
-  game_time nextUpdateTime_;
-  game_time nextWorldModelTime_;
-
-  void nextTurn();
-  void init();
-
- private:
-  void execute(const PlayerTurnData& turnData);
-  void updaterTask();
-  void updateTime(const std::chrono::milliseconds& d);
+  GameTimer timer_;
 
   GameLogic gameLogic_;
   std::thread updaterThread_;

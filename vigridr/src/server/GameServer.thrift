@@ -5,7 +5,7 @@ namespace cpp mjollnir.vigridr
 
 service Game {
   GameModel.GameInfo ready(),
-  GameModel.GameInfo gameInfo(),
-  GameModel.CommandStatus update(1:Command.Command command)
+  GameModel.GameInfo getGameInfo(),
+  GameModel.CommandStatus sendCommand(1:Command.Command command)
 }
 

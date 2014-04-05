@@ -8,20 +8,14 @@ GameService::GameService(std::shared_ptr<GameManager> gameManager, int32_t playe
 }
 
 void GameService::ready(GameInfo& gameInfo) {
-  std::unique_lock<std::mutex> lock(requestingGameInfo, std::defer_lock);
-  if(!lock.try_lock()) return;
   gameManager_->getGameInfo(gameInfo, playerId_);
 }
 
-void GameService::gameInfo(GameInfo& gameInfo) {
-  std::unique_lock<std::mutex> lock(requestingGameInfo, std::defer_lock);
-  if(!lock.try_lock()) return;
+void GameService::getGameInfo(GameInfo& gameInfo) {
   gameManager_->getGameInfo(gameInfo, playerId_);
 }
 
-CommandStatus GameService::update(const Command& command) {
-  std::unique_lock<std::mutex> lock(updating, std::defer_lock);
-  if(!lock.try_lock()) return CommandStatus::ERROR;
+CommandStatus GameService::sendCommand(const Command& command) {
   return gameManager_->update(command, playerId_);
 }
 

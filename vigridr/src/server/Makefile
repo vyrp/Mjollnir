@@ -1,6 +1,6 @@
 TARGET = server
-#UTILS = ../utils/teste.cpp
-#UTILSINC = ../utils/teste.h
+#UTILS = ../utils/MapUtils.cpp
+UTILSINC = ../utils/MapUtils.h ../utils/Log.h
 SOURCES  = $(wildcard *.cpp ./gen-cpp/*.cpp) $(UTILS)
 INCLUDES = $(wildcard *.h gen-cpp/*.h) $(UTILSINC)
 

@@ -2,23 +2,36 @@
 #define VIGRIDR_SERVER_GAME_SERVICE_H
 
 #include <memory>
-#include <mutex>
 
 #include "GameManager.h"
 #include "gen-cpp/Game.h"
 
 namespace mjollnir { namespace vigridr {
 
+/**
+ *  Service that handles the clients requests. Each client communicates
+ *  with the server through a different port. So each client talks with his 
+ *  own instance of the game service.
+ */
 class GameService : virtual public GameIf {
  public:
   GameService(std::shared_ptr<GameManager> gameManager, int32_t playerId);
-  void gameInfo(GameInfo& gameInfo) override;
+  /**
+   *  This method should be called when the player is ready to start the match.
+   */
   void ready(GameInfo& gameInfo) override;
-  CommandStatus update(const Command& command) override;
- private:
-  std::mutex updating;
-  std::mutex requestingGameInfo;
 
+  /**
+   *  Returns information about the current game state
+   */
+  void getGameInfo(GameInfo& gameInfo) override;
+
+  /**
+   *  Updates the world model based on the players command, once per turn.
+   */
+  CommandStatus sendCommand(const Command& command) override;
+
+ private:
   std::shared_ptr<GameManager> gameManager_;
   int32_t playerId_;
 };

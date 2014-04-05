@@ -4,8 +4,8 @@
 namespace mjollnir { namespace vigridr {
 
 enum class GameType {
-  TURN,
-  CONTINUOUS
+  TURN,  // e.g. Chess
+  CONTINUOUS  // e.g. Tron
 };
 
 }}
