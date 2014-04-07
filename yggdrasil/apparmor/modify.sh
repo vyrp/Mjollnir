@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 APPARMOR=/etc/apparmor.d
 MJOLLNIR=$APPARMOR/mjollnir
 DISABLE=$APPARMOR/disable

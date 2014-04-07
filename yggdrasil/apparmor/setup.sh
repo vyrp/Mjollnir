@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 APPARMOR=/etc/apparmor.d
 MJOLLNIR=$APPARMOR/mjollnir
 
@@ -6,7 +6,7 @@ rm -rf $MJOLLNIR/
 mkdir $MJOLLNIR/
 
 for base in $(ls *.base); do
-	cp $base $MJOLLNIR/$base
+    cp $base $MJOLLNIR/$base
 done
 
 for profile in $(ls *.profile); do

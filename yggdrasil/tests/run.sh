@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 RUNTIME_DIR=/Mjollnir/yggdrasil/tests/runtime
 SANITY_DIR=/Mjollnir/yggdrasil/tests/sanity
 RESULTS=/Mjollnir/yggdrasil/tests/results
