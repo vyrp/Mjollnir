@@ -1,8 +1,9 @@
 from os import environ
 from uuid import uuid4
 from functools import partial
-from glicko import GlickoPlayer
+from glicko import GlickoPlayer, RD_factor
 from pymongo import MongoClient
+from copy import copy
 
 MONGOLAB_URI = environ.get('MONGOLAB_URI')
 
@@ -14,8 +15,8 @@ def player_before_match(submission, match):
     Returns a GlickoPlayer corresponding to this submission, taking into 
     account the inactivity period between matches.
     """
-    player = GlickoPlayer(submission.rating, submission.RD)
-    inactivity = (match.datetime - submission1['last_update']).total_seconds()
+    player = GlickoPlayer(submission['rating'], submission['RD'])
+    inactivity = (match['datetime'] - submission['last_update']).total_seconds()
     player.advance_periods(inactivity)
     return player
     
@@ -23,7 +24,7 @@ def process_match_rating(submission, player, opp, score):
     """
     Updates submission on the database to reflect the match played.
     """
-    final_player = copy.copy(player)
+    final_player = copy(player)
     final_player.match_update(score, opp)
 
     submission['rating'] = final_player.rating
@@ -42,16 +43,16 @@ def process_matches():
     unprocessed_matches = mongodb.matches.find({'datetime': {'$gt': last_processed}})
 
     for match in unprocessed_matches:
-        last_processed = max(last_processed, match.datetime)
+        last_processed = max(last_processed, match['datetime'])
 
-        submission1 = mongodb.submissions.find_one({'cid': match.cid, 'uid': match.uid1})
-        submission2 = mongodb.submissions.find_one({'cid': match.cid, 'uid': match.uid2})
+        submission1 = mongodb.submissions.find_one({'cid': match['cid'], 'uid': match['uid1']})
+        submission2 = mongodb.submissions.find_one({'cid': match['cid'], 'uid': match['uid2']})
 
         player1 = player_before_match(submission1, match)
         player2 = player_before_match(submission2, match)
 
-        submission1['last_update'] = submission2['last_update'] = match.datetime
-        normalized_result = (result + 1) / 2.0
+        submission1['last_update'] = submission2['last_update'] = match['datetime']
+        normalized_result = (match['result'] + 1) / 2.0
 
         process_match_rating(submission1, player1, player2, normalized_result)
         process_match_rating(submission2, player2, player1, 1-normalized_result) 
@@ -65,9 +66,9 @@ def decrease_old_ratings(last_processed):
 	Decrease ratings for players according to their inactivity.
 	"""
 	for sub in mongodb.submissions.find():
-		t = last_processed - sub.last_update
+		t = last_processed - sub['last_update']
 		
-		player = GlickoPlayer(sub.rating, sub.RD)
+		player = GlickoPlayer(sub['rating'], sub['RD'])
 		player.advance_periods(t.total_seconds())
 		
 		sub['rating'] = player.rating
@@ -76,7 +77,7 @@ def decrease_old_ratings(last_processed):
 
 def submission_priority(sub):
 	"""
-	Returns the priority which which this submission should be matched by the matchnaking system.
+	Returns the priority which which this submission should be matched by the matchmaking system.
 	"""
 	if sub['RD'] > 100:
 		return 1000000000 + sub['rating']
@@ -89,7 +90,7 @@ def match_quality(sub_player, sub_opp):
 	"""
 	player = GlickoPlayer(sub_player['rating'], sub_player['RD'])
 	opp = GlickoPlayer(sub_opp['rating'], sub_opp['RD'])
-	return glicko.RD_factor(player, opp) 
+	return RD_factor(player, opp) 
 
 def execute_matchmaking():
     """
@@ -103,10 +104,10 @@ def execute_matchmaking():
 	    subs.sort(key = submission_priority, reverse = True)
 	    for index, sub in enumerate(subs[:5]):
 	    	best_opponent = max(subs[:index] + subs[index+1:], key=partial(match_quality, sub))
-	    	suggested_matches.append((challenge, sub['uid'], best_opponent['uid']))
+	    	suggested_matches.append((challenge['cid'], sub['uid'], best_opponent['uid']))
 	
 	#communicate with Yggdrasil here (API TBD)
-	print suggested_matches
+    print suggested_matches
 
 def main():
     last_processed = process_matches()
