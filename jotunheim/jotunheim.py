@@ -45,14 +45,14 @@ def process_matches():
     for match in unprocessed_matches:
         last_processed = max(last_processed, match['datetime'])
 
-        submission1 = mongodb.submissions.find_one({'cid': match['cid'], 'uid': match['uid1']})
-        submission2 = mongodb.submissions.find_one({'cid': match['cid'], 'uid': match['uid2']})
+        submission1 = mongodb.submissions.find_one({'cid': match['cid'], 'uid': match['users'][0]['uid']})
+        submission2 = mongodb.submissions.find_one({'cid': match['cid'], 'uid': match['users'][1]['uid']})
 
         player1 = player_before_match(submission1, match)
         player2 = player_before_match(submission2, match)
 
         submission1['last_update'] = submission2['last_update'] = match['datetime']
-        normalized_result = (match['result'] + 1) / 2.0
+        normalized_result = (match['users'][1]['rank'] - match['users'][0]['rank'] + 1) / 2.0
 
         process_match_rating(submission1, player1, player2, normalized_result)
         process_match_rating(submission2, player2, player1, 1-normalized_result) 
