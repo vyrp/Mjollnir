@@ -62,35 +62,35 @@ def process_matches():
     return last_processed
 
 def decrease_old_ratings(last_processed):
-	"""
-	Decrease ratings for players according to their inactivity.
-	"""
-	for sub in mongodb.submissions.find():
-		t = last_processed - sub['last_update']
-		
-		player = GlickoPlayer(sub['rating'], sub['RD'])
-		player.advance_periods(t.total_seconds())
-		
-		sub['rating'] = player.rating
-		sub['RD'] = player.RD
-		mongodb.submissions.save(sub)
+    """
+    Decrease ratings for players according to their inactivity.
+    """
+    for sub in mongodb.submissions.find():
+        t = last_processed - sub['last_update']
+        
+        player = GlickoPlayer(sub['rating'], sub['RD'])
+        player.advance_periods(t.total_seconds())
+        
+        sub['rating'] = player.rating
+        sub['RD'] = player.RD
+        mongodb.submissions.save(sub)
 
 def submission_priority(sub):
-	"""
-	Returns the priority which which this submission should be matched by the matchmaking system.
-	"""
-	if sub['RD'] > 100:
-		return 1000000000 + sub['rating']
-	return sub['rating'] + 10*sub['RD']
+    """
+    Returns the priority which which this submission should be matched by the matchmaking system.
+    """
+    if sub['RD'] > 100:
+        return 1000000000 + sub['rating']
+    return sub['rating'] + 10*sub['RD']
 
 
 def match_quality(sub_player, sub_opp):
-	"""
-	Returns a number that represents the value of the match to the matchmaker.
-	"""
-	player = GlickoPlayer(sub_player['rating'], sub_player['RD'])
-	opp = GlickoPlayer(sub_opp['rating'], sub_opp['RD'])
-	return RD_factor(player, opp) 
+    """
+    Returns a number that represents the value of the match to the matchmaker.
+    """
+    player = GlickoPlayer(sub_player['rating'], sub_player['RD'])
+    opp = GlickoPlayer(sub_opp['rating'], sub_opp['RD'])
+    return RD_factor(player, opp) 
 
 def execute_matchmaking():
     """
@@ -100,13 +100,13 @@ def execute_matchmaking():
     suggested_matches = []
 
     for challenge in mongodb.challenges.find():
-	    subs = list(mongodb.submissions.find({'cid': challenge['cid']}))
-	    subs.sort(key = submission_priority, reverse = True)
-	    for index, sub in enumerate(subs[:5]):
-	    	best_opponent = max(subs[:index] + subs[index+1:], key=partial(match_quality, sub))
-	    	suggested_matches.append((challenge['cid'], sub['uid'], best_opponent['uid']))
-	
-	#communicate with Yggdrasil here (API TBD)
+        subs = list(mongodb.submissions.find({'cid': challenge['cid']}))
+        subs.sort(key = submission_priority, reverse = True)
+        for index, sub in enumerate(subs[:5]):
+            best_opponent = max(subs[:index] + subs[index+1:], key=partial(match_quality, sub))
+            suggested_matches.append((challenge['cid'], sub['uid'], best_opponent['uid']))
+    
+    #communicate with Yggdrasil here (API TBD)
     print suggested_matches
 
 def main():
