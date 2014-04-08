@@ -48,8 +48,11 @@ from wtforms.validators import DataRequired
 
 
 
-##### Forms
+##### Classes
 class ChallengeDescriptionForm(Form):
+    """
+    WTForm to submit a challenge. WTF was chosen here so we could use Flask-PageDown.
+    """
     name = TextField('Challenge name', validators=[DataRequired()])
     dev_only = BooleanField('Dev only')
     pagedown = PageDownField('Challenge description', validators=[DataRequired()])
@@ -60,12 +63,14 @@ class ChallengeDescriptionForm(Form):
 ##### Initialization
 app = Flask(__name__)
 
+# Set environment variables
 app.config['SECRET_KEY'] = environ.get('STORMPATH_SECRET_KEY')
 app.config['STORMPATH_API_KEY_ID'] = environ.get('STORMPATH_API_KEY_ID')
 app.config['STORMPATH_API_KEY_SECRET'] = environ.get('STORMPATH_API_KEY_SECRET')
 app.config['STORMPATH_APPLICATION'] = environ.get('STORMPATH_APPLICATION')
 app.config['MONGOLAB_URI'] = environ.get('MONGOLAB_URI')
 
+# Export handy functions to jinja
 def markdown_to_html(content):
     return Markup(markdown.markdown(content))
 
@@ -73,14 +78,19 @@ app.jinja_env.globals.update(markdown_to_html=markdown_to_html)
 app.jinja_env.globals.update(is_active_user_in=is_active_user_in)
 app.jinja_env.globals.update(format_exc = traceback.format_exc)
 
+# Stormpath
 stormpath_manager = StormpathManager(app)
 stormpath_manager.login_view = '.login'
 
+# Mongodb
 mongo_client = MongoClient(app.config['MONGOLAB_URI'])
 mongodb = mongo_client['mjollnir-db']
 challenges_collection = mongodb.challenges
 
+# Pagedown
 pagedown = PageDown(app)
+
+
 
 
 ##### Website
@@ -88,16 +98,22 @@ pagedown = PageDown(app)
 ### Error Handlers
 @app.errorhandler(404)
 def page_not_found(error):
+    """
+    Handler for HTTP 404.
+    """
     return render_template('error.html', description = '404: Not Found :(', error = error), 404
+
+
 
 
 @app.errorhandler(Exception)
 def exception_handler(error):
-    if app.debug:
-        # In debug mode we already use don't panic
-        raise error
-    
+    """
+    Handler for HTTP 500 on unexpected exceptions.
+    """   
     return render_template('error.html', description = '500: Internal Server Error :(', error = error), 500
+
+
 
 
 ### Webpage Handlers
@@ -117,7 +133,6 @@ def register():
     if request.method == 'GET':
         return render_template('register.html')
 
-
     try:
         # Create a new Stormpath User.
         _user = stormpath_manager.application.accounts.create({
@@ -129,9 +144,7 @@ def register():
         })
         _user.__class__ = User
     except StormpathError, err:
-        # If something fails, we'll display a user-friendly error message.
         return render_template('register.html', error=err.message)
-
 
     return redirect(url_for('.login', x='verifymail'))
 
@@ -142,18 +155,10 @@ def register():
 def login():
     """
     This view logs in a user given an email address and password.
-
-
-    This works by querying Stormpath with the user's credentials, and either
-    getting back the User object itself, or an exception (in which case well
-    tell the user their credentials are invalid).
-
-
-    If the user is valid, we'll log them in, and store their session for later.
+    Flask-Stormpath handles logins and user sessions.
     """
     if request.method == 'GET':
         return render_template('login.html')
-
 
     try:
         _user = User.from_login(
@@ -161,8 +166,8 @@ def login():
             request.form.get('password'),
         )
     except StormpathError, err:
+        # TODO, some errors have wrong messages (e.g. 'incorrect password' upon unverified account)
         return render_template('login.html', error=err.message)
-
 
     login_user(_user, remember=True)
     return redirect(request.args.get('next') or url_for('dashboard'))
@@ -174,23 +179,18 @@ def login():
 @login_required
 def dashboard():
     """
-    This view renders a simple dashboard page for logged in users.
-
-
-    Users can see their personal information on this page, as well as store
-    additional data to their account (if they so choose).
+    Renders a simple dashboard page for logged in users.
     """
     if request.method == 'POST':
+        # This is a sample on how to store user data in Stormpath. 
+        # We might never do it, but let's keep it here for now anyways.
         if request.form.get('birthday'):
             user.custom_data['birthday'] = request.form.get('birthday')
-
 
         if request.form.get('color'):
             user.custom_data['color'] = request.form.get('color')
 
-
         user.save()
-
 
     return render_template('dashboard.html')
 
@@ -216,9 +216,6 @@ def newchallenge():
     """
     Allows a user in the "Dev" admin group to submit a new challenge.
     """
-    # This is potentially unsafe since there is no sanitizing on the markdown submitted to the db
-    # Won't be a problem while admins are the only ones with access to submit challenges though
-    #
     form = ChallengeDescriptionForm(csrf_enabled = False)
 
     if not form.pagedown.data:
@@ -228,17 +225,16 @@ def newchallenge():
         return render_template('newchallenge.html', form = form)
 
     if form.validate_on_submit():
-        challenge_name = form.name.data
-        challenge_description = form.pagedown.data
+        # This is potentially unsafe since there is no sanitizing on the markdown submitted to the db
+        # Won't be a problem while admins are the only ones with access to submit challenges though
+        #
         challenge_id = uuid4()
-
         document = { 'cid': str(challenge_id),
-                     'name': challenge_name,
-                     'description': challenge_description,
+                     'name': form.name.data,
+                     'description': form.pagedown.data,
                      'dev_only': True }
 
         challenges_collection.insert(document)
-        
         return redirect(url_for('.challenge', cid = challenge_id))
 
     else:
@@ -258,8 +254,7 @@ def editchallenge():
     if not challenge_id:
         abort(404)
 
-    query = { 'cid': challenge_id }
-    challenge = challenges_collection.find_one(query)
+    challenge = challenges_collection.find_one({ 'cid': challenge_id })
 
     if not challenge:
         abort(404)
@@ -273,17 +268,12 @@ def editchallenge():
         return render_template('editchallenge.html', form = form)
 
     if form.validate_on_submit():
-        challenge_name = form.name.data
-        challenge_description = form.pagedown.data
-        challenge_dev_only = form.dev_only.data
-
         document = { 'cid': challenge_id,
-                     'name': challenge_name,
-                     'description': challenge_description,
-                     'dev_only': challenge_dev_only }
+                     'name': form.name.data,
+                     'description': form.pagedown.data,
+                     'dev_only': form.dev_only.data }
 
-        challenges_collection.update(query, document)
-        
+        challenges_collection.update({ 'cid': challenge_id }, document)
         return redirect(url_for('.challenge', cid = challenge_id))
 
     else:
@@ -312,6 +302,8 @@ def challenge():
 
 
 
-if __name__ == "__main__":
-    if os.name == 'nt':
-        app.run(host = '0.0.0.0', port = 80, debug = True)
+# On unix systems the project should be executed using Gunicorn and Foreman.
+# Since Gunicorn doesn't run in windows yet, we let Flask itself handle the requests on nt systems.
+if os.name == 'nt':
+    if __name__ == "__main__":
+        app.run(host = '0.0.0.0', port = 80)
