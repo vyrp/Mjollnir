@@ -6,5 +6,5 @@ int main(){
 
     printf("tic...\n");
     printf("toc (%d)\n", nanosleep(&dt, NULL));
-	return 0;
+    return 0;
 }

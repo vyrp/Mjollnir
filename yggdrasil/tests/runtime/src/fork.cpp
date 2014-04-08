@@ -4,19 +4,19 @@
 
 int main(){
 #ifdef DEBUG
-	printf("Press to start\n");
-	getchar();
+    printf("Press to start\n");
+    getchar();
 #endif
 
     fork();
-	int result = fork();
-	pid_t pid = getpid();
-	pid_t ppid = getppid();
+    int result = fork();
+    pid_t pid = getpid();
+    pid_t ppid = getppid();
 
-	printf("pid = %d | ppid = %d | result = %d\n", pid, ppid, result);
+    printf("pid = %d | ppid = %d | result = %d\n", pid, ppid, result);
 
 #ifdef DEBUG
-	getchar();
+    getchar();
 #endif
-	return 0;
+    return 0;
 }

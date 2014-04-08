@@ -1,6 +1,6 @@
 #include <stdio.h>
 
 int main(){
-	// Threads
-	return 0;
+    // Threads
+    return 0;
 }

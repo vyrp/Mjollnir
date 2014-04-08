@@ -1,6 +1,6 @@
 #include <stdio.h>
 
 int main(){
-	// Networking
-	return 0;
+    // Networking
+    return 0;
 }

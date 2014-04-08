@@ -13,8 +13,7 @@ $(BIN):
 
 $(BINARIES): $(BIN)/% : $(SRC)/%.cpp
 	g++ -Wall $< -o $@
-	
+
 clean:
 	rm -rf $(BIN)
 	rm -rf $(FILES)/created.txt
-    

@@ -12,10 +12,10 @@ done
 for profile in $(ls *.profile); do
     cp $profile $MJOLLNIR/$profile
     if apparmor_parser -a $MJOLLNIR/$profile 2>/dev/null; then
-    	echo -e "$profile => LOADED"
+        echo -e "$profile => LOADED"
     elif apparmor_parser -r $MJOLLNIR/$profile 2>/dev/null; then
-    	echo -e "$profile => RELOADED"
+        echo -e "$profile => RELOADED"
     else
-    	echo -e "$profile => ERROR"
+        echo -e "$profile => ERROR"
     fi
 done
