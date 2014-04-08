@@ -13,18 +13,32 @@ class GameLogic {
   WorldModel getWorldModel();
   bool isFinished();
   int32_t getWinner();
- private:
-  bool checkLines(const WorldModel& wm, Marker player);
-  bool checkColumns(const WorldModel& wm, Marker player);
-  bool checkDiagonals(const WorldModel& wm, Marker player);
-  bool checkVictory(const WorldModel& wm, Marker player, int32_t playerId);
+  /**
+   *  Specific function to use at GameLogicTest test suite
+   */
+  void setHasFinished(bool value);
+  /**
+   *  Specific function to use at GameLogicTest test suite
+   */
+  void setWinner(int32_t value);
+  /**
+   *  Specific function to use at GameLogicTest test suite.
+   *  Internally should use setTableCoordinate()
+   */
   void setTableCoordinate(const Coordinate& coordinate, Marker marker);
-  bool checkTableCoordinate(const Coordinate& coordinate, Marker marker);
-  bool randomPlay(int32_t playerId);
-  WorldModel worldModel;
-  int32_t player1, player2, winner;
-  bool hasFinished;
-  const size_t boardSize = 3;
+ private:
+  bool checkLines_(const WorldModel& wm, Marker player);
+  bool checkColumns_(const WorldModel& wm, Marker player);
+  bool checkDiagonals_(const WorldModel& wm, Marker player);
+  bool checkVictory_(const WorldModel& wm, Marker player, int32_t playerId);
+  bool checkDraw_(const WorldModel& wm);
+  void setTableCoordinate_(const Coordinate& coordinate, Marker marker);
+  bool checkTableCoordinate_(const Coordinate& coordinate, Marker marker);
+  bool randomPlay_(int32_t playerId);
+  WorldModel worldModel_;
+  int32_t player1_, player2_, winner_;
+  bool hasFinished_;
+  const size_t boardSize_ = 3;
 };
 
 }}  // namespaces 

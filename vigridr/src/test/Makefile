@@ -2,8 +2,8 @@ CC = g++ -std=c++0x
 INCLUDES = -I/usr/local/include/gtest
 LFLAGS = -L/usr/local/lib
 LIBRARIES = -lpthread -lgtest
-TARGETS = sample_test
-OBJECTS_sample_test = 
+TARGETS = TicTacToeTest
+OBJECTS_TicTacToeTest = ../../obj/server/GameLogic.o
 BIN := ./bin
 
 all: $(BIN) $(BIN)/$(TARGETS)

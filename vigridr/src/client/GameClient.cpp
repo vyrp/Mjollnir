@@ -51,6 +51,7 @@ void printWorldModel(const WorldModel& wm) {
         }
         std::cout << "\n\n";
   }
+  std::cout << "\n";
 }
 
 #include <stdlib.h>
