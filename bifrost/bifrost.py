@@ -301,6 +301,13 @@ def challenge():
 
 
 
+@app.route('/challenges')
+def challenges():
+    """
+    Page to display all challenges
+    """
+    challenges = challenges_collection.find()
+    return render_template('challenges.html', challenges = challenges)
 
 # On unix systems the project should be executed using Gunicorn and Foreman.
 # Since Gunicorn doesn't run in windows yet, we let Flask itself handle the requests on nt systems.

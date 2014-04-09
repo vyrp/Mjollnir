@@ -6,8 +6,8 @@
   font-size: 1.5em;
 }
 
-.register, .login, .dashboard {
-  margin-top: 6em;
+.register, .login, .dashboard, .challenges {
+  margin-top: 3em;
 }
 
 .register-fail, .login-fail {
@@ -38,3 +38,5 @@
   line-height: 1.33;
   border-radius: 0;
 }
+
+.

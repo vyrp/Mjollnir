@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+
+{% block body %}
+  <div class="challenges">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="jumbotron">
+          <h1>Challenges</h1>
+          {% if challenges %}
+            <ul>
+              {{ challenges.count() }} Challenges
+              {% for challenge in challenges %}
+              <li>
+                <a href="{{ url_for('.challenge', cid = challenge.cid) }}">{{ challenge.name }}</a>
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <h3> Sorry ;( </h3>
+            <h4> We can't find any challenge at the momment ;( </h3>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
