@@ -9,16 +9,16 @@
           <h1>Challenges</h1>
           {% if challenges %}
             <ul>
-              {{ challenges.count() }} Challenges
+              {{ len(challenges) }} Challenges
               {% for challenge in challenges %}
               <li>
-                <a href="{{ url_for('.challenge', cid = challenge.cid) }}">{{ challenge.name }}</a>
+                <a href="{{ url_for('.challenge', cid = challenge.cid) }}">{{ challenge.name }}</a>{% if challenge.dev_only %} (Dev only){% endif %}
               </li>
               {% endfor %}
             </ul>
           {% else %}
             <h3> Sorry ;( </h3>
-            <h4> We can't find any challenge at the momment ;( </h3>
+            <h4> We can't find any challenges at the momment. </h4>
           {% endif %}
         </div>
       </div>

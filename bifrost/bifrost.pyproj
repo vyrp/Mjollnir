@@ -63,6 +63,7 @@
     <Content Include="static\js\bootstrap.min.js" />
     <Content Include="templates\base.html" />
     <Content Include="templates\challenge.html" />
+    <Content Include="templates\challenges.html" />
     <Content Include="templates\dashboard.html" />
     <Content Include="templates\editchallenge.html" />
     <Content Include="templates\error.html" />

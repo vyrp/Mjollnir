@@ -74,9 +74,10 @@ app.config['MONGOLAB_URI'] = environ.get('MONGOLAB_URI')
 def markdown_to_html(content):
     return Markup(markdown.markdown(content))
 
-app.jinja_env.globals.update(markdown_to_html=markdown_to_html)
-app.jinja_env.globals.update(is_active_user_in=is_active_user_in)
 app.jinja_env.globals.update(format_exc = traceback.format_exc)
+app.jinja_env.globals.update(is_active_user_in=is_active_user_in)
+app.jinja_env.globals.update(len=len)
+app.jinja_env.globals.update(markdown_to_html=markdown_to_html)
 
 # Stormpath
 stormpath_manager = StormpathManager(app)
@@ -101,7 +102,7 @@ def page_not_found(error):
     """
     Handler for HTTP 404.
     """
-    return render_template('error.html', description = '404: Not Found :(', error = error), 404
+    return render_template('error.html', description = '404: Not Found', error = error), 404
 
 
 
@@ -111,7 +112,7 @@ def exception_handler(error):
     """
     Handler for HTTP 500 on unexpected exceptions.
     """   
-    return render_template('error.html', description = '500: Internal Server Error :(', error = error), 500
+    return render_template('error.html', description = '500: Internal Server Error', error = error), 500
 
 
 
@@ -301,16 +302,20 @@ def challenge():
 
 
 
+
 @app.route('/challenges')
 def challenges():
     """
     Page to display all challenges
     """
-    challenges = challenges_collection.find()
+    challenges = [challenge for challenge in challenges_collection.find() if ( not challenge['dev_only'] or is_active_user_in('Dev') )]
     return render_template('challenges.html', challenges = challenges)
+
+
+
 
 # On unix systems the project should be executed using Gunicorn and Foreman.
 # Since Gunicorn doesn't run in windows yet, we let Flask itself handle the requests on nt systems.
 if os.name == 'nt':
     if __name__ == "__main__":
-        app.run(host = '0.0.0.0', port = 80)
+        app.run(host = '0.0.0.0', port = 8080)

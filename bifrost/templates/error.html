@@ -6,10 +6,11 @@
     <div class="row">
       <div class="col-lg-12">
         <div class="jumbotron">
-          <h1>{{ description }}</h1>
+          <h1>Oh noes! ;(</h1>
+          <h2>{{ description }}</h2>
           <br>
           {% if error and is_active_user_in('Dev') %}
-            <h2>Exception trace (only available for Devs):</h2>
+            <h3>Exception trace (only available for Devs):</h3>
             <pre>{{ format_exc( error ) }}</pre>
           {% endif %}
         </div>
