@@ -29,12 +29,14 @@ from flask.ext.stormpath import (
     logout_user,
     user,
 )
+
 from flask.ext.pagedown import PageDown
 from flask.ext.pagedown.fields import PageDownField
 from flask.ext.wtf import Form
 
 from extensions.flask_stormpath import groups_allowed
 from extensions.flask_stormpath import is_active_user_in
+from extensions.sorted_by_name import sorted_by_name
 
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
@@ -308,8 +310,9 @@ def challenges():
     """
     Page to display all challenges
     """
-    challenges = [challenge for challenge in challenges_collection.find() if ( not challenge['dev_only'] or is_active_user_in('Dev') )]
-    return render_template('challenges.html', challenges = challenges)
+    
+    challenges = sorted_by_name( [challenge for challenge in challenges_collection.find() if ( not challenge['dev_only'] or is_active_user_in('Dev') )] )
+    return render_template('challenges.html', challenges=challenges)
 
 
 
@@ -318,4 +321,4 @@ def challenges():
 # Since Gunicorn doesn't run in windows yet, we let Flask itself handle the requests on nt systems.
 if os.name == 'nt':
     if __name__ == "__main__":
-        app.run(host = '0.0.0.0', port = 8080)
+        app.run(host='0.0.0.0', port=8080)
