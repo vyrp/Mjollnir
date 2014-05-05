@@ -47,6 +47,15 @@ def rating_change(score, player, opp):
     expected = E(player, opp)
     return q * g(opp.RD) * (score - expected) / (1./player.RD**2 + d)
 
+def RD_after_match(player, opp):
+    """ 
+    Returns new RD for player after the given match.
+    """
+    d = RD_factor(player, opp)
+    RD = int( (1./(1./player.RD**2 + d)) ** 0.5 + 0.5 )
+    RD = max(RD, MIN_RD)
+    return RD
+
 class GlickoPlayer:
     def __init__(self, rating=INITIAL_RATING, RD=MAX_RD):
         """ Creates a new player with given rating and RD. """
@@ -65,9 +74,22 @@ class GlickoPlayer:
         if score < 0 or score > 1:
             raise ValueError('score should be between 0 and 1')
 
-        d = RD_factor(self, opp)
         rating_delta = rating_change(score, self, opp)
-        
-        self.rating = int( self.rating + rating_delta + 0.5 )
-        self.RD = int( (1./(1./self.RD**2 + d)) ** 0.5 + 0.5 )
-        self.RD = max(self.RD, MIN_RD)
+        new_RD = RD_after_match(self, opp)
+
+        self.rating = int(self.rating + rating_delta + 0.5)
+        self.RD = new_RD
+
+    def match_update(self, results):
+        """ 
+        Updates rating after a match with several opponents.
+        results is a dictionary that maps opponents to the score (0 to 1) relative to that opponent.
+        """
+        total_rating_delta = 0
+        new_RD = self.RD
+        for result in results:
+            total_rating_delta += rating_change(score, self, opp)
+            new_RD = min(new_RD, RD_after_match(self, opp))
+
+        self.rating = int( self.rating + total_rating_delta / len(results) + 0.5 )
+        self.RD = new_RD

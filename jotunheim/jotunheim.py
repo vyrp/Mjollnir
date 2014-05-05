@@ -20,43 +20,48 @@ def player_before_match(submission, match):
     player.advance_periods(inactivity)
     return player
     
-def process_match_rating(submission, player, opp, score):
-    """
-    Updates submission on the database to reflect the match played.
-    """
-    final_player = copy(player)
-    final_player.match_update(score, opp)
-
-    submission['rating'] = final_player.rating
-    submission['RD'] = final_player.RD
-    
-    mongodb.submissions.save(submission)
-
 def process_matches():
     """ 
     Changes rankings according to all of the match results that are on the database,
     but have not been processed since the last run. 
     """
+
+    #find unprocessed matches
     jotunheim_info = mongodb.jotunheim.find_one(sort=[('last_processed', -1)])
     last_processed = jotunheim_info['last_processed']
-
     unprocessed_matches = mongodb.matches.find({'datetime': {'$gt': last_processed}})
 
     for match in unprocessed_matches:
         last_processed = max(last_processed, match['datetime'])
 
-        submission1 = mongodb.submissions.find_one({'cid': match['cid'], 'uid': match['users'][0]['uid']})
-        submission2 = mongodb.submissions.find_one({'cid': match['cid'], 'uid': match['users'][1]['uid']})
+        #get submissions for every player in the match
+        match_ranks = [match['users']]
+        match_submissions = []
+        for user in match['users']:
+        	params = {'cid': match['cid'], 'uid': user['uid']}
+        	sub = mongodb.submissions.find_one(params)
+        	match_submissions.append(sub)
 
-        player1 = player_before_match(submission1, match)
-        player2 = player_before_match(submission2, match)
+        players_before_match = [player_before_match(sub, match) for sub in match_submissions]
+        players_after_match = [ copy(player) for player in players_before_match ]
 
-        submission1['last_update'] = submission2['last_update'] = match['datetime']
-        normalized_result = (match['users'][1]['rank'] - match['users'][0]['rank'] + 1) / 2.0
+        #update all submissions according to match results
+        for sub in match_submissions:
+        	sub['last_update'] = match['datetime']
 
-        process_match_rating(submission1, player1, player2, normalized_result)
-        process_match_rating(submission2, player2, player1, 1-normalized_result) 
+        for player_index in xrange(len(match['users'])):
+        	results = {}
+        	for other_player in xrange(len(match['users'])):
+        		if player_index == other_player: continue
 
+        		normalized_result = (match['users'][other_player]['rank'] - match['users'][player_index]['rank'] + 1) / 2.0
+        		results[ players_before_match[other_player] ] = normalized_result
+
+        	players_after_match[player_index].match_update(results)
+        	match_submissions[player_index]['rating'] = players_after_match[player_index].rating
+        	match_submissions[player_index]['RD'] = players_after_match[player_index].RD	 
+        	mongodb.submissions.save(submission)
+        
     jotunheim_info['last_processed'] = last_processed
     mongodb.jotunheim.save(jotunheim_info)
     return last_processed
@@ -77,7 +82,7 @@ def decrease_old_ratings(last_processed):
 
 def submission_priority(sub):
     """
-    Returns the priority which which this submission should be matched by the matchmaking system.
+    Returns the priority with which this submission should be matched by the matchmaking system.
     """
     if sub['RD'] > 100:
         return 1000000000 + sub['rating']
