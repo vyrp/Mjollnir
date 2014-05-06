@@ -4,8 +4,8 @@
 {% block body %}
   <div class="login">
     <div class="row">
-      <div class="col-lg-6 col-lg-offset-3">
-        <form class="bs-example form-horizontal" method="post" action="">
+      <div class="span6">
+        <form method="post" action="">
           <fieldset>
             <legend>Login</legend>
             {% if error %}
@@ -16,9 +16,7 @@
             {% elif request.args.get('x') == 'verifymail' %}
             <div class="alert alert-dismissable alert-info">
               <button type="button" class="close" data-dismiss="alert">&times;</button>
-              You should soon receive an email with a link to activate your account. After
-              activating it, you can proceed to login below. For questions, contact <strong>
-              heimdallr@rro.im</strong>.
+              You should soon receive an email with a link to activate your account. After activating it, you can proceed to login below. For questions, contact <strong> heimdallr@rro.im</strong>.
             </div>
             {% else %}
             <p class="last-p">
@@ -26,23 +24,17 @@
             </p>
             {% endif %}
 
-            <div class="form-group">
-              <label for="email" class="col-lg-4 control-label">Email</label>
-              <div class="col-lg-4">
-                <input type="email" class="form-control" id="email" name="email" placeholder="Email" autofocus>
-              </div>
+            <label for="email" class="col-lg-4 control-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" placeholder="heimdallr@rro.im" autofocus>
+
+            <label for="password" class="col-lg-4 control-label">Password</label>
+            <div class="col-lg-4">
+              <input type="password" class="form-control" id="password" name="password" placeholder="">
             </div>
-            <div class="form-group">
-              <label for="password" class="col-lg-4 control-label">Password</label>
-              <div class="col-lg-4">
-                <input type="password" class="form-control" id="password" name="password" placeholder="Password">
-              </div>
-            </div>
-            <div class="form-group">
-              <div class="col-lg-10 col-lg-offset-4">
-                <button type="submit" class="btn btn-primary">Login</button>
-              </div>
-            </div>
+    
+            <br/>
+            
+            <button type="submit" class="btn btn-primary">Login</button>
           </fieldset>
         </form>
       </div>

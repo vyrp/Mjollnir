@@ -2,18 +2,16 @@
 
 
 {% block body %}
-  <div class="challenge">
+  <div class="error">
     <div class="row">
       <div class="col-lg-12">
-        <div class="jumbotron">
-          <h1>Oh noes! ;(</h1>
-          <h2>{{ description }}</h2>
-          <br>
-          {% if error and is_active_user_in('Dev') %}
-            <h3>Exception trace (only available for Devs):</h3>
-            <pre>{{ format_exc( error ) }}</pre>
-          {% endif %}
-        </div>
+        <h1>Oh noes! ;(</h1>
+        <h1>{{ description }}</h1>
+        <br>
+        {% if error and is_active_user_in('Dev') %}
+          <h3>Exception trace (only available for Devs):</h3>
+          <pre>{{ format_exc( error ) }}</pre>
+        {% endif %}
       </div>
     </div>
   </div>

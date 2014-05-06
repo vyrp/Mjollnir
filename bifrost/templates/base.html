@@ -4,8 +4,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Mjöllnir | {% block title %}{% endblock %}</title>
+    <title>Mjöllnir | {{request.endpoint}}</title>
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/darkstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -17,38 +18,46 @@
     {% endblock %}
   </head>
   <body>
-    <div class="container">
-      <div class="header">
-        <ul class="nav nav-pills pull-right">
-          <li {% if request.endpoint == 'index' %}class="active"{% endif %}>
-            <a href="{{ url_for('index') }}">Home</a>
-          </li>
-          <li {% if request.endpoint == 'challenges' %} class="active" {% endif %}>
-            <a href="{{ url_for('challenges') }}">Challenges</a>
-          </li>
-          {% if user.is_authenticated() %}
-          <li {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>
-            <a href="{{ url_for('dashboard') }}">Dashboard</a>
-          </li>
-            {% if is_active_user_in('Dev') %}
-          <li {% if request.endpoint == 'newchallenge' %}class="active"{% endif %}>
-            <a href="{{ url_for('newchallenge') }}">New Challenge</a>
-          </li>
-            {% endif %}
-          <li>
-            <a href="{{ url_for('logout') }}">Logout</a>
-          </li>
-          {% else %}
-          <li {% if request.endpoint == 'login' %}class="active"{% endif %}>
-            <a href="{{ url_for('login') }}">Login</a>
-          </li>
-          <li {% if request.endpoint == 'register' %}class="active"{% endif %}>
-            <a href="{{ url_for('register') }}">Register</a>
-          </li>
-          {% endif %}
-        </ul>
-        <h3 class="text-muted">Mjöllnir</h3>
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand active" href="{{ url_for('index') }}">Mjöllnir</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li {% if request.endpoint == 'challenges' %} class="active" {% endif %}>
+                <a href="{{ url_for('challenges') }}">Challenges</a>
+              </li>
+              {% if user.is_authenticated() %}
+              <li {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+              </li>
+                {% if is_active_user_in('Dev') %}
+              <li {% if request.endpoint == 'newchallenge' %}class="active"{% endif %}>
+                <a href="{{ url_for('newchallenge') }}">New Challenge</a>
+              </li>
+                {% endif %}
+              <li>
+                <a href="{{ url_for('logout') }}">Logout</a>
+              </li>
+              {% else %}
+              <li {% if request.endpoint == 'login' %}class="active"{% endif %}>
+                <a href="{{ url_for('login') }}">Login</a>
+              </li>
+              <li {% if request.endpoint == 'register' %}class="active"{% endif %}>
+                <a href="{{ url_for('register') }}">Register</a>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
       </div>
+    </div>
+    <div class="mainblock well">
       {% block body %}{% endblock %}
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>

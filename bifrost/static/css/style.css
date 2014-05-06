@@ -7,7 +7,18 @@
 }
 
 .register, .login, .dashboard, .challenges {
-  margin-top: 3em;
+  margin: auto;
+  width: 450px;
+}
+
+.newchallenge {
+  margin: auto;
+  width: 650px;
+}
+
+.error {
+  margin: auto;
+  width: 850px;
 }
 
 .register-fail, .login-fail {
@@ -27,8 +38,12 @@
   font-weight: bold;
 }
 
-.jumbotron h1 {
+.mainblock h1 {
   text-align: center;
+}
+
+.mainblock {
+  margin: 50px 100px;
 }
 
 .bigbutton {

@@ -17,8 +17,8 @@ input {
 {% block body %}
   <div class="newchallenge">
     <div class="row">
-      <div class="col-lg-6 col-lg-offset-3">
-        <form class="bs-example form-horizontal" method="post" action="">
+      <div class="span6">
+        <form method="post" action="">
           <fieldset>
             <legend>Edit a challenge</legend>
             {% if error %}
@@ -27,30 +27,25 @@ input {
                 {{ error }}
               </div>
             {% endif %}
-            <div style="width: 500px;">
-                <form method = "POST">
-                    <div>
-                      <b>{{ form.name.label }}</b>:
-                      <br>
-                      {{ form.name() }}
-                    </div>
-                    <br>
-                    <div>
-                      {{ form.dev_only }} <b>{{ form.dev_only.label }}</b>
-                    </div>
-                    <br>
-                    <div>
-                      <b>{{ form.pagedown.label }}</b>:
-                      {{ form.pagedown(rows = 10, style = 'width:100%') }}
-                    </div>
-                </form>
+
+            <div>
+              {{ form.name.label }}{{ form.name() }}
             </div>
             <br>
+            <div>
+              {{ form.dev_only }} <b>{{ form.dev_only.label }}</b>
+            </div>
             <br>
-            <div class="form-group">
-              <div class="col-lg-10 col-lg-offset-4">
-                <button type="submit" class="btn btn-primary">Submit</button>
-              </div>
+            <div>
+              <b>{{ form.pagedown.label }}</b>
+              {{ form.pagedown(rows = 10, style = 'width:100%') }}
+            </div>
+
+            <br/>
+            <br/>
+
+            <div class="col-lg-10 col-lg-offset-4">
+              <button type="submit" class="btn btn-primary">Submit</button>
             </div>
           </fieldset>
         </form>
