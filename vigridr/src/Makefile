@@ -1,12 +1,13 @@
 THRIFTS =  $(shell find . -type f -name *.thrift)
-THRIFTSGEN = $(shell echo $(THRIFTS) | sed s,/[^/]*\.thrift,/gen-cpp,g | sed s,\\s,\\n,g | sort -u)
+THRIFTSGENCPP = $(shell echo $(THRIFTS) | sed s,/[^/]*\.thrift,/gen-cpp,g | sed s,\\s,\\n,g | sort -u)
 
-all: $(THRIFTSGEN) client server buildtests
+all: $(THRIFTSGENCPP) client server buildtests
 
-$(THRIFTSGEN): ../obj/thrift
-	rm -rf $(THRIFTSGEN)
+$(THRIFTSGENCPP): ../obj/thrift
+	rm -rf $(THRIFTSGENCPP)
 	$(foreach file, $(THRIFTS), thrift --gen cpp:pure_enums -o $(shell dirname $(file)) $(file);)
-	$(foreach folder, $(THRIFTSGEN), rm -f $(folder)/*.skeleton.cpp; mkdir -p ../obj/$(folder);)
+	$(foreach file, $(THRIFTS), thrift --gen py -o $(shell dirname $(file)) $(file);)
+	$(foreach folder, $(THRIFTSGENCPP), rm -f $(folder)/*.skeleton.cpp; mkdir -p ../obj/$(folder);)
 
 ../obj/thrift: $(THRIFTS)
 	touch ../obj/thrift

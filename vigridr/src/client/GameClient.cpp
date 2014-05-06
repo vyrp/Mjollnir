@@ -37,19 +37,19 @@ using ::mjollnir::vigridr::Marker;
 
 void printWorldModel(const WorldModel& wm) {
   for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-          char toPrint;
-          switch(wm.table[i][j]) {
-            case Marker::X:
-              toPrint = 'X'; break;
-            case Marker::O:
-              toPrint = 'O';break;
-            default:
-              toPrint = '-';break;
-          }
-          std::cout << toPrint << " ";
-        }
-        std::cout << "\n\n";
+    for (int j = 0; j < 3; j++) {
+      char toPrint;
+      switch(wm.table[i][j]) {
+        case Marker::X:
+          toPrint = 'X'; break;
+        case Marker::O:
+          toPrint = 'O';break;
+        default:
+          toPrint = '-';break;
+      }
+      std::cout << toPrint << " ";
+    }
+    std::cout << "\n\n";
   }
   std::cout << "\n";
 }
@@ -70,6 +70,10 @@ Command playTurn(const WorldModel& wm) {
   return command;
 }
 
+void init(){
+  srand(time(NULL));
+}
+
 void synchronize(int32_t t) {
   auto sleeptime = std::chrono::high_resolution_clock::now() + 
     std::chrono::milliseconds(t);
@@ -77,7 +81,7 @@ void synchronize(int32_t t) {
 }
 
 void playGame(GameClient& client) {
-  srand(time(NULL));
+  init();
   GameInfo gameInfo;
   client.ready(gameInfo);
   while (true) {
@@ -93,7 +97,6 @@ void playGame(GameClient& client) {
       client.sendCommand(command);
     }
   }
-
 }
 
 int main(int argc, char** argv) {
@@ -101,14 +104,12 @@ int main(int argc, char** argv) {
   gflags::SetUsageMessage(kUsageMessage);
   gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-  boost::shared_ptr<TTransport> socket(new TSocket("localhost", FLAGS_port));
-  boost::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
-  boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
-  GameClient client(protocol);
-
   try {
-    transport->open();
-    mjollnir::vigridr::GameInfo gameInfo;
+    boost::shared_ptr<TTransport> socket(new TSocket("localhost", FLAGS_port));
+    boost::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
+    boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
+    GameClient client(protocol);
+    transport->open();  
     playGame(client);
     transport->close();
   } catch (TException &tx) {
