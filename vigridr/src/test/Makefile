@@ -1,6 +1,6 @@
 CC = g++ -std=c++0x
-INCLUDES = -I/usr/local/include/gtest
-LFLAGS = -L/usr/local/lib
+INCLUDES = -I/../../third-parties/cpp/include/gtest
+LFLAGS = -L/../../third-parties/cpp/lib
 LIBRARIES = -lpthread -lgtest
 TARGETS = TicTacToeTest
 OBJECTS_TicTacToeTest = ../../obj/server/GameLogic.o

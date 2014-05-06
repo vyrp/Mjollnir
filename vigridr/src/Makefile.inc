@@ -24,11 +24,11 @@ BINARY   = $(TARGET)
 
 CC       = g++
 # compiling flags here
-CFLAGS   = -std=c++0x -Wall -Werror -I/usr/local/include/thrift -I/usr/local/include/gflags
+CFLAGS   = -std=c++0x -Wall -Werror -I/../../third-parties/cpp/include/thrift -I/../../third-parties/cpp/include/gflags
 
 LINKER   = g++ -o
 # linking flags here
-LFLAGS   = -Wall -L/usr/local/lib
+LFLAGS   = -Wall -L/../../third-parties/cpp/lib
 LIBRARIES = -lpthread -lthrift -lgflags
 
 rm       = rm -f

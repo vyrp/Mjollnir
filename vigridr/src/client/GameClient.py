@@ -1,9 +1,11 @@
 import sys
+import glob
 import argparse
 import time
 from random import randint
 
 sys.path.append('../server/gen-py')
+sys.path.insert(0, glob.glob('../../third-parties/python/lib')[0])
 
 from thrift import Thrift
 from thrift.transport import TSocket
