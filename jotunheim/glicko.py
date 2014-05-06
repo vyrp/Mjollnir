@@ -29,30 +29,33 @@ def E(player, opp):
     den = 1 + 10**(-g(opp.RD)*(player.rating-opp.rating)/400)
     return 1./den
 
-def RD_factor(player, opp):
+def RD_factor(player, results):
     """
     Returns a constant that gives the decrease factor for player's RD after a match.
     Note that the return value of this function is not the exact absolute RD decrease.
     """
-    expected = E(player, opp)
-    return q**2 * g(opp.RD)**2 * expected * (1-expected)
+    adjust = sum( g(opp.RD)**2 * E(player, opp) * (1-E(player, opp)) for opp in results.keys() )
+    return q**2 * adjust
 
-def rating_change(score, player, opp):
+def rating_change(player, results):
     """ 
     Returns by how much player's rating should change after the given match. 
     Score is given from player's point of view.
     """
+    d = RD_factor(player, results)
     
-    d = RD_factor(player, opp)
-    expected = E(player, opp)
-    return q * g(opp.RD) * (score - expected) / (1./player.RD**2 + d)
+    adjust = 0
+    for opp, score in results.items():
+        adjust += g(opp.RD) * (score - E(player, opp)) 
+    
+    return q * adjust / (1./player.RD**2 + d)
 
-def RD_after_match(player, opp):
+def RD_after_match(player, results):
     """ 
     Returns new RD for player after the given match.
     """
-    d = RD_factor(player, opp)
-    RD = int( (1./(1./player.RD**2 + d)) ** 0.5 + 0.5 )
+    d = RD_factor(player, results)
+    RD = (1./(1./player.RD**2 + d)) ** 0.5
     RD = max(RD, MIN_RD)
     return RD
 
@@ -66,30 +69,13 @@ class GlickoPlayer:
         """ Increase rating uncertainty based on number of elapsed time periods. """
         self.RD = min( (self.RD**2 + C * t) ** 0.5, MAX_RD)
 
-    def match_update(self, score, opp):
-        """ 
-        Updates rating after a match with an opponent.
-        The best score for this player is 1, while 0.5 is a draw and 0 is the worst score. 
-        """
-        if score < 0 or score > 1:
-            raise ValueError('score should be between 0 and 1')
-
-        rating_delta = rating_change(score, self, opp)
-        new_RD = RD_after_match(self, opp)
+    def match_update(self, results):
+        for score in results.values():
+            if score < 0 or score > 1:
+                raise ValueError('score should be between 0 and 1')
+ 
+        rating_delta = rating_change(self, results)
+        new_RD = RD_after_match(self, results)
 
         self.rating = int(self.rating + rating_delta + 0.5)
-        self.RD = new_RD
-
-    def match_update(self, results):
-        """ 
-        Updates rating after a match with several opponents.
-        results is a dictionary that maps opponents to the score (0 to 1) relative to that opponent.
-        """
-        total_rating_delta = 0
-        new_RD = self.RD
-        for result in results:
-            total_rating_delta += rating_change(score, self, opp)
-            new_RD = min(new_RD, RD_after_match(self, opp))
-
-        self.rating = int( self.rating + total_rating_delta / len(results) + 0.5 )
-        self.RD = new_RD
+        self.RD = new_RD    
