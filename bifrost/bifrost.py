@@ -322,3 +322,5 @@ def challenges():
 if os.name == 'nt':
     if __name__ == "__main__":
         app.run(host='0.0.0.0', port=8080)
+else:
+    print "Try 'foreman start'"
