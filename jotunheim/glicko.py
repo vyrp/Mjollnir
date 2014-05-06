@@ -29,12 +29,12 @@ def E(player, opp):
     den = 1 + 10**(-g(opp.RD)*(player.rating-opp.rating)/400)
     return 1./den
 
-def RD_factor(player, results):
+def RD_factor(player, opponents):
     """
     Returns a constant that gives the decrease factor for player's RD after a match.
     Note that the return value of this function is not the exact absolute RD decrease.
     """
-    adjust = sum( g(opp.RD)**2 * E(player, opp) * (1-E(player, opp)) for opp in results.keys() )
+    adjust = sum( g(opp.RD)**2 * E(player, opp) * (1-E(player, opp)) for opp in opponents )
     return q**2 * adjust
 
 def rating_change(player, results):
@@ -42,7 +42,7 @@ def rating_change(player, results):
     Returns by how much player's rating should change after the given match. 
     Score is given from player's point of view.
     """
-    d = RD_factor(player, results)
+    d = RD_factor(player, results.keys())
     
     adjust = 0
     for opp, score in results.items():
@@ -54,7 +54,7 @@ def RD_after_match(player, results):
     """ 
     Returns new RD for player after the given match.
     """
-    d = RD_factor(player, results)
+    d = RD_factor(player, results.keys())
     RD = (1./(1./player.RD**2 + d)) ** 0.5
     RD = max(RD, MIN_RD)
     return RD
