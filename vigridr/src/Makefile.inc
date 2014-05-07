@@ -14,7 +14,7 @@
 # directories
 SRCDIR = .
 OBJDIR   = ../../obj/$(TARGET)
-BINDIR   = ../../bin
+BINDIR   = ../../bin/cpp
 
 # objects
 OBJECTS  = $(SOURCES:%.cpp=$(OBJDIR)/%.o)
@@ -33,7 +33,7 @@ LIBRARIES = -lpthread -lthrift -lgflags
 
 rm       = rm -f
 
-all: $(BINDIR)/$(BINARY)
+cpp: $(BINDIR)/$(BINARY)
 	
 $(BINDIR)/$(BINARY): $(OBJECTS)
 	$(LINKER) $@ $(LFLAGS) $(OBJECTS) $(LIBRARIES)
@@ -56,5 +56,6 @@ clean:
 .PHONY: remove
 remove: clean
 	$(rm) $(BINDIR)/$(BINARY)
+	$(rm) $(OTHERBIN)
 	@echo "Executable removed!"
 

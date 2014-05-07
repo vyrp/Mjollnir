@@ -1,9 +1,18 @@
 ALLDIRECTORIES := $(shell find -type d | grep 'src')
-DIRECTORIES := $(ALLDIRECTORIES:./src/%=./obj/%)  ./bin
+DIRECTORIES := $(ALLDIRECTORIES:./src/%=./obj/%)  ./bin ./bin/cpp ./bin/csharp
 
 all: $(DIRECTORIES)
 	@$(MAKE) $(MFLAGS) -C src	
+
+clientcpp: $(DIRECTORIES)
+	@$(MAKE) clientcpp $(MFLAGS) -C src
+
+clientcsharp: $(DIRECTORIES)
+	@$(MAKE) clientcsharp $(MFLAGS) -C src
 	
+server: $(DIRECTORIES)
+	@$(MAKE) server $(MFLAGS) -C src
+
 $(DIRECTORIES): 
 	@mkdir -p $(DIRECTORIES)
 	@echo "Created directories "$(DIRECTORIES)
