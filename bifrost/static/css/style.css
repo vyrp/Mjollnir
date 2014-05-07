@@ -43,7 +43,11 @@
 }
 
 .mainblock {
-  margin: 50px 100px;
+  margin: 3.5% 20%;
+}
+
+.inside-well-margin {
+  margin: 2% 5%;
 }
 
 .bigbutton {
