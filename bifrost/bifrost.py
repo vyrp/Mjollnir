@@ -293,7 +293,7 @@ def challenge_by_name(challenge_name):
     challenge = challenges_collection.find_one({"name": challenge_name})
 
     if challenge and ( is_active_user_in('Dev') or not challenge['dev_only'] ):
-        return render_template('challenge.html', challenge=challenge)
+        return render_template('challenge.html', challenge = challenge, custom_title = challenge_name)
     else:
         abort(404)
 
