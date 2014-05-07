@@ -88,7 +88,6 @@ stormpath_manager.login_view = '.login'
 # Mongodb
 mongo_client = MongoClient(app.config['MONGOLAB_URI'])
 mongodb = mongo_client['mjollnir-db']
-challenges_collection = mongodb.challenges
 
 # Pagedown
 pagedown = PageDown(app)
@@ -142,8 +141,8 @@ def register():
             'email': request.form.get('email'),
             'username': request.form.get('username'),
             'password': request.form.get('password'),
-            'given_name': 'Xupa',
-            'surname': 'Croata',
+            'given_name': request.form.get('username'),
+            'surname': 'Xupa Croata',
         })
         _user.__class__ = User
     except StormpathError, err:
@@ -168,6 +167,21 @@ def login():
             request.form.get('email'),
             request.form.get('password'),
         )
+
+        # Verify if the user is already in the database, if not we create a new entry
+        # You might think doing this upon registration is a better idea, but we only want
+        # to create database entries for users that confirmed their emails, and we need to
+        # create entries before any page is displayed to the user.
+
+        user_in_db = mongodb.users.find_one({ 'username': _user.username })
+
+        if not user_in_db:
+            mongodb.users.insert({ 
+                'uid': str(uuid4()),
+                'username': _user.username,
+                'email': _user.email
+            })
+
     except StormpathError, err:
         # TODO, some errors have wrong messages (e.g. 'incorrect password' upon unverified account)
         return render_template('login.html', error=err.message)
@@ -178,24 +192,31 @@ def login():
 
 
 
-@app.route('/dashboard', methods=['GET', 'POST'])
+@app.route('/dashboard')
 @login_required
 def dashboard():
     """
     Renders a simple dashboard page for logged in users.
     """
-    if request.method == 'POST':
-        # This is a sample on how to store user data in Stormpath. 
-        # We might never do it, but let's keep it here for now anyways.
-        if request.form.get('birthday'):
-            user.custom_data['birthday'] = request.form.get('birthday')
+    user_in_db = mongodb.users.find_one({ 'username': user.username })
 
-        if request.form.get('color'):
-            user.custom_data['color'] = request.form.get('color')
+    if not user_in_db:
+        raise "Could not find user in the database"
 
-        user.save()
+    submissions = mongodb.submissions.find({ 'uid': user_in_db['uid'] })
+    challenge_solutions = list()
 
-    return render_template('dashboard.html')
+    for submission in submissions:
+        challenge = mongodb.challenges.find_one({ 'cid': submission['cid'] })
+
+        if not challenge:
+            raise "Could not find challenge " + submission['cid'] + " in the database"
+
+        submission['name'] = challenge['name']
+        submission['RD'] = round(submission['RD'], 2)
+        challenge_solutions.append(submission)
+
+    return render_template('dashboard.html', user_in_db = user_in_db, challenge_solutions = challenge_solutions)
 
 
 
@@ -237,7 +258,7 @@ def newchallenge():
                      'description': form.pagedown.data,
                      'dev_only': True }
 
-        challenges_collection.insert(document)
+        mongodb.challenges.insert(document)
         return redirect(url_for('.challenge_by_name', challenge_name = form.name.data))
 
     else:
@@ -257,7 +278,7 @@ def editchallenge():
     if not challenge_id:
         abort(404)
 
-    challenge = challenges_collection.find_one({ 'cid': challenge_id })
+    challenge = mongodb.challenges.find_one({ 'cid': challenge_id })
 
     if not challenge:
         abort(404)
@@ -276,7 +297,7 @@ def editchallenge():
                      'description': form.pagedown.data,
                      'dev_only': form.dev_only.data }
 
-        challenges_collection.update({ 'cid': challenge_id }, document)
+        mongodb.challenges.update({ 'cid': challenge_id }, document)
         return redirect(url_for('.challenge_by_name', challenge_name = form.name.data))
 
     else:
@@ -290,7 +311,7 @@ def challenge_by_name(challenge_name):
     """
     Page to display a challenge given a problem name.
     """
-    challenge = challenges_collection.find_one({"name": challenge_name})
+    challenge = mongodb.challenges.find_one({"name": challenge_name})
 
     if challenge and ( is_active_user_in('Dev') or not challenge['dev_only'] ):
         return render_template('challenge.html', challenge = challenge, custom_title = challenge_name)
@@ -310,7 +331,7 @@ def challenge():
     if not challenge_id:
         abort(404)
 
-    challenge = challenges_collection.find_one({"cid": challenge_id})
+    challenge = mongodb.challenges.find_one({"cid": challenge_id})
 
     if challenge and ( is_active_user_in('Dev') or not challenge['dev_only'] ):
         return render_template('challenge.html', challenge=challenge)
@@ -326,7 +347,7 @@ def challenges():
     Page to display all challenges
     """
     
-    challenges = sorted_by_name( [challenge for challenge in challenges_collection.find() if ( not challenge['dev_only'] or is_active_user_in('Dev') )] )
+    challenges = sorted_by_name( [challenge for challenge in mongodb.challenges.find() if ( not challenge['dev_only'] or is_active_user_in('Dev') )] )
     return render_template('challenges.html', challenges=challenges)
 
 
