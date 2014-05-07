@@ -62,8 +62,12 @@ def process_matches():
                 results[ players_before_match[other_player] ] = normalized_result
 
             players_after_match[player_index].match_update(results)
-            match_submissions[player_index]['rating'] = players_after_match[player_index].rating
-            match_submissions[player_index]['RD'] = players_after_match[player_index].RD     
+            new_rating = players_after_match[player_index].rating
+            new_RD = players_after_match[player_index].RD
+
+            match_submissions[player_index]['rating'] = new_rating
+            match_submissions[player_index]['RD'] = new_RD     
+            match_submissions[player_index].setdefault('rating_after_match', []).append( (match['mid'], new_rating) )
             mongodb.submissions.save( match_submissions[player_index] )
         
     jotunheim_info['last_processed'] = last_processed
