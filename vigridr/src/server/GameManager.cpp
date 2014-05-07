@@ -142,7 +142,8 @@ void GameManager::getGameInfo(GameInfo& gameInfo, int32_t playerId) {
     gameInfo = gameInfo_;
   }
   gameInfo.updateTimeLimitMs = timer_.getPlayerUpdateTime();
-  gameInfo.nextWorldModelTimeEstimateMs = timer_.getWorldModelTime();
+  // +1 just to make sure
+  gameInfo.nextWorldModelTimeEstimateMs = timer_.getWorldModelTime() + 1;
   {
     const size_t kInvalid = 10000;
     size_t idx = utils::getDefault(idToIdx_, playerId, kInvalid);

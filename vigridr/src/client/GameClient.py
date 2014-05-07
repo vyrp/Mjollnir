@@ -56,9 +56,12 @@ def synchronize(t):
 def play_game(client):
   init()
   gameInfo = client.ready()
+  start_time = time.time();
   while True:
-    synchronize(gameInfo.nextWorldModelTimeEstimateMs)
+    processing_time_ms = 1000*(time.time() - start_time);
+    synchronize(gameInfo.nextWorldModelTimeEstimateMs - processing_time_ms)
     gameInfo = client.getGameInfo()
+    start_time = time.time();
     wm = gameInfo.worldModel
     print_world_model(wm)
     if gameInfo.gameStatus == GameStatus.FINISHED:

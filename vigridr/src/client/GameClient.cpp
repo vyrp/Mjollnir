@@ -35,6 +35,10 @@ using ::mjollnir::vigridr::GameStatus;
 using ::mjollnir::vigridr::WorldModel;
 using ::mjollnir::vigridr::Marker;
 
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::high_resolution_clock;
+
 void printWorldModel(const WorldModel& wm) {
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
@@ -75,8 +79,7 @@ void init(){
 }
 
 void synchronize(int32_t t) {
-  auto sleeptime = std::chrono::high_resolution_clock::now() + 
-    std::chrono::milliseconds(t);
+  auto sleeptime = high_resolution_clock::now() + milliseconds(t);
   std::this_thread::sleep_until(sleeptime);
 }
 
@@ -84,9 +87,13 @@ void playGame(GameClient& client) {
   init();
   GameInfo gameInfo;
   client.ready(gameInfo);
+  auto startTime = high_resolution_clock::now();
   while (true) {
-    synchronize(gameInfo.nextWorldModelTimeEstimateMs);
+    auto processingTimeMs = duration_cast<milliseconds>(
+      high_resolution_clock::now() - startTime).count();
+    synchronize(gameInfo.nextWorldModelTimeEstimateMs - processingTimeMs);
     client.getGameInfo(gameInfo);
+    startTime = high_resolution_clock::now();
     const WorldModel& wm = gameInfo.worldModel;
     printWorldModel(wm);
     if (gameInfo.gameStatus == GameStatus::FINISHED) {
