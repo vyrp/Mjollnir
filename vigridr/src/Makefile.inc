@@ -24,7 +24,7 @@ BINARY   = $(TARGET)
 
 CC       = g++
 # compiling flags here
-CFLAGS   = -std=c++0x -Wall -Werror -I/../../third-parties/cpp/include/thrift -I/../../third-parties/cpp/include/gflags
+CFLAGS   = -std=c++0x -Wall -Werror -I ../../third-parties/cpp/include
 
 LINKER   = g++ -o
 # linking flags here

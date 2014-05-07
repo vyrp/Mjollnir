@@ -1,5 +1,5 @@
 CC = g++ -std=c++0x
-INCLUDES = -I/../../third-parties/cpp/include/gtest
+INCLUDES = -I ../../third-parties/cpp/include
 LFLAGS = -L/../../third-parties/cpp/lib
 LIBRARIES = -lpthread -lgtest
 TARGETS = TicTacToeTest
