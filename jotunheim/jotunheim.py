@@ -1,5 +1,4 @@
 from os import environ
-from uuid import uuid4
 from functools import partial
 from glicko import GlickoPlayer, RD_factor
 from pymongo import MongoClient
