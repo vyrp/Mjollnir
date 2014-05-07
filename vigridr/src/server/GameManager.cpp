@@ -95,34 +95,44 @@ clearCommands(std::array<PlayerTurnData, kMaxPlayers>& playerTurnData) {
   if(playerTurnData[1].isTurn()) { playerTurnData[1].clearCommand(); }
 }
 
+// updater task is a task that is executed to update the game every cycle
 void GameManager::updaterTask() {
   bool errorHappened = true;
   while (true) {
-    nextTurn();
+    nextTurn();  // initialize next turn
     timer_.sleepUntilPlayerUpdateTime();
     std::cout << "Updating..." << std::endl;
-    std::array<PlayerTurnData, kMaxPlayers> turns;
+    std::array<PlayerTurnData, kMaxPlayers> movements;
     {
       std::unique_lock<std::mutex> lock0(playerMutex_[0], std::defer_lock);
       std::unique_lock<std::mutex> lock1(playerMutex_[1], std::defer_lock);
-      std::lock(lock0, lock1);
+      // locks player 1 and 2 simultaneously so that there is no dead lock
+      std::lock(lock0, lock1); 
+      // check wheather the players sent the command
       errorHappened = !checkCommands(playerTurnData_);
       if (errorHappened) break;
-      turns = playerTurnData_;  // copy
+      movements = playerTurnData_;  // copy assignment operation
+      // now we can release the locks so that other threads can change
+      // playerTurnData without compromising the game update task
+      // btw playerTurnData is the data sent from a player in a given turn
       clearCommands(playerTurnData_);
     }
-    std::sort(turns.begin(), turns.end(), 
+    // sorting the player movements by update time (who sent first moves first)
+    std::sort(movements.begin(), movements.end(), 
       [](const PlayerTurnData& a, const PlayerTurnData& b) {
         return a.getLastUpdatedTime() < b.getLastUpdatedTime();
     });
-    for (auto& turn : turns) {
-      if (!turn.isTurn()) { continue; }
-      gameLogic_.update(turn.getCommand(), turn.getId()); 
+
+    // only execute movements if it is the player's turn
+    for (auto& playerMove : movements) {
+      if (!playerMove.isTurn()) { continue; }
+      gameLogic_.update(playerMove.getCommand(), playerMove.getId()); 
     }
     if (gameLogic_.isFinished()) {
       break;
     }
   }
+  // game ends
   finalizeGame(!errorHappened);
 }
 
