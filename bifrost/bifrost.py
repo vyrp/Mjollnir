@@ -238,7 +238,7 @@ def newchallenge():
                      'dev_only': True }
 
         challenges_collection.insert(document)
-        return redirect(url_for('.challenge', cid = challenge_id))
+        return redirect(url_for('.challenge_by_name', challenge_name = form.name.data))
 
     else:
         return render_template('newchallenge.html', form = form, error = "Please enter all the required information.")
@@ -277,7 +277,7 @@ def editchallenge():
                      'dev_only': form.dev_only.data }
 
         challenges_collection.update({ 'cid': challenge_id }, document)
-        return redirect(url_for('.challenge', cid = challenge_id))
+        return redirect(url_for('.challenge_by_name', challenge_name = form.name.data))
 
     else:
         return render_template('editchallenge.html', form = form, error = "Please enter all the required information.")
@@ -285,10 +285,25 @@ def editchallenge():
 
 
 
+@app.route('/challenge/<challenge_name>')
+def challenge_by_name(challenge_name):
+    """
+    Page to display a challenge given a problem name.
+    """
+    challenge = challenges_collection.find_one({"name": challenge_name})
+
+    if challenge and ( is_active_user_in('Dev') or not challenge['dev_only'] ):
+        return render_template('challenge.html', challenge=challenge)
+    else:
+        abort(404)
+
+
+
+
 @app.route('/challenge')
 def challenge():
     """
-    Page to display a challenge.
+    Page to display a challenge given an id.
     """
     challenge_id = request.args.get('cid')
 

@@ -11,7 +11,7 @@
             {{ len(challenges) }} Challenges
             {% for challenge in challenges %}
             <li>
-              <a href="{{ url_for('.challenge', cid = challenge.cid) }}">{{ challenge.name }}</a>{% if challenge.dev_only %} (Dev only){% endif %}
+              <a href="{{ url_for('.challenge_by_name', challenge_name=challenge.name) }}">{{ challenge.name }}</a>{% if challenge.dev_only %} (Dev only){% endif %}
             </li>
             {% endfor %}
           </ul>
