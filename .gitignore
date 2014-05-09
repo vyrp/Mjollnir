@@ -143,3 +143,6 @@ gen-csharp/
 yggdrasil/tests/compilation/src/templates.cpp
 yggdrasil/tests/runtime/files/created.txt
 yggdrasil/tests/results
+
+# Logs
+yggdrasil/server/logs/
