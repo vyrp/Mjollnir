@@ -19,7 +19,7 @@ app.logger.setLevel(logging.INFO)
 app.logger.addHandler(handler)
 
 @app.route("/run")
-def handler():
+def run_handler():
     uid1 = request.args.get('uid1')
     uid2 = request.args.get('uid2')
     pid = request.args.get('pid')
@@ -47,15 +47,18 @@ def handler():
     return response
 
 @app.errorhandler(404)
-def error_handler(error):
-    return '404'
-
-@app.errorhandler(500)
-def error_handler(error):
+def not_found(error):
     return json.dumps({
         'status': 'error',
-        'error': 'unexpected'
-    })
+        'error': '404'
+    }), 404
+
+@app.errorhandler(500)
+def server_error(error):
+    return json.dumps({
+        'status': 'error',
+        'error': '500'
+    }), 500
 
 def signal_handler(signal, frame):
     logger.warn('=== Process stopped (%d) at %s ===' % (signal, time.strftime('%H:%M:%S')))
@@ -65,4 +68,4 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 
-    app.run(host='0.0.0.0', port='30403')
+    app.run(host='0.0.0.0', port=30403)
