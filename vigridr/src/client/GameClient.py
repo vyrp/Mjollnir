@@ -2,7 +2,6 @@ import sys
 import glob
 import argparse
 import time
-from random import randint
 
 sys.path.append('../server/gen-py')
 sys.path.insert(0, glob.glob('../../third-parties/python/lib')[0])
@@ -12,6 +11,7 @@ from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
+from ClientLogic import init, play_turn
 from GameServer import Game
 from WorldModel.ttypes import Marker
 from Command.ttypes import Command
@@ -33,21 +33,6 @@ def print_world_model(wm):
         print
         print
     print
-
-def play_turn(wm):
-    command = Command(Coordinate())
-    while True:
-        x = randint(0,2)
-        y = randint(0,2)
-        if wm.table[x][y] == Marker.UNMARKED:
-            command.coordinate.x = x
-            command.coordinate.y = y
-            break
-    return command
-
-
-def init():
-    pass
 
 def synchronize(t):
     if t>0:
