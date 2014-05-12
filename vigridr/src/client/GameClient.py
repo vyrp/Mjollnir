@@ -13,27 +13,9 @@ from thrift.protocol import TBinaryProtocol
 
 from ClientLogic import init, play_turn
 from GameServer import Game
-from WorldModel.ttypes import Marker
 from Command.ttypes import Command
-from Command.ttypes import Coordinate
 from GameModel.ttypes import GameStatus
-
-def print_world_model(wm):
-    for i in range(3):
-        for j in range(3):
-            toPrint = ""
-            if wm.table[i][j] == Marker.X:
-                toPrint = "X"
-            elif wm.table[i][j] == Marker.O:
-                toPrint = "O"
-            else:
-                toPrint = "-"
-
-            print toPrint + " ",
-        print
-        print
-    print
-
+    
 def synchronize(t):
     if t>0:
         time.sleep(t/1000.0)
@@ -48,7 +30,6 @@ def play_game(client):
         gameInfo = client.getGameInfo()
         start_time = time.time();
         wm = gameInfo.worldModel
-        print_world_model(wm)
         if gameInfo.gameStatus == GameStatus.FINISHED:
             break
         if gameInfo.isMyTurn:

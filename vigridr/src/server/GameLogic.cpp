@@ -7,135 +7,94 @@ namespace mjollnir { namespace vigridr {
 GameLogic::GameLogic(int32_t playerId1, int32_t playerId2) {
   player1_ = playerId1;
   player2_ = playerId2;
-  winner_ = -1;
+  winner_ = kNoWinner;
   hasFinished_ = false;
-  std::vector<std::vector<Marker> > table {
-      {Marker::UNMARKED,Marker::UNMARKED,Marker::UNMARKED},
-      {Marker::UNMARKED,Marker::UNMARKED,Marker::UNMARKED},
-      {Marker::UNMARKED,Marker::UNMARKED,Marker::UNMARKED}
-  };
-  worldModel_.table = table;
+  worldModel_.__isset.field = true;
+  worldModel_.field.width = kWidth;
+  worldModel_.field.height = kHeight;
+  for (int32_t i = 0; i < kWidth; ++i) {
+    for (int32_t j = 0; j < kHeight; ++j) {
+      field_[i][j] = kEmpty;
+    }
+  }
+  // two players
+  for (size_t i = 0; i < 2; ++i) {
+    worldModel_.players.push_back(Player());
+    for (size_t j = 0; j < kpInit[i].size(); j++) {
+      Coordinate pos;
+      pos.x = kpInit[i][j].first;
+      pos.y = kpInit[i][j].second;
+      field_[pos.x][pos.y] = (i==0 ? playerId1 : playerId2);
+      worldModel_.players[i].body.push_back(pos);
+    }
+  }
+}
+
+Coordinate GameLogic::getUpdatedHeadPosition(Coordinate pos, Direction dir) {
+  Coordinate nextHeadPosition = pos;
+  switch (dir) {
+    case Direction::UP:
+      nextHeadPosition.y++;
+      break;
+    case Direction::DOWN:
+      nextHeadPosition.y--;
+      break;
+    case Direction::LEFT:
+      nextHeadPosition.x--;
+      break;
+    case Direction::RIGHT:
+      nextHeadPosition.x++;
+      break;
+  }
+  return nextHeadPosition;
+}
+
+bool GameLogic::isValidCoordinate(Coordinate pos) {
+  return pos.x < kWidth && pos.y < kHeight && pos.x >= 0 && pos.y >=0;
 }
 
 bool GameLogic::update(Command command, int32_t playerId) {
-  printf("Updating... player %d\n", playerId);
-  if(!hasFinished_ && 
-     checkTableCoordinate_(command.coordinate, Marker::UNMARKED)) {
-    if (playerId == player1_) {
-      setTableCoordinate_(command.coordinate, Marker::X);
-      hasFinished_ = checkVictory_(worldModel_, Marker::X , playerId);
-      if(hasFinished_)
-        std::cout << "Player X has won!" << std::endl;
-    }
-    else if (playerId == player2_) {
-      setTableCoordinate_(command.coordinate, Marker::O);
-      hasFinished_ = checkVictory_(worldModel_, Marker::O , playerId);
-      if(hasFinished_)
-        std::cout << "Player O has won!" << std::endl;
-    }
-    if(checkDraw_(worldModel_)) { hasFinished_ = true; }
-    return true;
+  size_t idx = 0;
+  if(playerId == player1_){
+    idx = 0;
+  } 
+  else if(playerId == player2_){
+    idx = 1;
+  } 
+  else {
+    return false;
   }
-  return false;
+
+  Coordinate nextHeadPosition = getUpdatedHeadPosition(
+    worldModel_.players[idx].body.back(), command.direction);
+  worldModel_.players[idx].body.push_back(nextHeadPosition);
+  
+  if (isValidCoordinate(nextHeadPosition) &&
+      field_[nextHeadPosition.x][nextHeadPosition.y] == kEmpty) {
+    field_[nextHeadPosition.x][nextHeadPosition.y] = playerId;
+  }
+  else {
+    if (winner_ == kNoWinner) {
+      winner_ = playerId;
+    }
+    else {
+      winner_ = kNoWinner;  // tie
+    }
+    hasFinished_ = true;
+  }
+  return true;
 }
 
 WorldModel GameLogic::getWorldModel() {
   return worldModel_;
 }
 
-void GameLogic::setTableCoordinate(const Coordinate& coordinate, Marker marker) {
-  setTableCoordinate_(coordinate, marker);
-}
-
-void GameLogic::setTableCoordinate_(const Coordinate& coordinate, Marker marker) {
-  worldModel_.table[coordinate.x][coordinate.y] = marker;
-}
-
-bool GameLogic::checkTableCoordinate_(const Coordinate& coordinate, Marker marker) {
-  return worldModel_.table[coordinate.x][coordinate.y] == marker;
-}
-
 bool GameLogic::isFinished() {
   return hasFinished_;
-}
-
-void GameLogic::setHasFinished(bool value) {
-  hasFinished_ = value;
 }
   
 int32_t GameLogic::getWinner() {
   return winner_;
-}
-
-void GameLogic::setWinner(int32_t value) {
-  winner_ = value;
-}
-
-bool GameLogic::randomPlay_(int32_t playerId) {
-  for(auto& line : worldModel_.table)
-    for(auto& element : line)
-      if(element == Marker::UNMARKED) {
-        if(playerId == player1_) {
-          element = Marker::X; 
-          return true;
-        }
-        else if(playerId == player2_) {
-          element = Marker::O;
-          return true;
-        }
-      }
-  return false;
-}
-
-bool GameLogic::checkLines_(const WorldModel& wm, Marker player) {
-  for(const auto& line : wm.table) {
-    for(size_t i = 0; i < boardSize_; ++i) {
-      if(line[i] != player) break;
-      if(i == boardSize_-1) return true;
-    }
-  }
-  return false;
-}
-
-bool GameLogic::checkColumns_(const WorldModel& wm, Marker player) {
-  for(size_t j = 0; j < boardSize_; ++j) {
-    for(size_t i = 0; i < boardSize_; ++i) {
-      if(wm.table[i][j] != player) break;
-      if(i == boardSize_-1) return true;
-    }
-  }
-  return false;
-}
-
-bool GameLogic::checkDiagonals_(const WorldModel& wm, Marker player) {
-  for(size_t i = 0; i < boardSize_; ++i) {
-    if(wm.table[i][boardSize_-1-i] != player) break;
-    if(i == boardSize_-1) return true;
-  }
-  for(size_t i = 0; i < boardSize_; ++i) {
-    if(wm.table[i][i] != player) break;
-    if(i == boardSize_-1) return true;
-  }
-  return false;
-}
-
-bool GameLogic::checkVictory_(const WorldModel& wm, Marker player, int32_t playerId) {
-  if(checkLines_(worldModel_, player) || 
-     checkColumns_(worldModel_, player) ||
-     checkDiagonals_(worldModel_, player) ) {
-    winner_ = playerId;
-    return true;
-  }
-  return false;
-}
-
-bool GameLogic::checkDraw_(const WorldModel& wm) {
-  for(const auto& line : wm.table) {
-    for(size_t i = 0; i < boardSize_; ++i) {
-      if(line[i] == Marker::UNMARKED) return false;
-    }
-  }
-  return true;
 }
 
 }}  // namespaces

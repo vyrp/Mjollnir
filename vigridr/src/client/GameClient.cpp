@@ -29,34 +29,18 @@ using ::apache::thrift::transport::TSocket;
 using ::apache::thrift::transport::TTransport;
 
 using ::mjollnir::vigridr::Command;
-using ::mjollnir::vigridr::Coordinate;
 using ::mjollnir::vigridr::GameClient;
 using ::mjollnir::vigridr::GameInfo;
 using ::mjollnir::vigridr::GameStatus;
 using ::mjollnir::vigridr::WorldModel;
-using ::mjollnir::vigridr::Marker;
 
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using std::chrono::high_resolution_clock;
 
+//DEBUG
 void printWorldModel(const WorldModel& wm) {
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      char toPrint;
-      switch(wm.table[i][j]) {
-        case Marker::X:
-          toPrint = 'X'; break;
-        case Marker::O:
-          toPrint = 'O';break;
-        default:
-          toPrint = '-';break;
-      }
-      std::cout << toPrint << " ";
-    }
-    std::cout << "\n\n";
-  }
-  std::cout << "\n";
+  
 }
 
 void synchronize(int32_t t) {

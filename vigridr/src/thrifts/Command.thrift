@@ -1,10 +1,12 @@
 namespace cpp mjollnir.vigridr
 
-struct Coordinate {
-  1: required i32 x,
-  2: required i32 y
+enum Direction {
+  UP = 1,
+  DOWN = 2,
+  LEFT = 3,
+  RIGHT = 4
 }
 
 struct Command {
-  1: required Coordinate coordinate
+  1: required Direction direction
 }

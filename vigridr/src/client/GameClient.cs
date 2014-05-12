@@ -8,26 +8,9 @@ using System.Diagnostics;
 
 public class CSharpClient
 {
+    // DEBUG
     public static void printWorldModel(WorldModel wm) {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                char toPrint;
-                switch(wm.Table[i][j]) {
-                    case Marker.X:
-                        toPrint = 'X'; 
-                        break;
-                    case Marker.O:
-                        toPrint = 'O';
-                        break;
-                    default:
-                        toPrint = '-';
-                        break;
-                }
-                Console.Write(toPrint + " ");
-            }
-            Console.WriteLine("\n");
-        }
-         Console.WriteLine("");
+
     }
 
 
