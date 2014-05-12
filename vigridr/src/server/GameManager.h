@@ -9,9 +9,9 @@
 
 #include "GameLogic.h"
 #include "GameTimer.h"
-#include "gen-cpp/Command_types.h"
-#include "gen-cpp/WorldModel_types.h"
-#include "gen-cpp/GameModel_types.h"
+#include "../thrifts/gen-cpp/Command_types.h"
+#include "../thrifts/gen-cpp/WorldModel_types.h"
+#include "../thrifts/gen-cpp/GameModel_types.h"
 
 namespace mjollnir { namespace vigridr {
 

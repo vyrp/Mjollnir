@@ -1,10 +1,10 @@
 TARGET = client
 #UTILS = ../utils/teste.cpp
 #UTILSINC = ../utils/teste.h
-SOURCES  = $(wildcard *.cpp ../server/gen-cpp/*.cpp) $(UTILS)
-INCLUDES = $(wildcard *.h ../server/gen-cpp/*.h) $(UTILSINC)
+SOURCES  = $(wildcard *.cpp ../thrifts/gen-cpp/*.cpp) $(UTILS)
+INCLUDES = $(wildcard *.h ../thrifts/gen-cpp/*.h) $(UTILSINC)
 CSBIN = ../../bin/csharp/$(TARGET).exe
-CSSOURCES  = $(wildcard *.cs ../server/gen-csharp/*.cs)
+CSSOURCES  = $(wildcard *.cs ../thrifts/gen-csharp/*.cs)
 OTHERBIN = $(CSBIN)
 
 

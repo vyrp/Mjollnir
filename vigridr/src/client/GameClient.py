@@ -3,7 +3,7 @@ import glob
 import argparse
 import time
 
-sys.path.append('../server/gen-py')
+sys.path.append('../thrifts/gen-py')
 sys.path.insert(0, glob.glob('../../third-parties/python/lib')[0])
 
 from thrift import Thrift

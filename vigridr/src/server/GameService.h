@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "GameManager.h"
-#include "gen-cpp/Game.h"
+#include "../thrifts/gen-cpp/Game.h"
 
 namespace mjollnir { namespace vigridr {
 

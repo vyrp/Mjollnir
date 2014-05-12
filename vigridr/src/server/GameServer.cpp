@@ -10,7 +10,7 @@
 
 #include "GameManager.h"
 #include "GameService.h"
-#include "gen-cpp/Game.h"
+#include "../thrifts/gen-cpp/Game.h"
 
 DEFINE_int32(port1, 9090, "Port used by the first client.");
 DEFINE_int32(port2, 9091, "Port used by the second client.");

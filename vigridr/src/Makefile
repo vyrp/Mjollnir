@@ -1,5 +1,5 @@
 THRIFTS =  $(shell find . -type f -name *.thrift)
-THRIFTSGENCPP = $(shell echo $(THRIFTS) | sed s,/[^/]*\.thrift,/gen-cpp,g | sed s,\\s,\\n,g | sort -u)
+THRIFTSGENCPP = $(shell echo $(THRIFTS) | sed s,\\s,\\n,g | sed s,/[^/]*\.thrift,/gen-cpp,g | sort -u)
 
 all: $(THRIFTSGENCPP) clientcpp clientcsharp server buildtests
 

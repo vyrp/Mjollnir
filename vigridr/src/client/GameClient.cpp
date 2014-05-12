@@ -12,7 +12,7 @@
 #include <thrift/transport/TSocket.h>
 #include <thrift/transport/TTransportUtils.h>
 
-#include "../server/gen-cpp/Game.h"
+#include "../thrifts/gen-cpp/Game.h"
 #include "ClientLogic.h"
 
 DEFINE_int32(port, 9090, "Port used to connect with the server.");
