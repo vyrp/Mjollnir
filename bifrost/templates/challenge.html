@@ -1,7 +1,7 @@
-{% extends "base.html" %}
+{% extends "sidebarbase.html" %}
 
 
-{% block body %}
+{% block main %}
   <div class="challenge">
     <div class="row">
       <div class="col-lg-12">
@@ -13,6 +13,7 @@
         {% endif %}
         {% if challenge %}
           <h1>{{ challenge.name }}</h1>
+          <hr class="hr-small"/>
           {% if is_active_user_in('Dev') %}
             <p align="right"><a href="{{ url_for('editchallenge', cid = challenge.cid) }}">Edit Challenge</a></p>
           {% endif %}            

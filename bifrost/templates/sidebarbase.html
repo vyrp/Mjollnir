@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div id="wrap">
+  <div id="main">
+    <div class="well">
+      <div class="inside-well-margin">
+        {% block main %}{% endblock %}
+      </div>
+    </div>
+  </div>
+  {% if user.is_authenticated() %}
+  <div id="sidebar" class="well">
+    {% block sidebar %}
+    <div class="anchor-center"><a href="{{ url_for('dashboard') }}" id="title-sidebar">{{ user.username }}</a></div>
+    <hr class="hr-small"/>
+    {% endblock %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

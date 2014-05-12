@@ -1,3 +1,21 @@
+#main {
+  float: left;
+  width: 610px;
+  padding: 10px 20px;
+}
+
+#sidebar {
+  float: right;
+  margin-top: 40px;
+  width: 230px;
+  padding: 10px;
+}
+
+#title-sidebar {
+  font-size: 18px;
+  font-weight: bold;
+}
+
 #welcome {
   margin-top: 6em;
 }
@@ -6,9 +24,18 @@
   font-size: 1.5em;
 }
 
+#wrap {
+  width: 900px;
+  margin: 0 auto;
+}
+
 .register, .login, .table-submissions .challenges {
   margin: auto;
   width: 450px;
+}
+
+.body-top-margin {
+  margin-top: 60px;
 }
 
 .newchallenge {
@@ -58,4 +85,17 @@
   border-radius: 0;
 }
 
-.
+.anchor-center {
+  display: block;
+  text-align: center;
+}
+
+.hr-small {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.wrap-generic-content {
+  width: 700px; 
+  margin: auto auto;
+}
