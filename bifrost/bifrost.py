@@ -372,6 +372,16 @@ def submitsolution(challenge_name):
 
 
 
+@app.route('/teapot')
+def teapot():
+    """
+    Allows a user to verify if this server is a teapot.
+    """
+    abort(418)
+
+
+
+
 # On unix systems the project should be executed using Gunicorn and Foreman.
 # Since Gunicorn doesn't run in windows yet, we let Flask itself handle the requests on nt systems.
 if os.name == 'nt':
