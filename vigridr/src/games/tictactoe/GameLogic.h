@@ -3,6 +3,7 @@
 
 #include "../thrifts/gen-cpp/Command_types.h"
 #include "../thrifts/gen-cpp/WorldModel_types.h"
+#include "../thrifts/gen-cpp/GameDescription_types.h"
 
 namespace mjollnir { namespace vigridr { 
 
@@ -10,9 +11,10 @@ class GameLogic {
  public:
   GameLogic(int32_t playerId1, int32_t playerId2);
   bool update(Command command, int32_t playerId);
-  WorldModel getWorldModel();
-  bool isFinished();
-  int32_t getWinner();
+  WorldModel getWorldModel() const;
+  bool isFinished() const;
+  int32_t getWinner() const;
+  GameDescription getGameDescription(int32_t playerId) const;
   /**
    *  Specific function to use at GameLogicTest test suite
    */

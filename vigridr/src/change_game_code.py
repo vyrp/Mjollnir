@@ -13,11 +13,10 @@ def copy(files, dest_dir):
     if os.path.isfile(file):
       sh.copy(file, dest_dir)
 
-def main():
-  game = sys.argv[1]
+def change_game_code(game):
   if game not in os.listdir(games_dir):
     print 'The game "' + game + '" is not in games folder'
-    exit(1)
+    return 1
 
   game_dir = os.path.join(games_dir, game)
 
@@ -30,8 +29,8 @@ def main():
   copy(server_h_files, server_dir)
   copy(thrift_files, thrifts_dir)
   copy(client_sample_files, client_dir)
-
+  return 0
 
 
 if __name__ == "__main__":
-  main()
+  change_game_code(sys.argv[1])

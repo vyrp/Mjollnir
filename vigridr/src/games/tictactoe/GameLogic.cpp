@@ -39,23 +39,32 @@ bool GameLogic::update(Command command, int32_t playerId) {
   return false;
 }
 
-WorldModel GameLogic::getWorldModel() {
+GameDescription GameLogic::getGameDescription(int32_t playerId) const {
+  GameDescription gameDescription;
+  gameDescription.myType = (playerId == player1_) ? Marker::X : Marker::O;
+  return gameDescription;
+}
+
+WorldModel GameLogic::getWorldModel() const {
   return worldModel_;
 }
 
-void GameLogic::setTableCoordinate(const Coordinate& coordinate, Marker marker) {
+void GameLogic::setTableCoordinate(
+    const Coordinate& coordinate, Marker marker) {
   setTableCoordinate_(coordinate, marker);
 }
 
-void GameLogic::setTableCoordinate_(const Coordinate& coordinate, Marker marker) {
+void GameLogic::setTableCoordinate_(
+    const Coordinate& coordinate, Marker marker) {
   worldModel_.table[coordinate.x][coordinate.y] = marker;
 }
 
-bool GameLogic::checkTableCoordinate_(const Coordinate& coordinate, Marker marker) {
+bool GameLogic::checkTableCoordinate_(
+    const Coordinate& coordinate, Marker marker) {
   return worldModel_.table[coordinate.x][coordinate.y] == marker;
 }
 
-bool GameLogic::isFinished() {
+bool GameLogic::isFinished() const {
   return hasFinished_;
 }
 
@@ -63,7 +72,7 @@ void GameLogic::setHasFinished(bool value) {
   hasFinished_ = value;
 }
   
-int32_t GameLogic::getWinner() {
+int32_t GameLogic::getWinner() const {
   return winner_;
 }
 
