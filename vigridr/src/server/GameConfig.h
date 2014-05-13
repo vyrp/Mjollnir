@@ -8,7 +8,7 @@
 namespace mjollnir { namespace vigridr { namespace config {
 
 /**
- *  Time for the client to proccess the world model and send the command
+ *  Time for the client to process the world model and send the command
  */
 constexpr std::chrono::milliseconds cycleDurationMs(1000);  // >= 3ms
 

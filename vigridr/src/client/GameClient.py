@@ -22,7 +22,7 @@ def synchronize(t):
 
 def play_game(client):
     gameInit = client.ready()
-    init(gameInit)
+    solution = Solution(gameInit)
     gameInfo = gameInit.gameInfo
     start_time = time.time();
     while True:
@@ -34,7 +34,7 @@ def play_game(client):
         if gameInfo.gameStatus == GameStatus.FINISHED:
             break
         if gameInfo.isMyTurn:
-            command = play_turn(wm)
+            command = solution.play_turn(wm)
             client.sendCommand(command)
         
 

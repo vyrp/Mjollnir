@@ -50,9 +50,9 @@ void synchronize(int32_t t) {
 }
 
 void playGame(GameClient& client) {
-  init();
   GameInit gameInit;
   client.ready(gameInit);
+  init(gameInit);
   GameInfo gameInfo = gameInit.gameInfo;
   auto startTime = high_resolution_clock::now();
   while (true) {

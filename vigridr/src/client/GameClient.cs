@@ -20,9 +20,9 @@ public class CSharpClient
     }
 
     public static void playGame(Game.Client client) {
-        Solution.init();
         GameInit gameInit = client.ready();
         GameInfo gameInfo = gameInit.GameInfo;
+        Solution solution = new Solution(gameInit);
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
         while (true) {
@@ -40,7 +40,7 @@ public class CSharpClient
             }
             if (gameInfo.IsMyTurn) 
             {
-                Command command = Solution.playTurn(wm);
+                Command command = solution.playTurn(wm);
                 client.sendCommand(command);
             }
         }
