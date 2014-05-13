@@ -8,14 +8,14 @@
 namespace mjollnir { namespace vigridr { namespace config {
 
 /**
- *  Time for the client to proccess the world model and send the command
+ *  Time for the client to process the world model and send the command
  */
 constexpr std::chrono::milliseconds cycleDurationMs(1000);  // >= 3ms
 
 /**
  *  Delay before the first cycle (for connection and initialization)
  */
-constexpr std::chrono::seconds firstCicleDurationS(4);
+constexpr std::chrono::seconds firstCycleDurationS(4);
 
 /** 
  *  An upper bound on the time the server takes to update the world model

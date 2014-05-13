@@ -11,7 +11,7 @@ from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
-from ClientLogic import init, play_turn
+from ClientLogic import Solution
 from GameServer import Game
 from Command.ttypes import Command
 from GameModel.ttypes import GameStatus
