@@ -19,7 +19,7 @@ void GameTimer::startCycle() {
 }
 
 void GameTimer::startFirstCycle() {
-  nextUpdateTime_ = clock::now() + config::firstCicleDurationS;
+  nextUpdateTime_ = clock::now() + config::firstCycleDurationS;
   nextWorldModelTime_ = nextUpdateTime_ + config::updateTimeUpperBoundMs;
 }
 
