@@ -11,15 +11,21 @@
             {{ error }}
           </div>
         {% endif %}
-        {% if challenge %}
-          <h1>{{ challenge.name }}</h1>
-          <hr class="hr-small"/>
-          {% if is_active_user_in('Dev') %}
-            <p align="right"><a href="{{ url_for('editchallenge', cid = challenge.cid) }}">Edit Challenge</a></p>
-          {% endif %}            
-          <br>
-          {{ markdown_to_html(challenge.description) }}
-        {% endif %}
+        <div class="height-60">
+          <div class="float-left width-400">
+            <h2>{{ challenge.name }}</h2>
+          </div>
+          <a class="btn btn-primary float-right margin-top-15" href="{{ url_for('submitsolution', challenge_name = challenge.name)}}">
+            Submit a solution
+          </a>
+        </div>
+
+        <hr class="hr-small"/>
+
+        {% if is_active_user_in('Dev') %}
+        <p align="right"><a href="{{ url_for('editchallenge', cid = challenge.cid) }}">Edit Challenge</a></p>
+        {% endif %}            
+        {{ markdown_to_html(challenge.description) }}
       </div>
     </div>
   </div>

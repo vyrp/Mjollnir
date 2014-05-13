@@ -353,6 +353,25 @@ def challenges():
 
 
 
+@app.route('/submit/<challenge_name>', methods=['GET', 'POST'])
+@login_required
+def submitsolution(challenge_name):
+    """
+    Allows a user to submit/update (override) a solution to an existing challenge.
+    """
+    challenge = mongodb.challenges.find_one({"name": challenge_name})
+
+    if not challenge or ( not is_active_user_in('Dev') and challenge['dev_only'] ):
+        abort(404)
+
+    if request.method == 'GET':
+        return render_template('submitsolution.html', challenge = challenge)
+
+    abort(501)
+
+
+
+
 # On unix systems the project should be executed using Gunicorn and Foreman.
 # Since Gunicorn doesn't run in windows yet, we let Flask itself handle the requests on nt systems.
 if os.name == 'nt':

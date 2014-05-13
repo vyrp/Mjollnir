@@ -1,0 +1,34 @@
+{% extends "sidebarbase.html" %}
+
+
+{% block main %}
+  <div class="submitsolution">
+    <div class="row">
+      <div class="span6">
+        <form method="post" action="">
+          <fieldset>
+            <legend>Submit a solution for challenge {{ challenge.name }}</legend>
+            {% if error %}
+              <div class="alert alert-dismissable alert-danger register-fail">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ error }}
+              </div>
+            {% endif %}
+
+            <label for="sourcefile" class="col-lg-4 control-label">Source file</label>
+            <span class="help-block">Supported languages: C# (.cs), C++ (.cpp) and Python (.py)</span>
+            <div class="col-lg-4">
+                <input type="file" class="form-control" id="sourcefile" name="sourcefile" accept=".cs,.cpp,.py">
+            </div>
+
+            <br/>
+
+            <div class="col-lg-10 col-lg-offset-4">
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

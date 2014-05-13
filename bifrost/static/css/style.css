@@ -99,3 +99,23 @@
   width: 700px; 
   margin: auto auto;
 }
+
+.float-left {
+  float: left;
+}
+
+.float-right {
+  float: right;
+}
+
+.width-400 {
+  width: 400px;
+}
+
+.height-60 {
+  height: 60px;
+}
+
+.margin-top-15 {
+  margin-top: 15px;
+}
