@@ -4,14 +4,6 @@
 {% block head %}
 {{ super() }}
 {{ pagedown.html_head() }}
-<style>
-.flask-pagedown-input {
-  color: #000000;
-}
-input {
-  color: #000000;
-}
-</style>
 {% endblock %}
 
 
@@ -31,13 +23,13 @@ input {
 
             <div>
               <b>{{ form.name.label }}</b>
-              {{ form.name() }}
+              {{ form.name(class="color-white") }}
             </div>
             <br>
             <br>
             <div>
               <b>{{ form.pagedown.label }}</b>
-              {{ form.pagedown(rows = 10, style = 'width:100%') }}
+              {{ form.pagedown(rows = 10, class="width-500 color-white") }}
             </div>
 
             <br/>
