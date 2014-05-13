@@ -19,7 +19,7 @@ class GameService : virtual public GameIf {
   /**
    *  This method should be called when the player is ready to start the match.
    */
-  void ready(GameInfo& gameInfo) override;
+  void ready(GameInit& gameInit) override;
 
   /**
    *  Returns information about the current game state

@@ -31,6 +31,7 @@ using ::apache::thrift::transport::TTransport;
 using ::mjollnir::vigridr::Command;
 using ::mjollnir::vigridr::GameClient;
 using ::mjollnir::vigridr::GameInfo;
+using ::mjollnir::vigridr::GameInit;
 using ::mjollnir::vigridr::GameStatus;
 using ::mjollnir::vigridr::WorldModel;
 
@@ -50,8 +51,9 @@ void synchronize(int32_t t) {
 
 void playGame(GameClient& client) {
   init();
-  GameInfo gameInfo;
-  client.ready(gameInfo);
+  GameInit gameInit;
+  client.ready(gameInit);
+  GameInfo gameInfo = gameInit.gameInfo;
   auto startTime = high_resolution_clock::now();
   while (true) {
     auto processingTimeMs = duration_cast<milliseconds>(

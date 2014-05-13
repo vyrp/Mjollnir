@@ -21,8 +21,9 @@ def synchronize(t):
         time.sleep(t/1000.0)
 
 def play_game(client):
-    init()
-    gameInfo = client.ready()
+    gameInit = client.ready()
+    init(gameInit)
+    gameInfo = gameInit.gameInfo
     start_time = time.time();
     while True:
         processing_time_ms = 1000*(time.time() - start_time);

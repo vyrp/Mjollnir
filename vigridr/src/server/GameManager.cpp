@@ -48,6 +48,7 @@ void GameManager::initializeGame(int32_t playerId0, int32_t playerId1) {
   std::unique_lock<std::mutex> lock1(playerMutex_[1], std::defer_lock);
   std::unique_lock<std::mutex> lock2(gameInfoMutex_, std::defer_lock);
   std::lock(lock0, lock1, lock2);
+  gameInfo_.worldModel = gameLogic_.getWorldModel();
   playerTurnData_[0].init(playerId0);
   playerTurnData_[1].init(playerId1);
   playerTurnData_[0].setIsTurn(true);
@@ -164,6 +165,11 @@ void GameManager::getGameInfo(GameInfo& gameInfo, int32_t playerId) {
   printf("%d %d\n", 
          gameInfo.updateTimeLimitMs, gameInfo.nextWorldModelTimeEstimateMs);
 }  
+
+void GameManager::getGameInit(GameInit& gameInit, int32_t playerId) {
+  getGameInfo(gameInit.gameInfo, playerId);
+  gameInit.gameDescription = gameLogic_.getGameDescription(playerId);
+}
 
 }}
 

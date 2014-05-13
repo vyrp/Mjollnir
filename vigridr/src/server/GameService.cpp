@@ -7,8 +7,8 @@ GameService::GameService(std::shared_ptr<GameManager> gameManager, int32_t playe
     playerId_(playerId) {
 }
 
-void GameService::ready(GameInfo& gameInfo) {
-  gameManager_->getGameInfo(gameInfo, playerId_);
+void GameService::ready(GameInit& gameInit) {
+  gameManager_->getGameInit(gameInit, playerId_);
 }
 
 void GameService::getGameInfo(GameInfo& gameInfo) {

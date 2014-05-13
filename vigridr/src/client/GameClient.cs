@@ -21,7 +21,8 @@ public class CSharpClient
 
     public static void playGame(Game.Client client) {
         Solution.init();
-        GameInfo gameInfo = client.ready();
+        GameInit gameInit = client.ready();
+        GameInfo gameInfo = gameInit.GameInfo;
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
         while (true) {

@@ -57,6 +57,7 @@ class GameManager {
   GameManager(int32_t playerId0, int32_t playerId1);
   CommandStatus update(const Command& command, int32_t playerId);
   void getGameInfo(GameInfo& gameInfo, int32_t playerId);
+  void getGameInit(GameInit& gameInit, int32_t playerId);
 
  private:
   void updaterTask();
