@@ -38,9 +38,11 @@ clean:
 	rm ../obj/thrift
 	$(MAKE) $(MFLAGS) clean -C client
 	$(MAKE) $(MFLAGS) clean -C server
+	$(MAKE) $(MFLAGS) clean -C test
 
 .PHONY: remove	
 remove:
 	$(MAKE) $(MFLAGS) remove -C client
 	$(MAKE) $(MFLAGS) remove -C server
+	$(MAKE) $(MFLAGS) remove -C test
 
