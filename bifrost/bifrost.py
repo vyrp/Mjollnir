@@ -219,7 +219,7 @@ def user_page(username):
         abort(404)
 
     submissions = mongodb.submissions.find({ 'uid': user_in_db['uid'] })
-    challenge_solutions = list()
+    challenge_solutions = []
 
     for submission in submissions:
         challenge = mongodb.challenges.find_one({ 'cid': submission['cid'] })
@@ -330,10 +330,28 @@ def challenge_by_name(challenge_name):
     """
     challenge = mongodb.challenges.find_one({"name": challenge_name})
 
-    if challenge and ( is_active_user_in('Dev') or not challenge['dev_only'] ):
-        return render_template('challenge.html', challenge = challenge, custom_title = challenge_name)
-    else:
+    if not challenge or ( not is_active_user_in('Dev') and challenge['dev_only'] ):
         abort(404)
+
+    submissions = mongodb.submissions.find({ 'cid': challenge['cid'] }).sort([ ('rating', -1) ])
+    challenge_solutions = []
+
+    i = 0
+    for submission in submissions:
+        i += 1
+        # TODO: Batch request
+        user_from_submission = mongodb.users.find_one({ 'uid': submission['uid'] })
+
+        if not user_from_submission:
+            raise "Could not find user " + submission['uid'] + " in the database"
+
+        submission['sequence'] = i
+        submission['username'] = user_from_submission['username']
+        submission['RD'] = round(submission['RD'], 2)
+        challenge_solutions.append(submission)
+
+
+    return render_template('challenge.html', challenge = challenge, challenge_solutions = challenge_solutions, custom_title = challenge_name)
 
 
 
@@ -420,10 +438,8 @@ def submitsolution(challenge_name):
 
         update_document = { '$set': { 'siid': siid,
                                       'language': filename.rsplit('.', 1)[1],
-                                      'previous_submissions': updated_previous_submissions } }
-
-        if 'RD' in existing_solution:
-            update_document['$set']['RD'] = max(160, existing_solution['RD'])
+                                      'previous_submissions': updated_previous_submissions,
+                                      'RD': max(160, existing_solution['RD']) } }
         
         mongodb.submissions.update(query_existing_solution, update_document)
 
@@ -435,6 +451,8 @@ def submitsolution(challenge_name):
                      'cid': challenge['cid'],
                      'uid': user_in_db['uid'],
                      'sid': str(uuid4()),
+                     'rating': 1500,
+                     'RD': 320.0,
                      'previous_submissions': [] }
         
         mongodb.submissions.insert(document)

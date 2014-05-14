@@ -52,12 +52,6 @@
     <Content Include="Procfile" />
     <Content Include="requirements.txt" />
     <Content Include="runtime.txt" />
-    <Content Include="static\css\bootstrap-theme.css" />
-    <Content Include="static\css\bootstrap-theme.css.map" />
-    <Content Include="static\css\bootstrap-theme.min.css" />
-    <Content Include="static\css\bootstrap.css" />
-    <Content Include="static\css\bootstrap.css.map" />
-    <Content Include="static\css\bootstrap.min.css" />
     <Content Include="static\css\style.css" />
     <Content Include="static\js\bootstrap.js" />
     <Content Include="static\js\bootstrap.min.js" />
