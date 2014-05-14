@@ -483,7 +483,7 @@ def submitsolution(challenge_name):
                      'uid': user.custom_data['uid'],
                      'sid': str(uuid4()),
                      'rating': 1500,
-                     'RD': 320.0,
+                     'RD': 300.0,
                      'previous_submissions': [] }
         
         mongodb.submissions.insert(document)
