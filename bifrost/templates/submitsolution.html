@@ -5,20 +5,20 @@
   <div class="submitsolution">
     <div class="row">
       <div class="span6">
-        <form method="post" action="">
+        <form method="post" action="" enctype="multipart/form-data">
           <fieldset>
-            <legend>Submit a solution for challenge {{ challenge.name }}</legend>
+            <legend>Submit a solution for challenge <i>{{ challenge.name }}</i></legend>
             {% if error %}
-              <div class="alert alert-dismissable alert-danger register-fail">
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                {{ error }}
-              </div>
+            <div class="alert alert-dismissable alert-danger register-fail">
+              <button type="button" class="close" data-dismiss="alert">&times;</button>
+              {{ error }}
+            </div>
             {% endif %}
 
-            <label for="sourcefile" class="col-lg-4 control-label">Source file</label>
             <span class="help-block">Supported languages: C# (.cs), C++ (.cpp) and Python (.py)</span>
+            <span class="help-block">Maximum file size: 512kB (if more, the connection will be aborted)</span>
             <div class="col-lg-4">
-                <input type="file" class="form-control" id="sourcefile" name="sourcefile" accept=".cs,.cpp,.py">
+              <input type="file" class="form-control" id="sourcefile" name="sourcefile" accept=".cs,.cpp,.py">
             </div>
 
             <br/>

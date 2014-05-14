@@ -6,6 +6,7 @@
     that reaches between Midgard (the world) and Asgard, the realm of the gods.
 """
 
+import boto
 import markdown
 import os
 import traceback
@@ -43,6 +44,8 @@ from pymongo.errors import PyMongoError
 
 from stormpath.error import Error as StormpathError
 
+from werkzeug.utils import secure_filename
+
 from wtforms.fields import TextField
 from wtforms.fields import BooleanField
 from wtforms.validators import DataRequired
@@ -71,6 +74,7 @@ app.config['STORMPATH_API_KEY_ID'] = environ.get('STORMPATH_API_KEY_ID')
 app.config['STORMPATH_API_KEY_SECRET'] = environ.get('STORMPATH_API_KEY_SECRET')
 app.config['STORMPATH_APPLICATION'] = environ.get('STORMPATH_APPLICATION')
 app.config['MONGOLAB_URI'] = environ.get('MONGOLAB_URI')
+app.config['MAX_CONTENT_LENGTH'] = 512 * 1024 # 512kB
 
 # Export handy functions to jinja
 def markdown_to_html(content):
@@ -88,6 +92,9 @@ stormpath_manager.login_view = '.login'
 # Mongodb
 mongo_client = MongoClient(app.config['MONGOLAB_URI'])
 mongodb = mongo_client['mjollnir-db']
+
+# Amazon S3
+s3 = boto.connect_s3()
 
 # Pagedown
 pagedown = PageDown(app)
@@ -367,7 +374,67 @@ def submitsolution(challenge_name):
     if request.method == 'GET':
         return render_template('submitsolution.html', challenge = challenge)
 
-    abort(501)
+    user_in_db = mongodb.users.find_one({ 'username': user.username })
+    
+    if not user_in_db:
+        raise "Current user not found in the database. Try logging out and in again."
+
+    file = request.files['sourcefile']
+
+    if not file:
+        return render_template('submitsolution.html', challenge = challenge, error = "Please select a Source File")
+
+    if not allowed_sourcefile(file.filename):
+        return render_template('submitsolution.html', challenge = challenge, error = "Invalid Source File (did you use an invalid extension?)")
+
+    
+    # Source Instance ID
+    siid = str(uuid4())
+
+    # Upload the source file to the 'mjollnir-solutions' S3 bucket using the siid as the key
+    filename = secure_filename(file.filename)
+    solutions_bucket = s3.get_bucket('mjollnir-solutions')
+    key = solutions_bucket.new_key(siid)
+    key.set_contents_from_file(file, headers=None, replace=True, cb=None, num_cb=10, policy=None, md5=None) 
+
+    # Update/Create a database entry for this submission
+    query_existing_solution = { 'uid': user_in_db['uid'], 'cid': challenge['cid'] }
+    existing_solution = mongodb.submissions.find_one(query_existing_solution)
+
+    if existing_solution:
+        # For an existing solution, we update the current siid and add the last one to the history
+        # Additionally, we increase the RD value since a new submission might change the rating
+
+        updated_previous_submissions = existing_solution['previous_submissions']
+        updated_previous_submissions.append({'siid': existing_solution['siid'], 'language': existing_solution['language']})
+
+        update_document = { '$set': { 'siid': siid,
+                                      'language': filename.rsplit('.', 1)[1],
+                                      'previous_submissions': updated_previous_submissions } }
+
+        if 'RD' in existing_solution:
+            update_document['$set']['RD'] = max(160, existing_solution['RD'])
+        
+        mongodb.submissions.update(query_existing_solution, update_document)
+
+    else:
+        # For new solutions, we just add the document blueprint
+
+        document = { 'siid': siid,
+                     'language': filename.rsplit('.', 1)[1],
+                     'cid': challenge['cid'],
+                     'uid': user_in_db['uid'],
+                     'sid': str(uuid4()),
+                     'previous_submissions': [] }
+        
+        mongodb.submissions.insert(document)
+    
+
+    return redirect(url_for('dashboard'))
+
+ALLOWED_EXTENSIONS = set(['cs', 'cpp', 'py'])
+def allowed_sourcefile(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
 
