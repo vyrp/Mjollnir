@@ -18,11 +18,11 @@ logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
 app.logger.addHandler(handler)
 
-@app.route("/run")
+@app.route('/run', methods=['POST'])
 def run_handler():
-    uid1 = request.args.get('uid1')
-    uid2 = request.args.get('uid2')
-    pid = request.args.get('pid')
+    uid1 = request.form['uid1']
+    uid2 = request.form['uid2']
+    pid = request.form['pid']
     
     if not uid1:
         return json.dumps({
