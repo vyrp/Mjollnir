@@ -153,7 +153,7 @@ def register():
         })
         _user.__class__ = User
     except StormpathError, err:
-        return render_template('register.html', error=err.message)
+        return render_template('register.html', error=err.message), 400
 
     return redirect(url_for('.login', x='verifymail'))
 
@@ -191,7 +191,7 @@ def login():
 
     except StormpathError, err:
         # TODO, some errors have wrong messages (e.g. 'incorrect password' upon unverified account)
-        return render_template('login.html', error=err.message)
+        return render_template('login.html', error=err.message), 400
 
     login_user(_user, remember=True)
     return redirect(request.args.get('next') or url_for('dashboard'))
@@ -269,7 +269,7 @@ def newchallenge():
         return redirect(url_for('.challenge_by_name', challenge_name = form.name.data))
 
     else:
-        return render_template('newchallenge.html', form = form, error = "Please enter all the required information.")
+        return render_template('newchallenge.html', form = form, error = "Please enter all the required information."), 400
 
 
 
@@ -308,7 +308,7 @@ def editchallenge():
         return redirect(url_for('.challenge_by_name', challenge_name = form.name.data))
 
     else:
-        return render_template('editchallenge.html', form = form, error = "Please enter all the required information.")
+        return render_template('editchallenge.html', form = form, error = "Please enter all the required information."), 400
 
 
 
@@ -382,10 +382,10 @@ def submitsolution(challenge_name):
     file = request.files['sourcefile']
 
     if not file:
-        return render_template('submitsolution.html', challenge = challenge, error = "Please select a Source File")
+        return render_template('submitsolution.html', challenge = challenge, error = "Please select a Source File"), 400
 
     if not allowed_sourcefile(file.filename):
-        return render_template('submitsolution.html', challenge = challenge, error = "Invalid Source File (did you use an invalid extension?)")
+        return render_template('submitsolution.html', challenge = challenge, error = "Invalid Source File (did you use an invalid extension?)"), 403
 
     
     # Source Instance ID
