@@ -1,6 +1,6 @@
 CC = g++ -std=c++0x -DGTEST_USE_OWN_TR1_TUPLE=0
 INCLUDES = -I ../../third-parties/cpp/include
-LFLAGS = -L/../../third-parties/cpp/lib
+LFLAGS = -L../../third-parties/cpp/lib
 LIBRARIES = -lpthread -lgtest
 TARGETS = TicTacToeTest
 OBJECTS_TicTacToeTest = ../../obj/server/GameLogic.o
