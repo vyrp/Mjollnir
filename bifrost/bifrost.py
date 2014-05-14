@@ -199,16 +199,24 @@ def login():
 
 
 
+# Might be better to use only /user/<username>
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    return user_page(user.username)
+
+@app.route('/user/<username>')
+def user_page(username):
     """
-    Renders a simple dashboard page for logged in users.
+    Renders a user's profile.
     """
-    user_in_db = mongodb.users.find_one({ 'username': user.username })
+    if not username:
+        abort(400)
+
+    user_in_db = mongodb.users.find_one({ 'username': username })
 
     if not user_in_db:
-        raise "Could not find user in the database"
+        abort(404)
 
     submissions = mongodb.submissions.find({ 'uid': user_in_db['uid'] })
     challenge_solutions = list()
@@ -223,7 +231,7 @@ def dashboard():
         submission['RD'] = round(submission['RD'], 2)
         challenge_solutions.append(submission)
 
-    return render_template('dashboard.html', user_in_db = user_in_db, challenge_solutions = challenge_solutions)
+    return render_template('dashboard.html', user_in_db = user_in_db, challenge_solutions = challenge_solutions, custom_title = username)
 
 
 
