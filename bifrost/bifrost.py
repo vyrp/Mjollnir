@@ -269,6 +269,7 @@ def newchallenge():
         return redirect(url_for('.challenge_by_name', challenge_name = form.name.data))
 
     else:
+        # TODO: unify editchallenge.html and newchallenge.html
         return render_template('newchallenge.html', form = form, error = "Please enter all the required information."), 400
 
 
@@ -308,6 +309,7 @@ def editchallenge():
         return redirect(url_for('.challenge_by_name', challenge_name = form.name.data))
 
     else:
+        # TODO: unify editchallenge.html and newchallenge.html
         return render_template('editchallenge.html', form = form, error = "Please enter all the required information."), 400
 
 

@@ -30,7 +30,8 @@ input {
             {% endif %}
 
             <div>
-              {{ form.name.label }}{{ form.name() }}
+              <b>{{ form.name.label }}</b>
+              {{ form.name(class="color-white") }}
             </div>
             <br>
             <div>
@@ -39,7 +40,7 @@ input {
             <br>
             <div>
               <b>{{ form.pagedown.label }}</b>
-              {{ form.pagedown(rows = 10, style = 'width:100%') }}
+                {{ form.pagedown(rows = 10, class="width-500 color-white") }}
             </div>
 
             <br/>
