@@ -7,6 +7,7 @@
 """
 
 import boto
+import datetime
 import markdown
 import os
 import traceback
@@ -65,6 +66,27 @@ class ChallengeDescriptionForm(Form):
 
 
 
+##### Methods exported to jinja
+def current_user_latest_matches():
+    return latest_matches(user.custom_data['uid'])
+
+def latest_matches(uid):
+    matches = list( mongodb.matches.find({ 'users': { '$elemMatch': { 'uid': uid } } }).sort([('datetime', -1)]).limit(8) )
+    challenges = list( mongodb.challenges.find({ 'cid': { '$in': [ match['cid'] for match in matches ] } }) )
+    latest = []
+    
+    for match in matches:
+        match['challenge_name'] = next( challenge['name'] for challenge in challenges if challenge['cid'] == match['cid'] )
+        time_delta = datetime.datetime.utcnow() - match['datetime']
+        match['hours_ago'] = int( time_delta.total_seconds() // 3600 )
+        match['minutes_ago'] = int( (time_delta.total_seconds() % 3600) // 60 )
+        latest.append(match)
+
+    return latest
+
+
+
+
 ##### Initialization
 app = Flask(__name__)
 
@@ -84,6 +106,9 @@ app.jinja_env.globals.update(format_exc = traceback.format_exc)
 app.jinja_env.globals.update(is_active_user_in=is_active_user_in)
 app.jinja_env.globals.update(len=len)
 app.jinja_env.globals.update(markdown_to_html=markdown_to_html)
+app.jinja_env.globals.update(latest_matches=latest_matches)
+app.jinja_env.globals.update(current_user_latest_matches=current_user_latest_matches)
+app.jinja_env.globals.update(datetime=datetime)
 
 # Stormpath
 stormpath_manager = StormpathManager(app)
@@ -183,11 +208,22 @@ def login():
         user_in_db = mongodb.users.find_one({ 'username': _user.username })
 
         if not user_in_db:
+            # uid is generated here and not upon registering due to regression issues
+            # TODO: change this after current users log in?
+            uid = str(uuid4())
+
             mongodb.users.insert({ 
-                'uid': str(uuid4()),
+                'uid': uid,
                 'username': _user.username,
                 'email': _user.email
             })
+
+            _user.custom_data['uid'] = uid
+            _user.save()
+
+        if not 'uid' in _user.custom_data:
+            _user.custom_data['uid'] = user_in_db['uid']
+            _user.save()
 
     except StormpathError, err:
         # TODO, some errors have wrong messages (e.g. 'incorrect password' upon unverified account)
@@ -402,11 +438,6 @@ def submitsolution(challenge_name):
     if request.method == 'GET':
         return render_template('submitsolution.html', challenge = challenge)
 
-    user_in_db = mongodb.users.find_one({ 'username': user.username })
-    
-    if not user_in_db:
-        raise "Current user not found in the database. Try logging out and in again."
-
     file = request.files['sourcefile']
 
     if not file:
@@ -426,7 +457,7 @@ def submitsolution(challenge_name):
     key.set_contents_from_file(file, headers=None, replace=True, cb=None, num_cb=10, policy=None, md5=None) 
 
     # Update/Create a database entry for this submission
-    query_existing_solution = { 'uid': user_in_db['uid'], 'cid': challenge['cid'] }
+    query_existing_solution = { 'uid': user.custom_data['uid'], 'cid': challenge['cid'] }
     existing_solution = mongodb.submissions.find_one(query_existing_solution)
 
     if existing_solution:
@@ -449,7 +480,7 @@ def submitsolution(challenge_name):
         document = { 'siid': siid,
                      'language': filename.rsplit('.', 1)[1],
                      'cid': challenge['cid'],
-                     'uid': user_in_db['uid'],
+                     'uid': user.custom_data['uid'],
                      'sid': str(uuid4()),
                      'rating': 1500,
                      'RD': 320.0,
@@ -463,6 +494,13 @@ def submitsolution(challenge_name):
 ALLOWED_EXTENSIONS = set(['cs', 'cpp', 'py'])
 def allowed_sourcefile(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
+
+
+
+@app.route('/match/<mid>')
+def match(mid):
+    abort(501)
 
 
 
