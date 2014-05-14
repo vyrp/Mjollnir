@@ -24,6 +24,21 @@ def sign(x):
     elif x == 0: return 0
     return -1
     
+def new_ratings(players_before_match, match):
+    players_after_match = [ copy(player) for player in players_before_match ]
+    
+    for player_index in xrange(len(match['users'])):
+        results = {}
+        for other_player in xrange(len(match['users'])):
+            if player_index == other_player: continue
+
+            normalized_result = (sign(match['users'][other_player]['rank'] - match['users'][player_index]['rank']) + 1) / 2.0
+            results[ players_before_match[other_player] ] = normalized_result
+
+        players_after_match[player_index].match_update(results)
+
+    return players_after_match
+
 def process_matches():
     """ 
     Changes rankings according to all of the match results that are on the database,
@@ -47,21 +62,14 @@ def process_matches():
             match_submissions.append(sub)
 
         players_before_match = [player_before_match(sub, match) for sub in match_submissions]
-        players_after_match = [ copy(player) for player in players_before_match ]
-
+        
         #update all submissions according to match results
         for sub in match_submissions:
             sub['last_update'] = match['datetime']
 
+        players_after_match = new_ratings(players_before_match, match)
+
         for player_index in xrange(len(match['users'])):
-            results = {}
-            for other_player in xrange(len(match['users'])):
-                if player_index == other_player: continue
-
-                normalized_result = (sign(match['users'][other_player]['rank'] - match['users'][player_index]['rank']) + 1) / 2.0
-                results[ players_before_match[other_player] ] = normalized_result
-
-            players_after_match[player_index].match_update(results)
             new_rating = players_after_match[player_index].rating
             new_RD = players_after_match[player_index].RD
 
@@ -106,22 +114,22 @@ def match_quality(sub_player, sub_opp):
     opp = GlickoPlayer(sub_opp['rating'], sub_opp['RD'])
     return RD_factor(player, [opp]) 
 
-def execute_matchmaking():
+def execute_matchmaking(challenges=mongodb.challenges, submissions=mongodb.submissions):
     """
     Based on the current set of ratings, suggests matches to be performed by the server
     to increase reliability of the standings.
     """
     suggested_matches = []
 
-    for challenge in mongodb.challenges.find():
-        subs = list(mongodb.submissions.find({'cid': challenge['cid']}))
+    for challenge in challenges.find():
+        subs = list(submissions.find({'cid': challenge['cid']}))
         subs.sort(key = submission_priority, reverse = True)
         for index, sub in enumerate(subs[:5]):
             best_opponent = max(subs[:index] + subs[index+1:], key=partial(match_quality, sub))
-            suggested_matches.append((challenge['cid'], sub['uid'], best_opponent['uid']))
+            suggested_matches.append( (challenge['cid'], (sub['uid'], best_opponent['uid'])) )
     
     #communicate with Yggdrasil here (API TBD)
-    print suggested_matches
+    return suggested_matches
 
 def main():
     last_processed = process_matches()
