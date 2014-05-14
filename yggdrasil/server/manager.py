@@ -6,7 +6,7 @@ import shutil
 import signal
 import sys
 import time
-from logging.handlers import TimedRotatingFileHandler 
+from logging.handlers import TimedRotatingFileHandler
 
 logger = None
 if len(sys.argv) == 2 and sys.argv[1] == 'd':
@@ -82,6 +82,7 @@ def run(uid1, uid2, pid):
     }
 
 if __name__ == '__main__':
-    run('100', '101', '1000')
-    run('104', '103', '1000')
-    run('102', '103', '1001')
+    logger.info(run('100', '101', '1000'))
+    logger.info(run('104', '103', '1000'))
+    logger.info(run('102', '103', '1001'))
+    logger.info(run('100', '105', '13'))
