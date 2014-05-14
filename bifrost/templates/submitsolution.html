@@ -15,13 +15,15 @@
             </div>
             {% endif %}
 
-            <span class="help-block">Supported languages: C# (.cs), C++ (.cpp) and Python (.py)</span>
-            <span class="help-block">Maximum file size: 512kB (if more, the connection will be aborted)</span>
-            <div class="col-lg-4">
-              <input type="file" class="form-control" id="sourcefile" name="sourcefile" accept=".cs,.cpp,.py">
-            </div>
+            <span class="help-block">Maximum file size: 512kB (if larger, the connection will be aborted)</span>
+            <input type="file" class="form-control" id="sourcefile" name="sourcefile">
 
-            <br/>
+            <span class="help-block">Source file language</span>
+            <select name="language">
+              {% for language in ACCEPTED_LANGUAGES.keys() %}
+                <option value="{{ language }}">{{ ACCEPTED_LANGUAGES[language] }}</option>
+              {% endfor %}
+            </select>
 
             <div class="col-lg-10 col-lg-offset-4">
               <button type="submit" class="btn btn-primary">Submit</button>
