@@ -2,7 +2,7 @@ THRIFTDIR = thrifts
 THRIFTS =  $(shell find $(THRIFTDIR) -type f -name *.thrift)
 THRIFTSGENCPP = $(shell echo $(THRIFTS) | sed s,\\s,\\n,g | sed s,/[^/]*\.thrift,/gen-cpp,g | sort -u)
 
-all: $(THRIFTSGENCPP) clientcpp clientcsharp clientpy server buildtests
+all: clientcpp clientcsharp clientpy server buildtests
 
 $(THRIFTSGENCPP): ../obj/thrift
 	rm -rf $(THRIFTSGENCPP)
@@ -37,6 +37,11 @@ test:
 .PHONY: buildtests
 buildtests: $(THRIFTSGENCPP)
 	@$(MAKE) $(MFLAGS) -C test
+
+.PHONY: deleteclients
+deleteclients:
+	$(MAKE) $(MFLAGS) delete -C client
+
 
 .PHONY: clean
 clean:

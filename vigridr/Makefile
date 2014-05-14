@@ -33,3 +33,8 @@ clean:
 .PHONY: remove
 remove:
 	@$(MAKE) $(MFLAGS) remove -C src	
+
+.PHONY: deleteclients
+deleteclients:
+	@$(MAKE) $(MFLAGS) deleteclients -C src	
+

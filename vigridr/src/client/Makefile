@@ -1,4 +1,5 @@
 TARGET = client
+
 #UTILS = ../utils/teste.cpp
 #UTILSINC = ../utils/teste.h
 SOURCES  = $(wildcard *.cpp ../thrifts/gen-cpp/*.cpp) $(UTILS)
@@ -13,10 +14,12 @@ PYSOURCES  = $(wildcard *.py)
 
 OTHERBIN = $(CSBIN) $(PYBIN)
 
-
 all: cpp csharp py
 
 include ../Makefile.inc
+
+CPPBIN = ../../bin/cpp/$(TARGET)
+CLIENTOBJDIR = ../../obj/client
 
 .PHONY: csharp
 csharp: $(CSBIN)
@@ -33,3 +36,12 @@ $(PYBIN): $(PYSOURCES) $(PYRUNNABLE) $(PYTHRIFTS)
 	cp -r $(PYSOURCES) $(PYDIR)
 	cp -r $(PYRUNNABLE) $(PYDIR)/client
 	cp -rf $(PYTHRIFTS) $(PYDIR)
+
+.PHONY: delete
+delete:
+	@echo "Deleting all client binaries"
+	rm -f $(OTHERBIN)
+	rm -rf $(PYDIR)/*
+	rm -f $(CPPBIN)
+	rm -rf $(CLIENTOBJDIR)/*
+	

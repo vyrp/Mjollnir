@@ -92,7 +92,8 @@ def change_game_code(game, copy_sample_clients, copy_tests, copy_obj):
 
 
 if __name__ == "__main__":
+  doall = "--all" in sys.argv;
   change_game_code(sys.argv[1], \
-                   "--with-client" in sys.argv, \
-                   "--with-test" in sys.argv, \
-                   "--with-obj" in sys.argv)
+                   "--with-client" in sys.argv or doall, \
+                   "--with-test" in sys.argv or doall, \
+                   "--with-obj" in sys.argv or doall)
