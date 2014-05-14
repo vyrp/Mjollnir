@@ -28,7 +28,7 @@ CFLAGS   = -std=c++0x -Wall -Werror -I ../../third-parties/cpp/include
 
 LINKER   = g++ -o
 # linking flags here
-LFLAGS   = -Wall -L/../../third-parties/cpp/lib
+LFLAGS   = -Wall -L../../third-parties/cpp/lib
 LIBRARIES = -lpthread -lthrift -lgflags
 
 rm       = rm -f
