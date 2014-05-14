@@ -17,8 +17,11 @@ server: $(DIRECTORIES)
 	@$(MAKE) server $(MFLAGS) -C src
 
 $(DIRECTORIES): 
-	@mkdir -p $(DIRECTORIES)
-	@echo "Created directories "$(DIRECTORIES)
+	@echo "Creating directory $@"
+	@mkdir -p $@
+
+.PHONY: directories
+directories: $(DIRECTORIES)
 
 .PHONY: test
 test:
