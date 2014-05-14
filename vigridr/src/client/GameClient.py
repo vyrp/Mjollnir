@@ -3,8 +3,21 @@ import glob
 import argparse
 import time
 
-sys.path.append('../thrifts/gen-py')
-sys.path.insert(0, glob.glob('../../third-parties/python/lib')[0])
+parser = argparse.ArgumentParser()
+parser.add_argument("--port", \
+                    help="Port used to connect with the server.", \
+                    type=int)
+parser.add_argument("--thrift", \
+                    help="Path to lib folder in which thrift is.", \
+                    type=str)
+args = parser.parse_args()
+if not args.port:
+    args.port = 9090
+if not args.thrift:
+    args.thrift = '../../third-parties/python/lib'
+
+sys.path.append('gen-py') 
+sys.path.insert(0, glob.glob(args.thrift)[0])
 
 from thrift import Thrift
 from thrift.transport import TSocket
@@ -39,11 +52,6 @@ def play_game(client):
         
 
 def run_client():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--port", \
-                        help="Port used to connect with the server.", \
-                        type=int)
-    args = parser.parse_args()
     if not args.port:
         args.port = 9090
 
