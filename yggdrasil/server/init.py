@@ -43,7 +43,7 @@ def run_handler():
         })
 
     response = json.dumps(run(uid1, uid2, pid))
-    logger.info(('(%s, %s, %s) => ' % (uid1, uid2, pid)) + response)
+    logger.info('(%s, %s, %s) => %s' % (uid1, uid2, pid, response))
     return response
 
 @app.errorhandler(404)

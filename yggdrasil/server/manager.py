@@ -1,88 +1,67 @@
-__all__ = ['run']
+__all__ = ['run', 'kill']
 
 import logging
-import os
-import shutil
-import signal
-import sys
+import threading
 import time
 from logging.handlers import TimedRotatingFileHandler
+from Queue import Queue
+from time import sleep
 
-logger = None
-if len(sys.argv) == 2 and sys.argv[1] == 'd':
-    class PrintLogger():
-        def info(self, msg):
-            print msg
-    logger = PrintLogger()
-else:
-    logger = logging.getLogger('yggdrasil')
-    logger.setLevel(logging.INFO)
-    handler = TimedRotatingFileHandler('/Mjollnir/yggdrasil/server/logs/manager.log', when='midnight', backupCount=7)
-    logger.addHandler(handler)
+def now():
+    return time.strftime('%H:%M:%S')
 
-SANDBOXES = '/sandboxes/'
-DOWNLOADS = SANDBOXES + 'downloads/'
-MOCK = SANDBOXES + 'mock/'
-COMPILING = SANDBOXES + 'compiling/'
+class GamesManager(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.logger = logging.getLogger('yggdrasil')
+        self.logger.setLevel(logging.INFO)
+        self.logger.addHandler(TimedRotatingFileHandler('/Mjollnir/yggdrasil/server/logs/manager.log', when='midnight', backupCount=7))
+        self.games_queue = Queue()
+        self.running = True
 
-def download(type, id):
-    name = type + id + '.cpp'
-    logger.info('Fetching source for ' + name)
-    try:
-        shutil.copy(MOCK + name, DOWNLOADS + name)
-    except IOError as e:
-        if e.errno == 2:
-            return None, name + ' not found'
-        else:
-            raise e
-    return name, None
+    def run(self):
+        try:
+            self.logger.info('[%s] === Starting game queue ===' % (now(), ))
+            while self.running:
+                uid1, uid2, pid, stop = self.games_queue.get() # wait for a requested game
+                if stop:
+                    break
+                self.logger.info('[%s] Starting game %s vs %s in %s' % (now(), uid1, uid2, pid))
+                sleep(5)
+                self.logger.info('[%s] Ended game %s vs %s in %s' % (now(), uid1, uid2, pid))
+            self.logger.info('[%s] === Game queue stopped  ===' % (now(), ))
+        except Exception as e:
+            self.logger.info('[%s] === Game queue interrupted ===\n%s' % (now(), str(e)))
 
-def fetch_solution(uid):
-    return download('solution', uid)
-    
-def fetch_problem(pid):
-    return download('problem', pid)
+    def run_game(self, uid1, uid2, pid):
+        if not self.is_alive():
+            return {
+                'status': 'error',
+                'error': 'Game thread not running'
+            }
+        try:
+            self.games_queue.put((uid1, uid2, pid, False))
+            self.logger.info('[%s] Enqueued game %s vs %s in %s' % (now(), uid1, uid2, pid))
+            return {
+                'status': 'ok'
+            }
+        except Exception as e:
+            self.logger.info('[%s] Could not enqueue %s vs %s in %s\n%s' % (now(), uid1, uid2, pid, str(e)))            
+            return {
+                'status': 'error',
+                'error': 'Could not enqueue the requested game'
+            }
 
-def error_response(error):
-    return {
-        'status': 'error',
-        'error': error
-    }
+    def kill(self):
+        self.running = False
+        self.games_queue.put((None, None, None, True))
 
-def compile(file):
-    os.system('g++ -Wall {0} -o {1} && {1}'.format(file, file[0:-4]))
+
+manager = GamesManager()
+manager.start()
 
 def run(uid1, uid2, pid):
-    logger.info('[' + time.strftime('%H:%M:%S') + ']')
-    
-    solution1, error = fetch_solution(uid1)
-    if error:
-        return error_response(error)
+    return manager.run_game(uid1, uid2, pid)
 
-    solution2, error = fetch_solution(uid2)
-    if error:
-        return error_response(error)
-
-    problem, error = fetch_problem(pid)
-    if error:
-        return error_response(error)
-    
-    shutil.move(DOWNLOADS + solution1, COMPILING)
-    shutil.move(DOWNLOADS + solution2, COMPILING)
-    shutil.move(DOWNLOADS + problem, COMPILING)
-
-    compile(COMPILING + solution1)
-    compile(COMPILING + solution2)
-    compile(COMPILING + problem)
-    
-    logger.info('Running ' + solution1 + ' against ' + solution2 + ' in ' + problem + '\n')
-    
-    return {
-        'status': 'ok'
-    }
-
-if __name__ == '__main__':
-    logger.info(run('100', '101', '1000'))
-    logger.info(run('104', '103', '1000'))
-    logger.info(run('102', '103', '1001'))
-    logger.info(run('100', '105', '13'))
+def kill():
+    manager.kill()
