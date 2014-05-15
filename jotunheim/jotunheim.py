@@ -1,8 +1,8 @@
 from os import environ
 from functools import partial
-from glicko import GlickoPlayer, RD_factor
 from pymongo import MongoClient
 from copy import copy
+import glicko
 
 MONGOLAB_URI = environ.get('MONGOLAB_URI')
 
@@ -11,10 +11,10 @@ mongodb = mongo_client['mjollnir-db']
 
 def player_before_match(submission, match):
     """
-    Returns a GlickoPlayer corresponding to this submission, taking into 
+    Returns a glicko.GlickoPlayer corresponding to this submission, taking into 
     account the inactivity period between matches.
     """
-    player = GlickoPlayer(submission['rating'], submission['RD'])
+    player = glicko.GlickoPlayer(submission['rating'], submission['RD'])
     inactivity = (match['datetime'] - submission.get('last_update', match['datetime'])).total_seconds()
     player.advance_periods(inactivity)
     return player
@@ -89,7 +89,7 @@ def decrease_old_ratings(last_processed):
     for sub in mongodb.submissions.find():
         t = last_processed - sub.get('last_update', last_processed)
         
-        player = GlickoPlayer(sub['rating'], sub['RD'])
+        player = glicko.GlickoPlayer(sub['rating'], sub['RD'])
         player.advance_periods(t.total_seconds())
         
         sub['rating'] = player.rating
@@ -97,24 +97,24 @@ def decrease_old_ratings(last_processed):
         sub['last_update'] = last_processed
         mongodb.submissions.save(sub)
 
-def submission_priority(sub):
+def submission_priority(ratings, sub):
     """
     Returns the priority with which this submission should be matched by the matchmaking system.
     """
-    if sub['RD'] > 100:
-        return 1000000000 + sub['rating']
-    return sub['rating'] + 10*sub['RD']
+    prio = 1000000000 if (sub['RD'] > 100) else 0
+    prio -= sub['rating'] - max([0] + [x for x in ratings if x < sub['rating']])
+    return prio
 
 
 def match_quality(sub_player, sub_opp):
     """
     Returns a number that represents the value of the match to the matchmaker.
     """
-    player = GlickoPlayer(sub_player['rating'], sub_player['RD'])
-    opp = GlickoPlayer(sub_opp['rating'], sub_opp['RD'])
-    return RD_factor(player, [opp]) 
+    player = glicko.GlickoPlayer(sub_player['rating'], sub_player['RD'])
+    opp = glicko.GlickoPlayer(sub_opp['rating'], sub_opp['RD'])
+    return -abs(0.5 - glicko.E(player, opp))
 
-def execute_matchmaking(challenges=mongodb.challenges, submissions=mongodb.submissions):
+def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=mongodb.submissions):
     """
     Based on the current set of ratings, suggests matches to be performed by the server
     to increase reliability of the standings.
@@ -123,8 +123,12 @@ def execute_matchmaking(challenges=mongodb.challenges, submissions=mongodb.submi
 
     for challenge in challenges.find():
         subs = list(submissions.find({'cid': challenge['cid']}))
-        subs.sort(key = submission_priority, reverse = True)
-        for index, sub in enumerate(subs[:5]):
+        ratings = [sub['rating'] for sub in subs]
+
+        subs.sort(key = partial(submission_priority, ratings), reverse = True)
+        for index, sub in enumerate(subs[:how_many]):
+            print 'matching ', sub['name']
+            print [(x['name'], match_quality(sub, x)) for x in subs[:index] + subs[index+1:]]
             best_opponent = max(subs[:index] + subs[index+1:], key=partial(match_quality, sub))
             suggested_matches.append( (challenge['cid'], (sub['uid'], best_opponent['uid'])) )
     
