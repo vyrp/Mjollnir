@@ -13,6 +13,7 @@ import os
 import traceback
 from os import environ
 from uuid import uuid4
+from itertools import chain
 
 from flask import (
     Flask,
@@ -39,6 +40,7 @@ from flask.ext.wtf import Form
 from extensions.flask_stormpath import groups_allowed
 from extensions.flask_stormpath import is_active_user_in
 from extensions.sorted_by_name import sorted_by_name
+from extensions.string_building import time_since_from_seconds
 
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
@@ -68,18 +70,33 @@ class ChallengeDescriptionForm(Form):
 
 ##### Things to be exported to jinja
 def current_user_latest_matches():
-    return latest_matches(user.custom_data['uid'])
+    return latest_matches(uid = user.custom_data['uid'])
 
-def latest_matches(uid):
-    matches = list( mongodb.matches.find({ 'users': { '$elemMatch': { 'uid': uid } } }).sort([('datetime', -1)]).limit(8) )
+def latest_matches(uid = None, cid = None, limit = 8):
+    query = {}
+
+    if uid:
+        query['users'] =  { '$elemMatch': { 'uid': uid } }
+
+    if cid:
+        query['cid'] = cid
+
+    matches = list( mongodb.matches.find(query).sort([('datetime', -1)]).limit(limit) )
     challenges = list( mongodb.challenges.find({ 'cid': { '$in': [ match['cid'] for match in matches ] } }) )
+    users = list( mongodb.users.find({ 'uid': { '$in': [ user['uid'] for user in chain.from_iterable(match['users'] for match in matches) ] } }) ) 
+    username_for_given_uid = ([user['username'] for user in users if user['uid'] == uid] or [None])[0]
+    # Maybe we should be using SQL :)
+
     latest = []
     
     for match in matches:
         match['challenge_name'] = next( challenge['name'] for challenge in challenges if challenge['cid'] == match['cid'] )
+        match['usernames'] = [ user['username'] for user in users if user['uid'] in [match_user['uid'] for match_user in match['users']] ]
+        match['opponents'] = [ username for username in match['usernames'] if username != username_for_given_uid ]
+
         time_delta = datetime.datetime.utcnow() - match['datetime']
-        match['hours_ago'] = int( time_delta.total_seconds() // 3600 )
-        match['minutes_ago'] = int( (time_delta.total_seconds() % 3600) // 60 )
+        match['time_since'] = time_since_from_seconds( time_delta.total_seconds() )      
+
         latest.append(match)
 
     return latest
@@ -376,7 +393,7 @@ def challenge_by_name(challenge_name):
     if not challenge or ( not is_active_user_in('Dev') and challenge['dev_only'] ):
         abort(404)
 
-    submissions = mongodb.submissions.find({ 'cid': challenge['cid'] }).sort([ ('rating', -1) ])
+    submissions = mongodb.submissions.find({ 'cid': challenge['cid'] }).sort([ ('rating', -1) ]).limit(10)
     challenge_solutions = []
 
     i = 0
@@ -393,8 +410,9 @@ def challenge_by_name(challenge_name):
         submission['RD'] = round(submission['RD'], 2)
         challenge_solutions.append(submission)
 
+    matches = latest_matches( cid = challenge['cid'] )
 
-    return render_template('challenge.html', challenge = challenge, challenge_solutions = challenge_solutions, custom_title = challenge_name)
+    return render_template('challenge.html', challenge = challenge, challenge_solutions = challenge_solutions, matches = matches, custom_title = challenge_name)
 
 
 
@@ -505,6 +523,17 @@ def submitsolution(challenge_name):
 @app.route('/match/<mid>')
 def match(mid):
     abort(501)
+
+
+
+
+@app.route('/matches')
+def matches():
+    """
+    Page to display the 10 most recent matches.
+    """
+    matches = latest_matches(limit = 10)
+    return render_template('matches.html', matches = matches)
 
 
 

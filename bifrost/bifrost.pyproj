@@ -31,6 +31,7 @@
     <Compile Include="bifrost.py" />
     <Compile Include="extensions\flask_stormpath.py" />
     <Compile Include="extensions\sorted_by_name.py" />
+    <Compile Include="extensions\string_building.py" />
     <Compile Include="extensions\__init__.py" />
   </ItemGroup>
   <ItemGroup>
@@ -58,6 +59,7 @@
     <Content Include="static\js\bootstrap.min.js" />
     <Content Include="templates\base.html" />
     <Content Include="templates\challenge.html" />
+    <Content Include="templates\matches.html" />
     <Content Include="templates\challenges.html" />
     <Content Include="templates\submitsolution.html" />
     <Content Include="templates\sidebarbase.html" />

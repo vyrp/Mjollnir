@@ -3,10 +3,6 @@
 
 {% block head %}
     {{ super() }}
-    <!--$('#myTab a').click(function (e) {
-      e.preventDefault()
-      $(this).tab('show')
-    })-->
 {% endblock %}
 
 {% block main %}
@@ -36,7 +32,8 @@
         <div>
           <ul id="challenge-tabs" class="nav nav-tabs">
             <li class="active"><a href="#description" data-toggle="tab">Description</a></li>
-            <li><a href="#ranking" data-toggle="tab">Ranking</a></li>
+            <li><a href="#ranking" data-toggle="tab">Top 10</a></li>
+            <li><a href="#latest-matches" data-toggle="tab">Latest Matches</a></li>
           </ul>
           <div id="myTabContent" class="tab-content">
             
@@ -65,6 +62,23 @@
                   {% endfor %}
                 </tbody>
               </table>
+            </div>
+
+            {# TODO: Only process the latest matches request when the user activates the tab? #}
+            <div class="tab-pane fade" id="latest-matches">
+              {% if matches %}
+              <dl>
+              {% for match in matches %}
+                <dd>
+                  <a href="{{ url_for('.match', mid = match.mid ) }}">{{ ' vs '.join(match.usernames) }}</a>
+                  ({{ match.time_since }})
+                </dd>
+              {% endfor %}
+              </dl>
+              {% else %}
+                <h3> Sorry ;( </h3>
+                <h4> We can't find any recent matches at the momment. </h4>
+              {% endif %}
             </div>
 
           </div>

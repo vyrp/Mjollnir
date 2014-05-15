@@ -17,7 +17,7 @@
       <dl>
       <dt>Latest matches</dt>
       {% for match in current_user_latest_matches() %}
-        <dd><a href="{{ url_for('.match', mid = match.mid) }}"> {{ match.challenge_name }} ({{ match.hours_ago }}h {{ match.minutes_ago }}m ago)</a></dd>
+        <dd><a href="{{ url_for('.match', mid = match.mid) }}"> {{ match.challenge_name }} vs {{ ', '.join(match.opponents) }}</a></dd>
       {% endfor %}
     </dl>
     {% endblock %}

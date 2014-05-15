@@ -32,6 +32,9 @@
               <li {% if request.endpoint == 'challenges' %} class="active" {% endif %}>
                 <a href="{{ url_for('challenges') }}">Challenges</a>
               </li>
+              <li {% if request.endpoint == 'matches' %} class="active" {% endif %}>
+                <a href="{{ url_for('matches') }}">Recent Matches</a>
+              </li>
               {% if user.is_authenticated() %}
               <li {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>
                 <a href="{{ url_for('dashboard') }}">Dashboard</a>
