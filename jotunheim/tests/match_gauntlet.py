@@ -7,8 +7,8 @@ from uuid import uuid4
 
 # clearly a stub, and not a spy, mock or fake
 class StubCollectionFinder(list):
-    def find(self, *args):
-        return iter(self)
+    def find(self, query={}):
+        return [x for x in self if all(x[key] == query[key] for key in query)]
 
 challenge_ids = [str(uuid4()) for x in xrange(2)]
 user_names = ["Fenrir", "Sleipnir", "Lenneth", "Arngrim", "Loki"]
@@ -74,7 +74,7 @@ def execute_matches(suggested_matches):
 matches = 0
 
 while True:
-    system('cls')
+    
     print "State after %d matches:\n\n" % matches
     for challenge in challenge_ids:
         print_rankings(challenge)
@@ -82,7 +82,8 @@ while True:
 
     print 'Press Enter for the next iteration...'
     raw_input()
+    system('cls')
 
-    suggested_matches = jotunheim.execute_matchmaking(challenges, submissions)
+    suggested_matches = jotunheim.execute_matchmaking(challenges=challenges, submissions=submissions)
     execute_matches(suggested_matches)
     matches += 1

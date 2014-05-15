@@ -12,8 +12,14 @@
   {% if user.is_authenticated() %}
   <div id="sidebar" class="well">
     {% block sidebar %}
-    <div class="anchor-center"><a href="{{ url_for('dashboard') }}" id="title-sidebar">{{ user.username }}</a></div>
-    <hr class="hr-small"/>
+      <div class="anchor-center"><a href="{{ url_for('dashboard') }}" id="title-sidebar">{{ user.username }}</a></div>
+      <hr class="hr-small"/>
+      <dl>
+      <dt>Latest matches</dt>
+      {% for match in current_user_latest_matches() %}
+        <dd><a href="{{ url_for('.match', mid = match.mid) }}"> {{ match.challenge_name }} ({{ match.hours_ago }}h {{ match.minutes_ago }}m ago)</a></dd>
+      {% endfor %}
+    </dl>
     {% endblock %}
   </div>
   {% endif %}

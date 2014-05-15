@@ -1,7 +1,8 @@
-THRIFTS =  $(shell find . -type f -name *.thrift)
+THRIFTDIR = thrifts
+THRIFTS =  $(shell find $(THRIFTDIR) -type f -name *.thrift)
 THRIFTSGENCPP = $(shell echo $(THRIFTS) | sed s,\\s,\\n,g | sed s,/[^/]*\.thrift,/gen-cpp,g | sort -u)
 
-all: $(THRIFTSGENCPP) clientcpp clientcsharp server buildtests
+all: clientcpp clientcsharp clientpy server buildtests
 
 $(THRIFTSGENCPP): ../obj/thrift
 	rm -rf $(THRIFTSGENCPP)
@@ -14,15 +15,19 @@ $(THRIFTSGENCPP): ../obj/thrift
 	touch ../obj/thrift
 
 .PHONY: clientcpp
-clientcpp:
+clientcpp: $(THRIFTSGENCPP)
 	@$(MAKE) cpp $(MFLAGS) -C client
 
 .PHONY: clientcsharp
-clientcsharp:
+clientcsharp: $(THRIFTSGENCPP)
 	@$(MAKE) csharp $(MFLAGS) -C client
+
+.PHONY: clientpy
+clientpy: $(THRIFTSGENCPP)
+	@$(MAKE) py $(MFLAGS) -C client
 	
 .PHONY: server
-server:
+server: $(THRIFTSGENCPP)
 	@$(MAKE) cpp $(MFLAGS) -C server
 
 .PHONY: test
@@ -30,17 +35,25 @@ test:
 	@$(MAKE) $(MFLAGS) test -C test
 
 .PHONY: buildtests
-buildtests:
+buildtests: $(THRIFTSGENCPP)
 	@$(MAKE) $(MFLAGS) -C test
+
+.PHONY: deleteclients
+deleteclients:
+	$(MAKE) $(MFLAGS) delete -C client
+
 
 .PHONY: clean
 clean:
 	rm ../obj/thrift
 	$(MAKE) $(MFLAGS) clean -C client
 	$(MAKE) $(MFLAGS) clean -C server
+	$(MAKE) $(MFLAGS) clean -C test
 
 .PHONY: remove	
 remove:
 	$(MAKE) $(MFLAGS) remove -C client
 	$(MAKE) $(MFLAGS) remove -C server
+	$(MAKE) $(MFLAGS) remove -C test
+	rm -rf $(THRIFTDIR)/gen-*
 

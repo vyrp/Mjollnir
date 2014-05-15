@@ -82,7 +82,7 @@ void GameManager::nextTurn() {
 bool 
 checkCommands(const std::array<PlayerTurnData, kMaxPlayers>& playerTurnData) {
   for (size_t i = 0; i < kMaxPlayers; ++i) {
-    if(playerTurnData[i].isTurn() && !playerTurnData[i].isCommandSet()) {
+    if (playerTurnData[i].isTurn() && !playerTurnData[i].isCommandSet()) {
       std::cout << "[ERROR]: No command set for player " << i << std::endl;
       return false;
     } 

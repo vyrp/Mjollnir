@@ -1,5 +1,5 @@
 ALLDIRECTORIES := $(shell find -type d | grep 'src')
-DIRECTORIES := $(ALLDIRECTORIES:./src/%=./obj/%)  ./bin ./bin/cpp ./bin/csharp
+DIRECTORIES := $(ALLDIRECTORIES:./src/%=./obj/%)  ./bin ./bin/cpp ./bin/csharp ./bin/py
 
 all: $(DIRECTORIES)
 	@$(MAKE) $(MFLAGS) -C src	
@@ -9,13 +9,19 @@ clientcpp: $(DIRECTORIES)
 
 clientcsharp: $(DIRECTORIES)
 	@$(MAKE) clientcsharp $(MFLAGS) -C src
+
+clientpy: $(DIRECTORIES)
+	@$(MAKE) clientpy $(MFLAGS) -C src
 	
 server: $(DIRECTORIES)
 	@$(MAKE) server $(MFLAGS) -C src
 
 $(DIRECTORIES): 
-	@mkdir -p $(DIRECTORIES)
-	@echo "Created directories "$(DIRECTORIES)
+	@echo "Creating directory $@"
+	@mkdir -p $@
+
+.PHONY: directories
+directories: $(DIRECTORIES)
 
 .PHONY: test
 test:
@@ -27,3 +33,8 @@ clean:
 .PHONY: remove
 remove:
 	@$(MAKE) $(MFLAGS) remove -C src	
+
+.PHONY: deleteclients
+deleteclients:
+	@$(MAKE) $(MFLAGS) deleteclients -C src	
+

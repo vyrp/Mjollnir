@@ -30,6 +30,7 @@
   <ItemGroup>
     <Compile Include="bifrost.py" />
     <Compile Include="extensions\flask_stormpath.py" />
+    <Compile Include="extensions\sorted_by_name.py" />
     <Compile Include="extensions\__init__.py" />
   </ItemGroup>
   <ItemGroup>

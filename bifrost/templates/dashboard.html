@@ -5,32 +5,37 @@
   <div class="dashboard">
     <div class="row">
       <div class="col-lg-12">
-        <h2>{{ user_in_db.username }}'s profile</h2>
+        <h2>{{ user_in_db.username }}'s dashboard</h2>
         <hr class="hr-small"/>
+        
         <h3>Current standings</h3>
-
+        
+        {% if challenge_solutions %}
         <table class="table table-submissions">
         <thead>
-            <tr>
+          <tr>
             <th>Problem</th>
             <th>Rank</th>
             <th>Percentile</th>
             <th>Rating</th>
             <th>Deviation</th>
-            </tr>
+          </tr>
         </thead>
         <tbody>
-            {% for solution in challenge_solutions %}
-            <tr>
-                <td><a href="{{ url_for('.challenge_by_name', challenge_name=solution.name) }}">{{ solution.name }}</a></td>
-                <td>x</td>
-                <td>99.2%</td>
-                <td>{{ solution.rating }}</td>
-                <td>{{ solution.RD }}</td>
-            </tr>
-            {% endfor %}
+          {% for solution in challenge_solutions %}
+          <tr>
+            <td><a href="{{ url_for('.challenge_by_name', challenge_name=solution.name) }}">{{ solution.name }}</a></td>
+            <td>x</td>
+            <td>99.2%</td>
+            <td>{{ solution.rating }}</td>
+            <td>{{ solution.RD }}</td>
+          </tr>
+          {% endfor %}
         </tbody>
         </table>
+        {% else %}
+          No submissions yet
+        {% endif %}
 
       </div>
     </div>

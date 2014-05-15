@@ -7,6 +7,7 @@
 """
 
 import boto
+import datetime
 import markdown
 import os
 import traceback
@@ -65,6 +66,34 @@ class ChallengeDescriptionForm(Form):
 
 
 
+##### Things to be exported to jinja
+def current_user_latest_matches():
+    return latest_matches(user.custom_data['uid'])
+
+def latest_matches(uid):
+    matches = list( mongodb.matches.find({ 'users': { '$elemMatch': { 'uid': uid } } }).sort([('datetime', -1)]).limit(8) )
+    challenges = list( mongodb.challenges.find({ 'cid': { '$in': [ match['cid'] for match in matches ] } }) )
+    latest = []
+    
+    for match in matches:
+        match['challenge_name'] = next( challenge['name'] for challenge in challenges if challenge['cid'] == match['cid'] )
+        time_delta = datetime.datetime.utcnow() - match['datetime']
+        match['hours_ago'] = int( time_delta.total_seconds() // 3600 )
+        match['minutes_ago'] = int( (time_delta.total_seconds() % 3600) // 60 )
+        latest.append(match)
+
+    return latest
+
+
+
+
+ACCEPTED_LANGUAGES = {'cs40': 'C# 4.0 (mono)',
+                      'cpp11': 'C++11 (g++ 4.7.3)',
+                      'python27': 'Python (2.7.3)'}
+
+
+
+
 ##### Initialization
 app = Flask(__name__)
 
@@ -84,6 +113,9 @@ app.jinja_env.globals.update(format_exc = traceback.format_exc)
 app.jinja_env.globals.update(is_active_user_in=is_active_user_in)
 app.jinja_env.globals.update(len=len)
 app.jinja_env.globals.update(markdown_to_html=markdown_to_html)
+app.jinja_env.globals.update(latest_matches=latest_matches)
+app.jinja_env.globals.update(current_user_latest_matches=current_user_latest_matches)
+app.jinja_env.globals.update(ACCEPTED_LANGUAGES=ACCEPTED_LANGUAGES)
 
 # Stormpath
 stormpath_manager = StormpathManager(app)
@@ -183,11 +215,22 @@ def login():
         user_in_db = mongodb.users.find_one({ 'username': _user.username })
 
         if not user_in_db:
+            # uid is generated here and not upon registering due to regression issues
+            # TODO: change this after current users log in?
+            uid = str(uuid4())
+
             mongodb.users.insert({ 
-                'uid': str(uuid4()),
+                'uid': uid,
                 'username': _user.username,
                 'email': _user.email
             })
+
+            _user.custom_data['uid'] = uid
+            _user.save()
+
+        if not 'uid' in _user.custom_data:
+            _user.custom_data['uid'] = user_in_db['uid']
+            _user.save()
 
     except StormpathError, err:
         # TODO, some errors have wrong messages (e.g. 'incorrect password' upon unverified account)
@@ -402,31 +445,29 @@ def submitsolution(challenge_name):
     if request.method == 'GET':
         return render_template('submitsolution.html', challenge = challenge)
 
-    user_in_db = mongodb.users.find_one({ 'username': user.username })
-    
-    if not user_in_db:
-        raise "Current user not found in the database. Try logging out and in again."
+    if 'language' not in request.form:
+        return render_template('submit.solution.html', challenge = challenge, error = "Please select a language"), 400
+
+    language = request.form['language']
+    if language not in ACCEPTED_LANGUAGES.keys():
+        return render_template('submitsolution.html', challenge = challenge, error = "Invalid language"), 403
 
     file = request.files['sourcefile']
-
     if not file:
         return render_template('submitsolution.html', challenge = challenge, error = "Please select a Source File"), 400
-
-    if not allowed_sourcefile(file.filename):
-        return render_template('submitsolution.html', challenge = challenge, error = "Invalid Source File (did you use an invalid extension?)"), 403
-
     
-    # Source Instance ID
+    # Source/Solution/Submission (you choose!) Instance ID
     siid = str(uuid4())
 
     # Upload the source file to the 'mjollnir-solutions' S3 bucket using the siid as the key
     filename = secure_filename(file.filename)
     solutions_bucket = s3.get_bucket('mjollnir-solutions')
     key = solutions_bucket.new_key(siid)
+    key.set_metadata('language', language)
     key.set_contents_from_file(file, headers=None, replace=True, cb=None, num_cb=10, policy=None, md5=None) 
 
     # Update/Create a database entry for this submission
-    query_existing_solution = { 'uid': user_in_db['uid'], 'cid': challenge['cid'] }
+    query_existing_solution = { 'uid': user.custom_data['uid'], 'cid': challenge['cid'] }
     existing_solution = mongodb.submissions.find_one(query_existing_solution)
 
     if existing_solution:
@@ -434,10 +475,9 @@ def submitsolution(challenge_name):
         # Additionally, we increase the RD value since a new submission might change the rating
 
         updated_previous_submissions = existing_solution['previous_submissions']
-        updated_previous_submissions.append({'siid': existing_solution['siid'], 'language': existing_solution['language']})
+        updated_previous_submissions.append({'siid': existing_solution['siid']})
 
         update_document = { '$set': { 'siid': siid,
-                                      'language': filename.rsplit('.', 1)[1],
                                       'previous_submissions': updated_previous_submissions,
                                       'RD': max(160, existing_solution['RD']) } }
         
@@ -447,12 +487,11 @@ def submitsolution(challenge_name):
         # For new solutions, we just add the document blueprint
 
         document = { 'siid': siid,
-                     'language': filename.rsplit('.', 1)[1],
                      'cid': challenge['cid'],
-                     'uid': user_in_db['uid'],
+                     'uid': user.custom_data['uid'],
                      'sid': str(uuid4()),
                      'rating': 1500,
-                     'RD': 320.0,
+                     'RD': 300.0,
                      'previous_submissions': [] }
         
         mongodb.submissions.insert(document)
@@ -460,9 +499,12 @@ def submitsolution(challenge_name):
 
     return redirect(url_for('dashboard'))
 
-ALLOWED_EXTENSIONS = set(['cs', 'cpp', 'py'])
-def allowed_sourcefile(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
+
+
+@app.route('/match/<mid>')
+def match(mid):
+    abort(501)
 
 
 

@@ -9,14 +9,14 @@
         <hr class="hr-small" />
         <br/>
         {% if challenges %}
-          <ul>
-            {{ len(challenges) }} Challenges
+          <dl>
+            <dt>Available challenges:</dt>
             {% for challenge in challenges %}
-            <li>
+            <dd>
               <a href="{{ url_for('.challenge_by_name', challenge_name=challenge.name) }}">{{ challenge.name }}</a>{% if challenge.dev_only %} (Dev only){% endif %}
-            </li>
+            </dd>
             {% endfor %}
-          </ul>
+          </dl>
         {% else %}
           <h3> Sorry ;( </h3>
           <h4> We can't find any challenges at the momment. </h4>
