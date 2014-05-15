@@ -72,7 +72,7 @@ bool GameLogic::update(Command command, int32_t playerId) {
   }
   else {
     if (winner_ == kNoWinner) {
-      winner_ = playerId;
+      winner_ = (player1_ == playerId) ? player2_ : player1_;
     }
     else {
       winner_ = kNoWinner;  // tie
