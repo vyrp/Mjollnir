@@ -25,8 +25,8 @@
           {% for solution in challenge_solutions %}
           <tr>
             <td><a href="{{ url_for('.challenge_by_name', challenge_name=solution.name) }}">{{ solution.name }}</a></td>
-            <td>x</td>
-            <td>99.2%</td>
+            <td>{{ solution.rank }}</td>
+            <td>{{ solution.percentile }}%</td>
             <td>{{ solution.rating }}</td>
             <td>{{ solution.RD }}</td>
           </tr>

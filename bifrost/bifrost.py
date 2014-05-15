@@ -289,6 +289,8 @@ def user_page(username):
 
         submission['name'] = challenge['name']
         submission['RD'] = round(submission['RD'], 2)
+        submission['rank'] = mongodb.submissions.find({ 'cid': submission['cid'], 'rating': { 'gt': submission['rating'] } }).count() + 1
+        submission['percentile'] = 100*float(submission['rank'])/mongodb.submissions.find({ 'cid': submission['cid'] }).count()
         challenge_solutions.append(submission)
 
     return render_template('dashboard.html', user_in_db = user_in_db, challenge_solutions = challenge_solutions, custom_title = username)
