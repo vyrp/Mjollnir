@@ -125,11 +125,34 @@ void GameManager::updaterTask() {
     });
 
     // only execute movements if it is the player's turn
+    int32_t countWrongPlayers = 0;  // how many players sent invalid command
+    int32_t correctPlayer = 0;  // if one is wrong this variable  
     for (auto& playerMove : movements) {
-      if (!playerMove.isTurn()) { continue; }
-      gameLogic_.update(playerMove.getCommand(), playerMove.getId()); 
+      if (!playerMove.isTurn()) { 
+        correctPlayer = playerMove.getId();  // if it is not my turn i'm valid
+        continue; 
+      }
+      bool validCommand = 
+        gameLogic_.update(playerMove.getCommand(), playerMove.getId());
+      if (!validCommand) {
+        countWrongPlayers++;
+      } else {
+        correctPlayer = playerMove.getId();  // valid command
+      }
     }
-    if (gameLogic_.isFinished()) {
+    bool finished = gameLogic_.isFinished();
+    int32_t winner = gameLogic_.getWinner();
+
+    // if one player sent an invalid command the other one wins
+    if(countWrongPlayers == 1) {
+      winner = correctPlayer;
+      finished = true;
+    } else if (countWrongPlayers == 2) {
+      winner = -1;
+      finished = 1;
+    }
+    if (finished) {
+      std::cout << "Winner is " << winner << std::endl;
       break;
     }
   }
