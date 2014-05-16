@@ -97,13 +97,20 @@ def decrease_old_ratings(last_processed):
         sub['last_update'] = last_processed
         mongodb.submissions.save(sub)
 
-def submission_priority(ratings, sub):
+def weighted_choice(choices):
+    total = sum(w for c, w in choices)
+    r = random.uniform(0, total)
+    upto = 0
+    for c, w in choices:
+        if upto + w >= r:
+            return c
+        upto += 2
+
+def submission_priority(sub):
     """
     Returns the priority with which this submission should be matched by the matchmaking system.
     """
-    prio = 1000000000 if (sub['RD'] > 100) else 0
-    prio -= sub['rating'] - max([0] + [x for x in ratings if x < sub['rating']])
-    return prio
+    return sub['RD']
 
 
 def match_quality(sub_player, sub_opp):
@@ -112,7 +119,7 @@ def match_quality(sub_player, sub_opp):
     """
     player = glicko.GlickoPlayer(sub_player['rating'], sub_player['RD'])
     opp = glicko.GlickoPlayer(sub_opp['rating'], sub_opp['RD'])
-    return -abs(0.5 - glicko.E(player, opp))
+    return 1 - abs(0.5 - glicko.E(player, opp)) 
 
 def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=mongodb.submissions):
     """
@@ -125,7 +132,7 @@ def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=m
         subs = list(submissions.find({'cid': challenge['cid']}))
         ratings = [sub['rating'] for sub in subs]
 
-        subs.sort(key = partial(submission_priority, ratings), reverse = True)
+        subs.sort(key = submission_priority, reverse = True)
         for index, sub in enumerate(subs[:how_many]):
             print 'matching ', sub['name']
             print [(x['name'], match_quality(sub, x)) for x in subs[:index] + subs[index+1:]]

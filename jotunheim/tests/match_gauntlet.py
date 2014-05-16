@@ -81,7 +81,15 @@ while True:
         print
 
     print 'Press Enter for the next iteration...'
-    raw_input()
+    inp = raw_input()
+    if inp == 'p':
+        uid = uuid4() 
+        for cid in challenge_ids:    
+            real_performance[cid,uid]=(random.randint(1200, 2000), random.randint(10, 30))
+            submissions.append({'cid': cid, 'uid': uid, 'rating':1500, 'RD':300, 'name': 'New User'} )
+    elif inp == 'q':
+        break
+
     system('cls')
 
     suggested_matches = jotunheim.execute_matchmaking(challenges=challenges, submissions=submissions)
