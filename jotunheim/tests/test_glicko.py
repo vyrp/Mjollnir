@@ -1,3 +1,8 @@
+import sys
+if __name__ == "__main__":
+    print "This is a unit test, run with ../run_unit_tests.py"
+    sys.exit()
+
 import unittest
 import glicko
 

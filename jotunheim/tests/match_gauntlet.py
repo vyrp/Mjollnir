@@ -1,9 +1,14 @@
+import sys
+if __name__ == "__main__":
+    print "Run as ../run_test.py match_gauntlet"
+    sys.exit()
+
 import random
 import itertools
+from os import environ, system
+from uuid import uuid4 
 import jotunheim
 import glicko
-from os import environ, system
-from uuid import uuid4
 
 # clearly a stub, and not a spy, mock or fake
 class StubCollectionFinder(list):
