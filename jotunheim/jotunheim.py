@@ -3,6 +3,7 @@ from functools import partial
 from pymongo import MongoClient
 from copy import copy
 import glicko
+import random
 
 MONGOLAB_URI = environ.get('MONGOLAB_URI')
 
@@ -104,7 +105,7 @@ def weighted_choice(choices):
     for c, w in choices:
         if upto + w >= r:
             return c
-        upto += 2
+        upto += w
 
 def submission_priority(sub):
     """
@@ -134,9 +135,9 @@ def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=m
 
         subs.sort(key = submission_priority, reverse = True)
         for index, sub in enumerate(subs[:how_many]):
-            print 'matching ', sub['name']
-            print [(x['name'], match_quality(sub, x)) for x in subs[:index] + subs[index+1:]]
-            best_opponent = max(subs[:index] + subs[index+1:], key=partial(match_quality, sub))
+            #print 'matching ', sub['name']
+            #print [(x['name'], match_quality(sub, x)) for x in subs[:index] + subs[index+1:]]
+            best_opponent = weighted_choice([(other, match_quality(sub, other)) for other in subs[:index] + subs[index+1:]])
             suggested_matches.append( (challenge['cid'], (sub['uid'], best_opponent['uid'])) )
     
     #communicate with Yggdrasil here (API TBD)
