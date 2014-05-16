@@ -540,10 +540,10 @@ def matches():
 
 
 
-@app.route('/teapot')
+@app.route('/pleaseMakeCoffee', methods=['BREW', 'POST', 'GET'])
 def teapot():
     """
-    Allows a user to verify if this server is a teapot.
+    Allows a user to ask for a cup of coffee.
     """
     abort(418)
 
