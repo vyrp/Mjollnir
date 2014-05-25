@@ -34,9 +34,9 @@ class Game():
     _counter = 0
     _lock = threading.Lock()
     
-    def __init__(self, uid1, uid2, pid, logger):
-        self.uid1 = uid1
-        self.uid2 = uid2
+    def __init__(self, siid1, siid2, pid, logger):
+        self.siid1 = siid1
+        self.siid2 = siid2
         self.pid = pid
         self.logger = logger
         with Game._lock:
@@ -55,8 +55,8 @@ class Game():
         return True
 
     def download(self):
-        dbmanager.download(self.uid1)
-        dbmanager.download(self.uid2)
+        dbmanager.download(self.siid1)
+        dbmanager.download(self.siid2)
 
     def compile(self):
         os.chdir('/Mjollnir/vigridr/src/')
@@ -64,8 +64,8 @@ class Game():
         
         os.chdir('/Mjollnir/vigridr/')
         os.mkdir(self.game + '/')
-        for idx, uid in [(1, self.uid1), (2, self.uid2)]:
-            shutil.move('/sandboxes/downloads/' + uid, 'src/client/ClientLogic.cpp')
+        for idx, siid in [(1, self.siid1), (2, self.siid2)]:
+            shutil.move('/sandboxes/downloads/' + siid, 'src/client/ClientLogic.cpp')
             execute('make clientcpp')
             os.mkdir(self.game + '/client' + str(idx))
             shutil.move('bin/cpp/client', self.game + '/client' + str(idx) + '/client')
@@ -77,8 +77,8 @@ class Game():
     def run(self):
         game_name = self.game.split('/')[-1]
         self.server_log = game_name + '.log'
-        self.client1_log = game_name + '.' +  self.uid1 + '.log'
-        self.client2_log = game_name + '.' +  self.uid2 + '.log'
+        self.client1_log = game_name + '.' +  self.siid1 + '.log'
+        self.client2_log = game_name + '.' +  self.siid2 + '.log'
         
         os.chdir(self.game)
         server = CommandThread('server/server --port1 9090 --port2 9091 &> ' + server_log)

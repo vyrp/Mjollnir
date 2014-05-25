@@ -20,20 +20,20 @@ app.logger.addHandler(handler)
 
 @app.route('/run', methods=['POST'])
 def run_handler():
-    uid1 = request.form['uid1']
-    uid2 = request.form['uid2']
+    siid1 = request.form['siid1']
+    siid2 = request.form['siid2']
     pid = request.form['pid']
     
-    if not uid1:
+    if not siid1:
         return json.dumps({
             'status': 'error',
-            'error': 'missing uid1'
+            'error': 'missing siid1'
         })
 
-    if not uid2:
+    if not siid2:
         return json.dumps({
             'status': 'error',
-            'error': 'missing uid2'
+            'error': 'missing siid2'
         })
     
     if not pid:
@@ -42,8 +42,8 @@ def run_handler():
             'error': 'missing pid'
         })
 
-    response = json.dumps(manager.run(uid1, uid2, pid))
-    logger.info('(%s, %s, %s) => %s' % (uid1, uid2, pid, response))
+    response = json.dumps(manager.run(siid1, siid2, pid))
+    logger.info('(%s, %s, %s) => %s' % (siid1, siid2, pid, response))
     return response
 
 @app.errorhandler(404)

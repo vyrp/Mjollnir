@@ -24,36 +24,36 @@ class GamesManager(threading.Thread):
         try:
             self.logger.info('[%s] === Starting game queue ===' % (now(), ))
             while self.running:
-                uid1, uid2, pid, stop = self.games_queue.get() # wait for a requested game
+                siid1, siid2, pid, stop = self.games_queue.get() # wait for a requested game
                 if stop:
                     break
 
-                self.logger.info('[%s] Starting game %s vs %s in %s' % (now(), uid1, uid2, pid))
-                with Game(uid1, uid2, pid, self.logger) as game:
+                self.logger.info('[%s] Starting game %s vs %s in %s' % (now(), siid1, siid2, pid))
+                with Game(siid1, siid2, pid, self.logger) as game:
                     game.download()
                     game.compile()
                     game.run()
                     game.upload()                
-                self.logger.info('[%s] Ended game %s vs %s in %s' % (now(), uid1, uid2, pid))
+                self.logger.info('[%s] Ended game %s vs %s in %s' % (now(), siid1, siid2, pid))
                 
             self.logger.info('[%s] === Game queue stopped  ===' % (now(), ))
         except Exception as e:
             self.logger.info('[%s] === Game queue interrupted ===\n%s' % (now(), str(e)))
 
-    def run_game(self, uid1, uid2, pid):
+    def run_game(self, siid1, siid2, pid):
         if not self.is_alive() or not self.running:
             return {
                 'status': 'error',
                 'error': 'Game thread not running'
             }
         try:
-            self.games_queue.put((uid1, uid2, pid, False))
-            self.logger.info('[%s] Enqueued game %s vs %s in %s' % (now(), uid1, uid2, pid))
+            self.games_queue.put((siid1, siid2, pid, False))
+            self.logger.info('[%s] Enqueued game %s vs %s in %s' % (now(), siid1, siid2, pid))
             return {
                 'status': 'ok'
             }
         except Exception as e:
-            self.logger.info('[%s] Could not enqueue %s vs %s in %s\n%s' % (now(), uid1, uid2, pid, str(e)))            
+            self.logger.info('[%s] Could not enqueue %s vs %s in %s\n%s' % (now(), siid1, siid2, pid, str(e)))            
             return {
                 'status': 'error',
                 'error': 'Could not enqueue the requested game'
@@ -67,8 +67,8 @@ class GamesManager(threading.Thread):
 manager = GamesManager()
 manager.start()
 
-def run(uid1, uid2, pid):
-    return manager.run_game(uid1, uid2, pid)
+def run(siid1, siid2, pid):
+    return manager.run_game(siid1, siid2, pid)
 
 def kill():
     manager.kill()
