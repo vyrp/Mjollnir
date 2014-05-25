@@ -1,8 +1,6 @@
 __all__ = ['Game']
 
-import dbmock as dbmanager
-import pdb
-
+import dbmanager
 import os
 import shutil
 import sys
@@ -75,15 +73,10 @@ class Game():
         shutil.copy('/Mjollnir/vigridr/src/games/' + self.pid + '/bin/server', self.game + '/server/server')
 
     def run(self):
-        game_name = self.game.split('/')[-1]
-        self.server_log = game_name + '.log'
-        self.client1_log = game_name + '.' +  self.siid1 + '.log'
-        self.client2_log = game_name + '.' +  self.siid2 + '.log'
-        
         os.chdir(self.game)
-        server = CommandThread('server/server --port1 9090 --port2 9091 &> ' + server_log)
-        client1 = CommandThread('client1/client --port 9090 &> ' + client1_log)
-        client2 = CommandThread('client2/client --port 9091 &> ' + client2_log)
+        server = CommandThread('server/server --port1 9090 --port2 9091 &> server/log')
+        client1 = CommandThread('client1/client --port 9090 &> client1/log')
+        client2 = CommandThread('client2/client --port 9091 &> client2/log')
         
         pdb.set_trace()
         
@@ -96,9 +89,9 @@ class Game():
         client1.join()
         server.join()
         
-        print '===================> Returns = server(%d) client1(%d) client2(%d)' % (server.result, client1.result, client2.result)
+        self.logger.info('===================> Returns = server(%d) client1(%d) client2(%d)' % (server.result, client1.result, client2.result))
 
     def upload(self):
-        dbmanager.upload(self.game + '/' + self.server_log)
-        dbmanager.upload(self.game + '/' + self.client1_log)
-        dbmanager.upload(self.game + '/' + self.client2_log)
+        dbmanager.upload(self.game + '/server/log')
+        dbmanager.upload(self.game + '/client1/log')
+        dbmanager.upload(self.game + '/client2/log')
