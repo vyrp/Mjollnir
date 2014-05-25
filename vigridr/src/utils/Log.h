@@ -6,10 +6,10 @@
 #include <utility>  
 
 #define CHECK(condition, ...) (condition ? true : mjollnir::vigridr::crash(\
-                                          __FILE__,\
-                                          __LINE__,\
-                                          #condition,\
-                                          __VA_ARGS__))
+  __FILE__,\
+  __LINE__,\
+  #condition,\
+  __VA_ARGS__))
 
 namespace mjollnir { namespace vigridr {
 

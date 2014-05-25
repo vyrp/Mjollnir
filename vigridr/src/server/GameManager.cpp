@@ -6,6 +6,7 @@
 #include "../utils/MapUtils.h"
 #include "GameType.h"
 #include "GameConfig.h"
+#include "GameLogger.h"
 
 namespace mjollnir { namespace vigridr {
 
@@ -49,6 +50,8 @@ GameManager::~GameManager() {
 void GameManager::finalizeGame(bool success) {
   gameInfo_.gameStatus = GameStatus::FINISHED;
   gameInfo_.worldModel = gameLogic_.getWorldModel();
+  GameLogger::logWorldModel(gameInfo_.worldModel);
+  GameLogger::flushLog();
 }
 
 void GameManager::initializeGame(int32_t playerId0, int32_t playerId1) {
@@ -83,6 +86,7 @@ void GameManager::nextTurn() {
   gameInfo_.cycle++;
   gameInfo_.gameStatus = GameStatus::RUNNING;
   gameInfo_.worldModel = gameLogic_.getWorldModel();
+  GameLogger::logWorldModel(gameInfo_.worldModel);
   timer_.sleepUntilWorldModelTime();
   timer_.startCycle();
 }
@@ -157,7 +161,7 @@ void GameManager::updaterTask() {
       finished = true;
     } else if (countWrongPlayers == 2) {
       winner = -1;
-      finished = 1;
+      finished = true;
     }
     if (finished) {
       std::cout << "Winner is " << winner << std::endl;
