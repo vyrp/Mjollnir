@@ -41,7 +41,7 @@ class GamesManager(threading.Thread):
             self.logger.info('[%s] === Game queue interrupted ===\n%s' % (now(), str(e)))
 
     def run_game(self, uid1, uid2, pid):
-        if not self.is_alive():
+        if not self.is_alive() or not self.running:
             return {
                 'status': 'error',
                 'error': 'Game thread not running'

@@ -1,6 +1,10 @@
-#!/bin/bash
+#!/bin/bash -e
 echo "Creating sandboxes folder"
-rm -rf /sandboxes/
-mkdir /sandboxes/
+sudo rm -rf /sandboxes/
+sudo mkdir /sandboxes/
+sudo chown ubuntu:ubuntu /sandboxes/
 mkdir /sandboxes/downloads/
-mkdir /sandboxes/cache/
+
+echo "Building all"
+cd /Mjollnir/vigridr/src/
+python build_all.py

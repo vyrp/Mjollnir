@@ -60,8 +60,15 @@ def server_error(error):
         'error': '500'
     }), 500
 
-def signal_handler(signal, frame):
-    logger.warn('=== Process stopped (%d) at %s ===' % (signal, time.strftime('%H:%M:%S')))
+def signal_handler(sig, frame):
+    if sig == signal.SIGINT:
+        sig = "SIGINT"
+    elif sig == signal.SIGTERM:
+        sig = "SIGTERM"
+    else
+        sig = str(sig)
+
+    logger.warn('=== Process stopped (%s) at %s ===' % (sig, time.strftime('%H:%M:%S')))
     manager.kill()
     sys.exit(-1)
     
