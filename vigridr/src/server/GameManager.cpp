@@ -47,7 +47,7 @@ GameManager::~GameManager() {
   updaterThread_.join();
 }
 
-void GameManager::finalizeGame(bool success) {
+void GameManager::finalizeGame() {
   gameInfo_.gameStatus = GameStatus::FINISHED;
   gameInfo_.worldModel = gameLogic_.getWorldModel();
   GameLogger::logWorldModel(gameInfo_.worldModel);
@@ -92,14 +92,19 @@ void GameManager::nextTurn() {
 }
 
 bool 
-checkCommands(const std::array<PlayerTurnData, kMaxPlayers>& playerTurnData) {
+checkCommands(const std::array<PlayerTurnData, kMaxPlayers>& playerTurnData,
+              int32_t& correctPlayer) {
+  int32_t wrongPlayerCount = 0;
   for (size_t i = 0; i < kMaxPlayers; ++i) {
     if (playerTurnData[i].isTurn() && !playerTurnData[i].isCommandSet()) {
-      std::cout << "[ERROR]: No command set for player " << i << std::endl;
-      return false;
-    } 
+      LOG("[ERROR]: No command set for player %d", i);
+      wrongPlayerCount++;
+    } else {
+      correctPlayer = playerTurnData[i].getId();
+    }
   }
-  return true;
+  if(wrongPlayerCount > 1) correctPlayer = -1;
+  return wrongPlayerCount == 0;
 }
 
 void 
@@ -110,20 +115,23 @@ clearCommands(std::array<PlayerTurnData, kMaxPlayers>& playerTurnData) {
 
 // updater task is a task that is executed to update the game every cycle
 void GameManager::updaterTask() {
-  bool errorHappened = true;
   while (true) {
     nextTurn();  // initialize next turn
     timer_.sleepUntilPlayerUpdateTime();
-    std::cout << "Updating..." << std::endl;
+    LOG("Updating...");
     std::array<PlayerTurnData, kMaxPlayers> movements;
     {
       std::unique_lock<std::mutex> lock0(playerMutex_[0], std::defer_lock);
       std::unique_lock<std::mutex> lock1(playerMutex_[1], std::defer_lock);
       // locks player 1 and 2 simultaneously so that there is no dead lock
       std::lock(lock0, lock1); 
-      // check wheather the players sent the command
-      errorHappened = !checkCommands(playerTurnData_);
-      if (errorHappened) break;
+      // check wheather the players sent the command if just one sent gets him
+      int32_t correctPlayer;
+      bool errorHappened = !checkCommands(playerTurnData_, correctPlayer);
+      if (errorHappened) {
+        std::cout << correctPlayer;
+        break;
+      }
       movements = playerTurnData_;  // copy assignment operation
       // now we can release the locks so that other threads can change
       // playerTurnData without compromising the game update task
@@ -164,12 +172,14 @@ void GameManager::updaterTask() {
       finished = true;
     }
     if (finished) {
-      std::cout << "Winner is " << winner << std::endl;
+      LOG("Winner is %d", winner);
+      // print winner so that the caller knows how game ended
+      std::cout << winner;
       break;
     }
   }
   // game ends
-  finalizeGame(!errorHappened);
+  finalizeGame();
 }
 
 CommandStatus GameManager::update(const Command& command, int32_t playerId) {
@@ -197,8 +207,8 @@ void GameManager::getGameInfo(GameInfo& gameInfo, int32_t playerId) {
     std::unique_lock<std::mutex> lock(playerMutex_[idx]);
     gameInfo.isMyTurn = playerTurnData_[idx].isTurn();
   }
-  printf("%d %d\n", 
-         gameInfo.updateTimeLimitMs, gameInfo.nextWorldModelTimeEstimateMs);
+  LOG("%d %d", 
+      gameInfo.updateTimeLimitMs, gameInfo.nextWorldModelTimeEstimateMs);
 }  
 
 void GameManager::getGameInit(GameInit& gameInit, int32_t playerId) {

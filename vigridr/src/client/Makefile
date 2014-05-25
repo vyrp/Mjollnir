@@ -1,7 +1,6 @@
 TARGET = client
 
-#UTILS = ../utils/teste.cpp
-#UTILSINC = ../utils/teste.h
+UTILS = ../utils/Log.cpp
 SOURCES  = $(wildcard *.cpp ../thrifts/gen-cpp/*.cpp) $(UTILS)
 INCLUDES = $(wildcard *.h ../thrifts/gen-cpp/*.h) $(UTILSINC)
 CSBIN = ../../bin/csharp/$(TARGET)

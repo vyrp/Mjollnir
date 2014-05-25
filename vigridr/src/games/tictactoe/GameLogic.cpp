@@ -18,20 +18,15 @@ GameLogic::GameLogic(int32_t playerId1, int32_t playerId2) {
 }
 
 bool GameLogic::update(Command command, int32_t playerId) {
-  printf("Updating... player %d\n", playerId);
   if(!hasFinished_ && 
      checkTableCoordinate_(command.coordinate, Marker::UNMARKED)) {
     if (playerId == player1_) {
       setTableCoordinate_(command.coordinate, Marker::X);
       hasFinished_ = checkVictory_(worldModel_, Marker::X , playerId);
-      if(hasFinished_)
-        std::cout << "Player X has won!" << std::endl;
     }
     else if (playerId == player2_) {
       setTableCoordinate_(command.coordinate, Marker::O);
       hasFinished_ = checkVictory_(worldModel_, Marker::O , playerId);
-      if(hasFinished_)
-        std::cout << "Player O has won!" << std::endl;
     }
     if(checkDraw_(worldModel_)) { hasFinished_ = true; }
     return true;

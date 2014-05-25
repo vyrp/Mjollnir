@@ -10,6 +10,7 @@
 
 #include "GameManager.h"
 #include "GameService.h"
+#include "../utils/Log.h"
 #include "../thrifts/gen-cpp/Game.h"
 
 DEFINE_int32(port1, 9090, "Port used by the first client.");
@@ -54,12 +55,12 @@ int main(int argc, char **argv) {
 
     // finishing server when game ends
     gameManager->onGameEnd([&] () { 
-      printf("Stopping server\n");
+      LOG("Stopping server");
       server.stop(); 
     });
-    printf("Starting server...\n");
+    LOG("Starting server...");
     server.serve();
-    printf("Done\n");  
+    LOG("Done");  
   };
   std::thread player1Service(serviceInit, FLAGS_port1);
   std::thread player2Service(serviceInit, FLAGS_port2);
