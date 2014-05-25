@@ -32,7 +32,7 @@ void GameLogger::flushLog() {
   gamePt.push_back(std::make_pair("wmList", wmListPt));
   std::ofstream file;
   file.open("logs"); 
-  write_json (file, gamePt, true);
+  write_json (file, gamePt, false);
   file.close();
 }
 
