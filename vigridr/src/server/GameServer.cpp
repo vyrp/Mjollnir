@@ -40,6 +40,7 @@ int main(int argc, char **argv) {
   auto gameManager = std::make_shared<GameManager>(FLAGS_port1, FLAGS_port2);
   auto serviceInit = [&](int32_t port) {  
     boost::shared_ptr<GameService> handler(new GameService(gameManager, port));
+
     boost::shared_ptr<TProcessor> processor(new GameProcessor(handler));
     boost::shared_ptr<TServerTransport> serverTransport(
       new TServerSocket(port));
@@ -50,9 +51,15 @@ int main(int argc, char **argv) {
 
     TSimpleServer server(processor, serverTransport, 
                          transportFactory, protocolFactory);
+
+    // finishing server when game ends
+    gameManager->onGameEnd([&] () { 
+      printf("Stopping server\n");
+      server.stop(); 
+    });
     printf("Starting server...\n");
     server.serve();
-    printf("Done");  
+    printf("Done\n");  
   };
   std::thread player1Service(serviceInit, FLAGS_port1);
   std::thread player2Service(serviceInit, FLAGS_port2);

@@ -4,6 +4,7 @@
 #include <array>
 #include <atomic>
 #include <chrono>
+#include <functional>
 #include <mutex>
 #include <thread>
 
@@ -55,9 +56,16 @@ class PlayerTurnData {
 class GameManager {
  public:
   GameManager(int32_t playerId0, int32_t playerId1);
+  ~GameManager();
+
   CommandStatus update(const Command& command, int32_t playerId);
   void getGameInfo(GameInfo& gameInfo, int32_t playerId);
   void getGameInit(GameInit& gameInit, int32_t playerId);
+
+  /**
+   *  This handler is called once when the game ends
+   */
+  void onGameEnd(std::function<void ()> handler);
 
  private:
   void updaterTask();
@@ -78,6 +86,10 @@ class GameManager {
 
   GameLogic gameLogic_;
   std::thread updaterThread_;
+
+  std::vector<std::function<void ()>> gameEndHandlers_;
+  std::mutex gameEndHandlersMutex_;
+
 };
 
 }}

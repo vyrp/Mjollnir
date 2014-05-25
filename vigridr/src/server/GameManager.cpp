@@ -35,7 +35,15 @@ GameManager::GameManager(int32_t playerId0, int32_t playerId1)
   initializeGame(playerId0, playerId1);
   updaterThread_ = std::thread([this]() { 
     updaterTask(); 
+    // calling game end handlers callback
+    for (auto& handler : gameEndHandlers_) { 
+      handler(); 
+    }
   });
+}
+
+GameManager::~GameManager() {
+  updaterThread_.join();
 }
 
 void GameManager::finalizeGame(bool success) {
@@ -192,6 +200,11 @@ void GameManager::getGameInfo(GameInfo& gameInfo, int32_t playerId) {
 void GameManager::getGameInit(GameInit& gameInit, int32_t playerId) {
   getGameInfo(gameInit.gameInfo, playerId);
   gameInit.gameDescription = gameLogic_.getGameDescription(playerId);
+}
+
+void GameManager::onGameEnd(std::function<void ()> handler) {
+  std::unique_lock<std::mutex> lock(gameEndHandlersMutex_);
+  gameEndHandlers_.push_back(handler);
 }
 
 }}
