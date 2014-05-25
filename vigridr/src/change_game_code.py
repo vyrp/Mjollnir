@@ -31,7 +31,7 @@ def copy_gen(files, dest_dir):
       except:
         pass
       os.makedirs(directory, 0777);
-      copy(glob.glob(os.path.join(file, '*')), directory)
+      copy_force(glob.glob(os.path.join(file, '*')), directory)
       
 def copy_force(files, dest_dir):
   for file in files:
