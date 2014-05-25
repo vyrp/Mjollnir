@@ -2,12 +2,12 @@
 
 import json
 import logging
+import manager
 import signal
 import sys
 import time
 from flask import Flask, request
 from logging.handlers import TimedRotatingFileHandler 
-from manager import run
 
 app = Flask(__name__)
 handler = TimedRotatingFileHandler('/Mjollnir/yggdrasil/server/logs/server.log', when='midnight', backupCount=7)
@@ -42,7 +42,7 @@ def run_handler():
             'error': 'missing pid'
         })
 
-    response = json.dumps(run(uid1, uid2, pid))
+    response = json.dumps(manager.run(uid1, uid2, pid))
     logger.info('(%s, %s, %s) => %s' % (uid1, uid2, pid, response))
     return response
 
@@ -62,6 +62,7 @@ def server_error(error):
 
 def signal_handler(signal, frame):
     logger.warn('=== Process stopped (%d) at %s ===' % (signal, time.strftime('%H:%M:%S')))
+    manager.kill()
     sys.exit(-1)
     
 if __name__ == '__main__':

@@ -3,6 +3,7 @@ __all__ = ['run', 'kill']
 import logging
 import threading
 import time
+from game import Game
 from logging.handlers import TimedRotatingFileHandler
 from Queue import Queue
 from time import sleep
@@ -26,9 +27,15 @@ class GamesManager(threading.Thread):
                 uid1, uid2, pid, stop = self.games_queue.get() # wait for a requested game
                 if stop:
                     break
+
                 self.logger.info('[%s] Starting game %s vs %s in %s' % (now(), uid1, uid2, pid))
-                sleep(5)
+                with Game(uid1, uid2, pid, self.logger) as game:
+                    game.download()
+                    game.compile()
+                    game.run()
+                    game.upload()                
                 self.logger.info('[%s] Ended game %s vs %s in %s' % (now(), uid1, uid2, pid))
+                
             self.logger.info('[%s] === Game queue stopped  ===' % (now(), ))
         except Exception as e:
             self.logger.info('[%s] === Game queue interrupted ===\n%s' % (now(), str(e)))
