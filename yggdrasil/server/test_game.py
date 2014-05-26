@@ -8,7 +8,7 @@ class Logger():
     def info(self, msg):
         print msg
 
-with Game('ttt2.cpp', 'ttt2.py', 'tictactoe', Logger()) as game:
+with Game('tron1.py', 'tron2.py', 'tron', Logger()) as game:
     #pdb.set_trace()
     game.download()
     game.compile()

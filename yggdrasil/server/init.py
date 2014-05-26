@@ -65,7 +65,7 @@ def signal_handler(sig, frame):
         sig = "SIGINT"
     elif sig == signal.SIGTERM:
         sig = "SIGTERM"
-    else
+    else:
         sig = str(sig)
 
     logger.warn('=== Process stopped (%s) at %s ===' % (sig, time.strftime('%H:%M:%S')))
