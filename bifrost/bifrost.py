@@ -524,8 +524,28 @@ def submitsolution(challenge_name):
 
 @app.route('/match/<mid>')
 def match(mid):
-    abort(501)
+    """
+    Page to visualize a match.
+    """
+    match = mongodb.matches.find_one({ 'mid': mid })
 
+    if not match:
+        abort(404)
+
+    challenge = mongodb.challenges.find_one({ 'cid': match['cid'] })
+    
+    if not challenge:
+        raise "Couldn't find a challenge with cid " + match['cid']
+    
+    users = list( mongodb.users.find({ 'uid': { '$in': [ user['uid'] for user in match['users'] ] } }) )
+
+    time_delta = datetime.datetime.utcnow() - match['datetime']
+    match['time_since'] = time_since_from_seconds( time_delta.total_seconds() )      
+    match['challenge_name'] = challenge['name']
+    match['cid'] = challenge['cid']
+    match['usernames'] = [ user['username'] for user in users if user['uid'] in [match_user['uid'] for match_user in match['users']] ]
+
+    return render_template('match.html', match = match)
 
 
 

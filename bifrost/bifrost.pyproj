@@ -58,6 +58,7 @@
     <Content Include="static\js\bootstrap.js" />
     <Content Include="static\js\bootstrap.min.js" />
     <Content Include="templates\base.html" />
+    <Content Include="templates\match.html" />
     <Content Include="templates\challenge.html" />
     <Content Include="templates\matches.html" />
     <Content Include="templates\challenges.html" />
