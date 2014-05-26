@@ -1,6 +1,6 @@
 __all__ = ['Game']
 
-import dbmanager
+import dbmock as dbmanager
 import os
 import shutil
 import sys
@@ -10,6 +10,10 @@ from time import sleep
 
 sys.path.append('/Mjollnir/vigridr/src/')
 from change_game_code import change_game_code
+
+class NullLogger():
+    def info(self, msg):
+        pass
 
 class CommandThread(threading.Thread):
     def __init__(self, command):
@@ -58,40 +62,53 @@ class Game():
 
     def compile(self):
         os.chdir('/Mjollnir/vigridr/src/')
-        change_game_code(self.pid, False, False, False)
+        self.logger.info('Changing game code')
+        change_game_code(self.pid, False, False, False, NullLogger())
         
         os.chdir('/Mjollnir/vigridr/')
         os.mkdir(self.game + '/')
-        for idx, siid in [(1, self.siid1), (2, self.siid2)]:
-            shutil.move('/sandboxes/downloads/' + siid, 'src/client/ClientLogic.cpp')
-            execute('make clientcpp')
-            os.mkdir(self.game + '/client' + str(idx))
-            shutil.move('bin/cpp/client', self.game + '/client' + str(idx) + '/client')
-            execute('make remove')
+        for idx, siid in [('1', self.siid1), ('2', self.siid2)]:
+            ext = siid.split('.')[-1]
+            lang = 'csharp' if ext == 'cs' else ext
+            shutil.move('/sandboxes/downloads/' + siid, 'src/client/ClientLogic.' + ext)
+            self.logger.info('make client' + lang)
+            execute('make client' + lang + ' 1> /dev/null 2> /dev/null')
+            shutil.copytree('bin/' + lang, self.game + '/client' + idx)
+            execute('make remove 1> /dev/null 2> /dev/null')
         
         os.mkdir(self.game + '/server/')
         shutil.copy('/Mjollnir/vigridr/src/games/' + self.pid + '/bin/server', self.game + '/server/server')
 
     def run(self):
         os.chdir(self.game)
-        server = CommandThread('server/server --port1 9090 --port2 9091 &> server/log')
-        client1 = CommandThread('client1/client --port 9090 &> client1/log')
-        client2 = CommandThread('client2/client --port 9091 &> client2/log')
-        
-        pdb.set_trace()
-        
+        server = CommandThread('cd server && ./server --port1 9090 --port2 9091 1> result 2> /dev/null')
+        client1 = CommandThread('cd client1 && ./client --port 9090 1> /dev/null 2> /dev/null')
+        client2 = CommandThread('cd client2 && ./client --port 9091 1> /dev/null 2> /dev/null')
+
+        self.logger.info('Starting server')
         server.start()
         sleep(1)
+
+        self.logger.info('Starting client1')
         client1.start()
+
+        self.logger.info('Starting client2')
         client2.start()
         
         client2.join()
         client1.join()
         server.join()
         
-        self.logger.info('===================> Returns = server(%d) client1(%d) client2(%d)' % (server.result, client1.result, client2.result))
+        with open('server/result', 'r') as file:
+            winner = file.read()
+            if winner == '-1':
+                self.logger.info('Result: tie')
+            elif winner == '9090':
+                self.logger.info('Winner: ' + self.siid1)
+            elif winner == '9091':
+                self.logger.info('Winner: ' + self.siid2)
+            else:
+                self.logger.info('Result: error')
 
     def upload(self):
-        dbmanager.upload(self.game + '/server/log')
-        dbmanager.upload(self.game + '/client1/log')
-        dbmanager.upload(self.game + '/client2/log')
+        dbmanager.upload(self.game + '/server/logs')

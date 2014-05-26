@@ -12,6 +12,8 @@ thrift_compiled_file = '../obj/thrift'
 obj_dir = '../obj'
 bin_dir = '../bin'
 
+logger = None
+
 def touch(path):
     with open(path, 'w'):
         os.utime(path, None)
@@ -19,7 +21,7 @@ def touch(path):
 def copy(files, dest_dir):
   for file in files:
     if os.path.isfile(file):
-      print "Copying ", file, " to ", dest_dir
+      logger.info("Copying " + str(file) + " to " + str(dest_dir))
       sh.copy(file, dest_dir)
 
 def copy_gen(files, dest_dir):
@@ -52,11 +54,15 @@ def copy_force(files, dest_dir):
       os.makedirs(directory, 0777);
       copy_force(glob.glob(os.path.join(file, '*')), directory)
       
+class DefaultLogger():
+  def info(self, msg):
+    print msg
 
-
-def change_game_code(game, copy_sample_clients, copy_tests, copy_obj):
+def change_game_code(game, copy_sample_clients, copy_tests, copy_obj, used_logger=DefaultLogger()):
+  global logger
+  logger = used_logger
   if game not in os.listdir(games_dir):
-    print 'The game "' + game + '" is not in games folder'
+    logger.info('The game "' + game + '" is not in games folder')
     return 1
 
   game_dir = os.path.join(games_dir, game)
