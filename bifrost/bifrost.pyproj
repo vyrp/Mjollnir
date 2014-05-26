@@ -55,8 +55,8 @@
     <Content Include="requirements.txt" />
     <Content Include="runtime.txt" />
     <Content Include="static\css\style.css" />
-    <Content Include="static\js\bootstrap.js" />
-    <Content Include="static\js\bootstrap.min.js" />
+    <Content Include="static\js\snake.js" />
+    <Content Include="static\js\tictactoe.js" />
     <Content Include="templates\base.html" />
     <Content Include="templates\match.html" />
     <Content Include="templates\challenge.html" />

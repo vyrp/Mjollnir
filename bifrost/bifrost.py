@@ -62,6 +62,7 @@ class ChallengeDescriptionForm(Form):
     WTForm to submit a challenge. WTF was chosen here so we could use Flask-PageDown.
     """
     name = TextField('Challenge name', validators=[DataRequired()])
+    visualizer = TextField('Visualizer file name', validators=[DataRequired()])
     dev_only = BooleanField('Dev only')
     pagedown = PageDownField('Challenge description', validators=[DataRequired()])
 
@@ -311,6 +312,7 @@ def logout():
 
 
 
+#TODO: unify editchallenge and newchallenge
 @app.route('/newchallenge', methods=['GET', 'POST'])
 @groups_allowed(['Dev'])
 def newchallenge():
@@ -332,6 +334,7 @@ def newchallenge():
         challenge_id = uuid4()
         document = { 'cid': str(challenge_id),
                      'name': form.name.data,
+                     'visualizer': form.visualizer.data,
                      'description': form.pagedown.data,
                      'dev_only': True }
 
@@ -339,12 +342,12 @@ def newchallenge():
         return redirect(url_for('.challenge_by_name', challenge_name = form.name.data))
 
     else:
-        # TODO: unify editchallenge.html and newchallenge.html
         return render_template('newchallenge.html', form = form, error = "Please enter all the required information."), 400
 
 
 
 
+#TODO: unify editchallenge and newchallenge
 @app.route('/editchallenge', methods=['GET', 'POST'])
 @groups_allowed(['Dev'])
 def editchallenge():
@@ -365,6 +368,7 @@ def editchallenge():
 
     if request.method == 'GET':
         form.name.data = challenge.get('name')
+        form.visualizer.data = challenge.get('visualizer')
         form.dev_only.data = challenge.get('dev_only')
         form.pagedown.data = challenge.get('description')
         return render_template('editchallenge.html', form = form)
@@ -372,6 +376,7 @@ def editchallenge():
     if form.validate_on_submit():
         document = { 'cid': challenge_id,
                      'name': form.name.data,
+                     'visualizer': form.visualizer.data,
                      'description': form.pagedown.data,
                      'dev_only': form.dev_only.data }
 
@@ -379,7 +384,6 @@ def editchallenge():
         return redirect(url_for('.challenge_by_name', challenge_name = form.name.data))
 
     else:
-        # TODO: unify editchallenge.html and newchallenge.html
         return render_template('editchallenge.html', form = form, error = "Please enter all the required information."), 400
 
 

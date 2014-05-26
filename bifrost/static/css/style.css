@@ -29,6 +29,11 @@
   margin: 0 auto;
 }
 
+#match-player {
+  width: 500px;
+  height: 400px;
+}
+
 .register, .login, .table-submissions .challenges {
   margin: auto;
   width: 450px;
@@ -118,6 +123,18 @@
 
 .margin-top-15 {
   margin-top: 15px;
+}
+
+.margin-top-20 {
+  margin-top: 20px;
+}
+
+.margin-top-55 {
+  margin-top: 55px;
+}
+
+.margin-left-20 {
+  margin-left: 20px;
 }
 
 .color-white {
