@@ -3,6 +3,7 @@
 import json
 import logging
 import manager
+import os
 import signal
 import sys
 import time
@@ -76,4 +77,6 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 
+    os.setgid(1000)
+    os.setuid(1000)
     app.run(host='0.0.0.0', port=30403)
