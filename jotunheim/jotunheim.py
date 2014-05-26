@@ -2,6 +2,8 @@ from os import environ
 from functools import partial
 from pymongo import MongoClient
 from copy import copy
+import urllib
+import urllib2
 import glicko
 import random
 
@@ -127,6 +129,7 @@ def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=m
     Based on the current set of ratings, suggests matches to be performed by the server
     to increase reliability of the standings.
     """
+    # This function needs to be reworked in the case of multi-player matches.
     suggested_matches = []
 
     for challenge in challenges.find():
@@ -138,9 +141,18 @@ def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=m
             #print 'matching ', sub['name']
             #print [(x['name'], match_quality(sub, x)) for x in subs[:index] + subs[index+1:]]
             best_opponent = weighted_choice([(other, match_quality(sub, other)) for other in subs[:index] + subs[index+1:]])
-            suggested_matches.append( (challenge['cid'], (sub['uid'], best_opponent['uid'])) )
+            suggested_matches.append( (challenge, [sub, best_opponent]) )
+    		
+    for match in suggested_matches:
+    	values = {'cid': suggested_matches[0]['cid'], 
+    			  'siid1': suggested_matches[1][0]['siid'],
+    			  'uid1': suggested_matches[1][0]['uid'],
+    			  'siid2': suggested_matches[1][1]['siid'],
+    			  'uid2': suggested_matches[1][1]['uid']}
+
+    	encoded = urllib.urlencode(values)
+    	response = urllib2.urlopen('http://127.0.0.1:30403/run', data=encoded)
     
-    #communicate with Yggdrasil here (API TBD)
     return suggested_matches
 
 def main():
