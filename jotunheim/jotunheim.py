@@ -2,6 +2,7 @@ from os import environ
 from functools import partial
 from pymongo import MongoClient
 from copy import copy
+import datetime
 import urllib
 import urllib2
 import glicko
@@ -31,9 +32,11 @@ def new_ratings(players_before_match, match):
     players_after_match = [ copy(player) for player in players_before_match ]
     
     for player_index in xrange(len(match['users'])):
+    	if match['users'][player_index]['rank'] == -1: continue
         results = {}
         for other_player in xrange(len(match['users'])):
             if player_index == other_player: continue
+            if match['users'][other_player]['rank'] == -1: continue
 
             normalized_result = (sign(match['users'][other_player]['rank'] - match['users'][player_index]['rank']) + 1) / 2.0
             results[ players_before_match[other_player] ] = normalized_result
@@ -51,16 +54,20 @@ def process_matches():
     #find unprocessed matches
     jotunheim_info = mongodb.jotunheim.find_one(sort=[('last_processed', -1)])
     last_processed = jotunheim_info['last_processed']
-    unprocessed_matches = mongodb.matches.find({'datetime': {'$gt': last_processed}})
+
+    response = urllib2.urlopen("http://127.0.0.1:30403/games")
+    unprocessed_matches = json.load(response)
 
     for match in unprocessed_matches:
+    	match['datetime'] = datetime.datetime.fromtimestamp(match['datetime'])
         last_processed = max(last_processed, match['datetime'])
 
         #get submissions for every player in the match
+        
         match_ranks = [match['users']]
         match_submissions = []
         for user in match['users']:
-            params = {'cid': match['cid'], 'uid': user['uid']}
+            params = {'siid': user['siid']}
             sub = mongodb.submissions.find_one(params)
             match_submissions.append(sub)
 
