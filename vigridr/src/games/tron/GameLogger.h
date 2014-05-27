@@ -5,12 +5,17 @@
 #include <algorithm>
 
 #include "../thrifts/gen-cpp/WorldModel_types.h"
+#include "../thrifts/gen-cpp/GameDescription_types.h"
 
 namespace mjollnir { namespace vigridr {
 
 class GameLogger {
  public:
   static void logWorldModel(const WorldModel& wm);
+  static void logGameDescription(const GameDescription& description1, 
+                                 const std::string& player1,
+                                 const GameDescription& description2,
+                                 const std::string& player2);
   static void flushLog();
 };
 

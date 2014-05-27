@@ -2,11 +2,16 @@
 
 #include <stdexcept>
 
+#include <gflags/gflags.h>
+
 #include "../utils/Log.h"
 #include "../utils/MapUtils.h"
 #include "GameType.h"
 #include "GameConfig.h"
 #include "GameLogger.h"
+
+DEFINE_string(player1, "p1", "First player's id (to be logged).");
+DEFINE_string(player2, "p2", "Second player's id (to be logged).");
 
 namespace mjollnir { namespace vigridr {
 
@@ -60,6 +65,10 @@ void GameManager::initializeGame(int32_t playerId0, int32_t playerId1) {
   std::unique_lock<std::mutex> lock2(gameInfoMutex_, std::defer_lock);
   std::lock(lock0, lock1, lock2);
   gameInfo_.worldModel = gameLogic_.getWorldModel();
+  GameLogger::logGameDescription(gameLogic_.getGameDescription(playerId0),
+                                 FLAGS_player1,
+                                 gameLogic_.getGameDescription(playerId1),
+                                 FLAGS_player2);
   playerTurnData_[0].init(playerId0);
   playerTurnData_[1].init(playerId1);
   playerTurnData_[0].setIsTurn(true);
