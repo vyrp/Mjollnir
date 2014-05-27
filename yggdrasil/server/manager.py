@@ -6,7 +6,7 @@ import threading
 import time
 from game import Game
 from logging.handlers import TimedRotatingFileHandler
-from Queue import Queue
+from Queue import Empty, Queue
 from time import sleep
 
 def now():
@@ -37,10 +37,6 @@ class GamesManager(threading.Thread):
                 if stop:
                     break
 
-                if cid not in self.game_names:
-                    self.logger.warn("[%s] cid %s doesn't exist" % (now(), cid))
-                    continue
-
                 pid = self.game_names[cid]
 
                 self.logger.info('[%s] Starting game %s vs %s in %s' % (now(), siid1, siid2, pid))
@@ -62,9 +58,19 @@ class GamesManager(threading.Thread):
                 'status': 'error',
                 'error': 'Game thread not running'
             }
+
+        if cid not in self.game_names:
+            self.logger.warn("[%s] cid %s doesn't exist" % (now(), cid))
+            return {
+                'status': 'error',
+                'error': "cid %s doesn't exist" % (cid,)
+            }
+
+        pid = self.game_names[cid]
+
         try:
             self.games_queue.put((siid1, siid2, uid1, uid2, cid, False))
-            self.logger.info('[%s] Enqueued game %s vs %s in %s' % (now(), siid1, siid2, cid))
+            self.logger.info('[%s] Enqueued game %s vs %s in %s' % (now(), siid1, siid2, pid))
             return {
                 'status': 'ok'
             }

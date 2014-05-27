@@ -1,3 +1,4 @@
+
 import pdb
 
 from game import Game
@@ -8,9 +9,11 @@ class Logger():
     def info(self, msg):
         print msg
 
-with Game('ttt2.cpp', 'ttt1.cs', 'user1', 'user2', 'ttt', 'tictactoe', Logger()) as game:
+with Game('ttt1.cs', 'ttt2.py', 'croata', 'roim', 'ttt', 'tictactoe', Logger()) as game:
     #pdb.set_trace()
     game.download()
     game.compile()
     game.run()
     game.upload()
+    for key, value in game.result.items():
+        print key, '=>', value
