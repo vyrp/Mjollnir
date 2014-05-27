@@ -16,6 +16,8 @@ class GlickoTest(unittest.TestCase):
     def test_G(self):
         player = self.players
         self.assertAlmostEqual(glicko.g(player[1].RD), 0.9955, places=4)
+        player = glicko.GlickoPlayer(RD=glicko.RD1)
+        player.advance_periods(glicko.DECAY_PERIOD)
         self.assertAlmostEqual(glicko.g(player[2].RD), 0.9531, places=4)
         self.assertAlmostEqual(glicko.g(player[3].RD), 0.7242, places=4)
 
@@ -29,8 +31,6 @@ class GlickoTest(unittest.TestCase):
         self.assertAlmostEqual(E03, 0.303, places=3)
 
     def test_decay_period(self):
-        player = glicko.GlickoPlayer(RD=glicko.RD1)
-        player.advance_periods(glicko.DECAY_PERIOD)
         self.assertEqual(player.RD, glicko.RD2)
 
     def test_invalid_score(self):

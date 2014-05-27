@@ -5,6 +5,8 @@ from copy import copy
 import datetime
 import urllib
 import urllib2
+import json
+import time
 import glicko
 import random
 
@@ -29,6 +31,9 @@ def sign(x):
     return -1
     
 def new_ratings(players_before_match, match):
+    """
+    Returns a list of glicko.GlickoPlayer instances with the updated rating and RD values for the players after the given match.'
+    """
     players_after_match = [ copy(player) for player in players_before_match ]
     
     for player_index in xrange(len(match['users'])):
@@ -165,7 +170,8 @@ def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=m
 def main():
     last_processed = process_matches()
     decrease_old_ratings(last_processed)
-    execute_matchmaking()
+    suggested_matches = execute_matchmaking()
+    time.sleep(60*5*len(suggested_matches))
 
 if __name__ == "__main__":
     main()
