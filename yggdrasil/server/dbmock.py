@@ -13,5 +13,8 @@ if not os.path.isdir(DOWNLOADS):
 def download(siid):
     shutil.copy(MOCK + siid, DOWNLOADS)
 
+_counter = 1
 def upload(log):
-    shutil.copy(log, MOCK)
+    shutil.copy(log, MOCK + 'log' + str(_counter))
+    _counter += 1
+    return _counter

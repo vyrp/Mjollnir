@@ -8,7 +8,7 @@ import signal
 import sys
 import time
 from flask import Flask, request
-from logging.handlers import TimedRotatingFileHandler 
+from logging.handlers import TimedRotatingFileHandler
 
 app = Flask(__name__)
 handler = TimedRotatingFileHandler('/Mjollnir/yggdrasil/server/logs/server.log', when='midnight', backupCount=7)
@@ -21,31 +21,22 @@ app.logger.addHandler(handler)
 
 @app.route('/run', methods=['POST'])
 def run_handler():
-    siid1 = request.form['siid1']
-    siid2 = request.form['siid2']
-    pid = request.form['pid']
-    
-    if not siid1:
-        return json.dumps({
-            'status': 'error',
-            'error': 'missing siid1'
-        })
+    requires = ['siid1', 'siid2', 'uid1', 'uid2', 'cid']
 
-    if not siid2:
-        return json.dumps({
-            'status': 'error',
-            'error': 'missing siid2'
-        })
-    
-    if not pid:
-        return json.dumps({
-            'status': 'error',
-            'error': 'missing pid'
-        })
+    for item in requires:
+        if not request.form[item]:
+            return json.dumps({
+                'status': 'error',
+                'error': 'missing ' + item
+            })
 
-    response = json.dumps(manager.run(siid1, siid2, pid))
-    logger.info('(%s, %s, %s) => %s' % (siid1, siid2, pid, response))
+    response = json.dumps(manager.run(*[request.form[item] for item in requires]))
+    logger.info('(%s, %s, %s) => %s' % (request.form['siid1'], request.form['siid2'], request.form['cid'], response))
     return response
+
+@app.route('/games')
+def games_handler():
+    return json.dumps(manager.games())
 
 @app.errorhandler(404)
 def not_found(error):
@@ -72,11 +63,11 @@ def signal_handler(sig, frame):
     logger.warn('=== Process stopped (%s) at %s ===' % (sig, time.strftime('%H:%M:%S')))
     manager.kill()
     sys.exit(-1)
-    
+
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 
     os.setgid(1000)
     os.setuid(1000)
-    app.run(host='0.0.0.0', port=30403)
+    app.run(host='127.0.0.1', port=30403)

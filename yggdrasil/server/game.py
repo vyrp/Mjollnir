@@ -6,7 +6,8 @@ import shutil
 import sys
 import threading
 import traceback
-from time import sleep
+from time import sleep, time
+from uuid import uuid4
 
 sys.path.append('/Mjollnir/vigridr/src/')
 from change_game_code import change_game_code
@@ -33,23 +34,36 @@ def execute(command):
         raise ExecutionError('Return of "%s" was %d.' % (command, result))
 
 class Game():
-    _counter = 0
-    _lock = threading.Lock()
-    
-    def __init__(self, siid1, siid2, pid, logger):
+    def __init__(self, siid1, siid2, uid1, uid2, cid, pid, logger):
         self.siid1 = siid1
         self.siid2 = siid2
+        self.uid1 = uid1
+        self.uid2 = uid2
         self.pid = pid
         self.logger = logger
-        with Game._lock:
-            Game._counter += 1
-            self.game = '/sandboxes/game' + str(Game._counter)
+        self.mid = str(uuid4())
+        self.game = '/sandboxes/game-' + self.mid
+        self.result = {
+            'cid': cid,
+            'datetime': time(),
+            'log': None,
+            'mid': self.mid,
+            'users': [{
+                'uid': uid1,
+                'siid': siid1,
+                'rank': -1
+            }, {
+                'uid': uid2,
+                'siid': siid2,
+                'rank': -1
+            }]
+        }
         
     def __enter__(self):
         return self
         
     def __exit__(self, t, v, tr):
-        shutil.rmtree(self.game + '/', True)
+        shutil.rmtree(self.game, True)
         if t:
             self.logger.error('From Game.__exit__:')
             for line in traceback.format_exception(t, v, tr):
@@ -81,9 +95,12 @@ class Game():
 
     def run(self):
         os.chdir(self.game)
-        server = CommandThread('cd server && ./server --port1 9090 --port2 9091 1> result 2> /dev/null')
-        client1 = CommandThread('cd client1 && ./client --port 9090 1> /dev/null 2> /dev/null')
-        client2 = CommandThread('cd client2 && ./client --port 9091 1> /dev/null 2> /dev/null')
+        server = CommandThread(
+            'cd server && ./server --player1 %s --player2 %s --port1 %s --port2 %s 1> result 2> /dev/null' %
+            (self.uid1, self.uid2, '9090', '9091')
+        )
+        client1 = CommandThread('cd client1 && ./client --port %s 1> /dev/null 2> /dev/null' % ('9090',))
+        client2 = CommandThread('cd client2 && ./client --port %s 1> /dev/null 2> /dev/null' % ('9091',))
 
         self.logger.info('Starting server')
         server.start()
@@ -99,16 +116,30 @@ class Game():
         client1.join()
         server.join()
         
+        if client1.result != 0 or client2.result != 0 or server.result != 0:
+            raise ExecutionError(
+                'Failed to execute: client1(%d) client2(%d) server(%d)' %
+                (client1.result, client2.result, server.result)
+            )
+        
+        winner = ''
         with open('server/result', 'r') as file:
             winner = file.read()
-            if winner == '-1':
-                self.logger.info('Result: tie')
-            elif winner == '9090':
-                self.logger.info('Winner: ' + self.siid1)
-            elif winner == '9091':
-                self.logger.info('Winner: ' + self.siid2)
-            else:
-                self.logger.info('Result: error')
+        
+        if winner == '-1':
+            self.logger.info('Result: tie')
+            self.result['users'][0]['rank'] = 1
+            self.result['users'][1]['rank'] = 1
+        elif winner == '9090':
+            self.logger.info('Winner: ' + self.siid1)
+            self.result['users'][0]['rank'] = 1
+            self.result['users'][1]['rank'] = 2
+        elif winner == '9091':
+            self.logger.info('Winner: ' + self.siid2)
+            self.result['users'][0]['rank'] = 2
+            self.result['users'][1]['rank'] = 1
+        else:
+            self.logger.info('Result: error')
 
     def upload(self):
-        dbmanager.upload(self.game + '/server/logs')
+        self.result['log'] = dbmanager.upload(self.game + '/server/logs')

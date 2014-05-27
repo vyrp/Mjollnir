@@ -38,3 +38,4 @@ def upload(log):
     siid = str(uuid4())
     key = logs_bucket.new_key(siid)
     key.set_contents_from_filename(log)
+    return siid
