@@ -18,7 +18,7 @@
         {% endif %}
 
         <div class="height-60">
-          <h2>{{ match.challenge_name }}</h2>
+          <h2><a href="{{ url_for('.challenge_by_name', challenge_name=match.challenge_name) }}">{{ match.challenge_name }}</a></h2>
           <div class="float-left width-400">
             <h3>{{ ' vs '.join(match.usernames) }}</h3>
           </div>
@@ -27,12 +27,33 @@
           </div>
         </div>
 
-        <div class="well margin-top-55 margin-left-20">
-          <div id="match-player">
+          <div class="margin-left-16">
+              <div class="well margin-top-55">
+                  <div id="match-player">
+                  </div>
+              </div>
           </div>
-        </div>
 
       </div>
     </div>
   </div>
+{% endblock %}
+
+
+{% block script %}
+  {{ super() }}
+  <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js"></script>
+  
+  <script type="text/javascript">
+    bifrost_mid = "{{ match.mid | safe }}";
+    bifrost_match_users = [
+      {% for user in match.users %}
+        { uid: "{{ user.uid | safe }}", username: "{{ user.username | safe }}" },
+      {% endfor %}
+    ];
+  </script>
+
+  <script src="{{ url_for('static', filename='js/' + match.visualizer) }}"></script>
+  <script src="{{ url_for('static', filename='js/match_player.js') }}"></script>
+
 {% endblock %}

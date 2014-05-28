@@ -30,7 +30,7 @@
 }
 
 #match-player {
-  width: 500px;
+  width: 480px;
   height: 400px;
 }
 
@@ -133,8 +133,8 @@
   margin-top: 55px;
 }
 
-.margin-left-20 {
-  margin-left: 20px;
+.margin-left-16 {
+  margin-left: 16px;
 }
 
 .color-white {

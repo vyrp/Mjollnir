@@ -547,7 +547,9 @@ def match(mid):
     match['time_since'] = time_since_from_seconds( time_delta.total_seconds() )      
     match['challenge_name'] = challenge['name']
     match['cid'] = challenge['cid']
+    match['visualizer'] = challenge['visualizer']
     match['usernames'] = [ user['username'] for user in users if user['uid'] in [match_user['uid'] for match_user in match['users']] ]
+    match['users'] = users
 
     return render_template('match.html', match = match)
 
