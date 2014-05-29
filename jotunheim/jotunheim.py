@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from os import environ
 from functools import partial
 from pymongo import MongoClient
@@ -156,22 +158,24 @@ def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=m
             suggested_matches.append( (challenge, [sub, best_opponent]) )
     		
     for match in suggested_matches:
-    	values = {'cid': suggested_matches[0]['cid'], 
-    			  'siid1': suggested_matches[1][0]['siid'],
-    			  'uid1': suggested_matches[1][0]['uid'],
-    			  'siid2': suggested_matches[1][1]['siid'],
-    			  'uid2': suggested_matches[1][1]['uid']}
+    	values = {'cid': match[0]['cid'], 
+    			  'siid1': match[1][0]['siid'],
+    			  'uid1': match[1][0]['uid'],
+    			  'siid2': match[1][1]['siid'],
+    			  'uid2': match[1][1]['uid']}
 
     	encoded = urllib.urlencode(values)
+    	print 'Enqueueing', values
     	response = urllib2.urlopen('http://127.0.0.1:30403/run', data=encoded)
     
     return suggested_matches
 
 def main():
-    last_processed = process_matches()
-    decrease_old_ratings(last_processed)
-    suggested_matches = execute_matchmaking()
-    time.sleep(60*5*len(suggested_matches))
+    while True:
+        last_processed = process_matches()
+        decrease_old_ratings(last_processed)
+        suggested_matches = execute_matchmaking()
+        time.sleep(60*5*len(suggested_matches))
 
 if __name__ == "__main__":
     main()
