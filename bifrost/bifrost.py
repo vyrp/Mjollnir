@@ -288,10 +288,12 @@ def user_page(username):
         if not challenge:
             raise "Could not find challenge " + submission['cid'] + " in the database"
 
+        total_submissions = mongodb.submissions.find({ 'cid': submission['cid'] }).count()
+
         submission['name'] = challenge['name']
         submission['RD'] = round(submission['RD'], 2)
         submission['rank'] = mongodb.submissions.find({ 'cid': submission['cid'], 'rating': { 'gt': submission['rating'] } }).count() + 1
-        submission['percentile'] = 100*float(submission['rank'])/mongodb.submissions.find({ 'cid': submission['cid'] }).count()
+        submission['percentile'] = 100*float(total_submissions - submission['rank'] + 1)/total_submissions
         challenge_solutions.append(submission)
 
     return render_template('dashboard.html', user_in_db = user_in_db, challenge_solutions = challenge_solutions, custom_title = username)
