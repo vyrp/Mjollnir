@@ -551,7 +551,9 @@ def match(mid):
     match['usernames'] = [ user['username'] for user in users if user['uid'] in [match_user['uid'] for match_user in match['users']] ]
     match['users'] = users
 
-    return render_template('match.html', match = match)
+    custom_title = ' vs '.join(match['usernames']) + ' on ' + match['challenge_name']
+
+    return render_template('match.html', match = match, custom_title = custom_title)
 
 
 
