@@ -1,16 +1,20 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 
 {% block body %}
 <div class="well wrap-generic-content">
-  <h1>Lorem Ipsum</h1>
-  <p class="lead">
-  <br />
-  <br />
-  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec elementum quam non nisl convallis hendrerit. Sed id luctus mauris, vel semper velit. Nullam sit amet sapien in quam gravida condimentum in quis magna. Pellentesque ultricies viverra ligula nec porta. Vivamus a lacus id dolor mattis lobortis vitae quis lectus. Aliquam imperdiet augue arcu, ut imperdiet metus euismod et. Nam semper sapien eget tortor imperdiet accumsan. 
-  <br />
-  <br />
-  Curabitur ut neque enim. Aliquam sagittis consequat erat, nec lobortis sapien pretium vel. Pellentesque cursus et magna eget volutpat. Aenean pharetra est sapien, eget tincidunt dui imperdiet quis. Mauris a dui sit amet sapien porta scelerisque eget laoreet mi. Sed venenatis luctus nibh, id adipiscing nisi porttitor ut. Maecenas rhoncus aliquet mauris sit amet facilisis. Donec vitae tempor elit. Integer blandit lectus et lacus condimentum mattis sit amet ac sem. Nulla imperdiet lorem sed diam accumsan, molestie rutrum mauris porta. Nullam tempus libero sed consectetur semper. Sed semper, arcu at dictum tempus, augue nisl commodo lectus, non pellentesque dolor neque nec sapien. Nunc porttitor lacinia purus id ornare. Maecenas feugiat, nisl ac viverra accumsan, velit libero feugiat est, dictum malesuada est tellus non diam.
+  <h1 class="text-center"><img src="{{ url_for('static', filename='icons/odal_rune.png') }}" id="index-logo">Mjöllnir</h1>
+  <hr />
+  <p class="lead" align="justify">
+    <br />
+    <br />
+      Mjöllnir is a platform for online Artificial Intelligence Challenges.
+    <br />
+    <br />
+      Users can submit solutions to challenges such as Tic-Tac-Toe in many different languages. Our servers will automatically match and rank submissions against each other.
+    <br />
+    <br />
+      Mjöllnir is an <a href="//github.com/vyrp/Mjollnir">open-source</a> project by undergraduate students at <a href="//www.ita.br">ITA</a>.
   </p>
   <br />
 </div>

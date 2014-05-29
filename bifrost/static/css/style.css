@@ -40,6 +40,12 @@
   height: 400px;
 }
 
+#index-logo {
+    width: 100px;
+    height: 100px;
+    margin-bottom:20px;
+}
+
 .register, .login, .table-submissions .challenges {
   margin: auto;
   width: 450px;
@@ -61,6 +67,10 @@
 
 .register-fail, .login-fail {
   margin-bottom: 1em;
+}
+
+.text-center {
+  text-align: center;
 }
 
 .login .last-p {
