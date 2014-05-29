@@ -11,6 +11,12 @@
   padding: 10px;
 }
 
+#navbar-icon {
+  width: 20px;
+  height: 20px; 
+  margin-bottom: 3px;
+}
+
 #title-sidebar {
   font-size: 18px;
   font-weight: bold;
