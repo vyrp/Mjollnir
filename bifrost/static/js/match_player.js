@@ -74,7 +74,7 @@ $.get("https://s3-us-west-2.amazonaws.com/mjollnir-matches/" + bifrost_mid, func
         if (!challenge_player.is_paused) {
             challenge_player.next_tick();
         }
-    }, 1000);
+    }, 500);
 
     // Remove the loading info
     loading_circle.remove();
