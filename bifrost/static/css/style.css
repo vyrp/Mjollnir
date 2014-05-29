@@ -121,6 +121,10 @@
   height: 60px;
 }
 
+.margin-center {
+  margin: auto auto;
+}
+
 .margin-top-15 {
   margin-top: 15px;
 }
@@ -143,4 +147,8 @@
 
 .width-500 {
   width: 500px;
+}
+
+.width-42 {
+  width: 42px;
 }

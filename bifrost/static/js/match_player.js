@@ -41,15 +41,47 @@ loading_circle_bar.animate(animRotation);
 
 
 $.get("https://s3-us-west-2.amazonaws.com/mjollnir-matches/" + bifrost_mid, function (data) {
+    // Setup replay data
     challenge_player.match_data = JSON.parse(data);
-
-    loading_circle.remove();
-    loading_circle_bar.remove();
-    loading_text.remove();
 
     challenge_player.current_tick = 0;
     challenge_player.total_ticks = challenge_player.match_data.wmList.length;
 
+    // Setup replay control functions
+    challenge_player.is_paused = true;
+
+    challenge_player.play = function () {
+        challenge_player.is_paused = false;
+    }
+
+    challenge_player.pause = function () {
+        challenge_player.is_paused = true;
+    }
+
+    challenge_player.next_tick = function () {
+        if (challenge_player.current_tick + 1 < challenge_player.total_ticks) {
+            challenge_player.render_tick(++challenge_player.current_tick);
+        }
+    }
+
+    challenge_player.previous_tick = function () {
+        if (challenge_player.current_tick > 0) {
+            challenge_player.render_tick(--challenge_player.current_tick);
+        }
+    }
+    
+    setInterval(function () {
+        if (!challenge_player.is_paused) {
+            challenge_player.next_tick();
+        }
+    }, 1000);
+
+    // Remove the loading info
+    loading_circle.remove();
+    loading_circle_bar.remove();
+    loading_text.remove();
+
+    // Initial draw logic
     challenge_player.render_arena();
     challenge_player.render_tick(challenge_player.current_tick);
 
