@@ -29,6 +29,10 @@ SCRIPTNAME=/etc/init.d/$NAME
 . /lib/init/vars.sh
 VERBOSE=yes
 
+# Load environment variables
+. /etc/environment
+export MONGOLAB_URI="$MONGOLAB_URI"
+
 # Define LSB log_* functions.
 # Depend on lsb-base (>= 3.2-14) to ensure that this file is present
 # and status_of_proc is working.

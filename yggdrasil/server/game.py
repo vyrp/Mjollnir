@@ -1,6 +1,8 @@
+
 __all__ = ['Game']
 
-import dbmock as dbmanager
+#import dbmock as dbmanager
+import dbmanager
 import os
 import shutil
 import sys
@@ -46,7 +48,6 @@ class Game():
         self.result = {
             'cid': cid,
             'datetime': time(),
-            'log': None,
             'mid': self.mid,
             'users': [{
                 'uid': uid1,
@@ -71,8 +72,8 @@ class Game():
         return True
 
     def download(self):
-        dbmanager.download(self.siid1)
-        dbmanager.download(self.siid2)
+        self.ext1 = dbmanager.download(self.siid1)
+        self.ext2 = dbmanager.download(self.siid2)
 
     def compile(self):
         os.chdir('/Mjollnir/vigridr/src/')
@@ -81,8 +82,7 @@ class Game():
         
         os.chdir('/Mjollnir/vigridr/')
         os.mkdir(self.game + '/')
-        for idx, siid in [('1', self.siid1), ('2', self.siid2)]:
-            ext = siid.split('.')[-1]
+        for idx, siid, ext in [('1', self.siid1, self.ext1), ('2', self.siid2, self.ext2)]:
             lang = 'csharp' if ext == 'cs' else ext
             shutil.move('/sandboxes/downloads/' + siid, 'src/client/ClientLogic.' + ext)
             self.logger.info('make client' + lang)
@@ -104,7 +104,7 @@ class Game():
 
         self.logger.info('Starting server')
         server.start()
-        sleep(1)
+        sleep(1.5)
 
         self.logger.info('Starting client1')
         client1.start()
@@ -142,4 +142,4 @@ class Game():
             self.logger.info('Result: error')
 
     def upload(self):
-        self.result['log'] = dbmanager.upload(self.game + '/server/logs')
+        dbmanager.upload(dict(self.result), self.game + '/server/logs')

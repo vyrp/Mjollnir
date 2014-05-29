@@ -46,6 +46,9 @@ class GamesManager(threading.Thread):
                     game.run()
                     game.upload()
                     self.completed_queue.put_nowait(game.result)
+                    self.logger.info('<<<<<<')
+                    self.logger.info(str(game.result))
+                    self.logger.info('>>>>>>')
                 self.logger.info('[%s] Ended game %s vs %s in %s' % (now(), siid1, siid2, pid))
                 
             self.logger.info('[%s] === Game queue stopped  ===' % (now(), ))
