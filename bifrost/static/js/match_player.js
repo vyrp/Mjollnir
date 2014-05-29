@@ -33,7 +33,7 @@ paper.customAttributes.arc = function (centerX, centerY, startAngle, endAngle, a
 
 //TODO, extract magic numbers
 var loading_circle = paper.circle(240, 200, 25).attr({ stroke: "#f1f2f1", "stroke-width": 10 });
-var loading_circle_bar = paper.path().attr({ stroke: "#000000", "stroke-width": 10, arc: [240, 200, 0, 1, 25] });
+var loading_circle_bar = paper.path().attr({ stroke: "#161616", "stroke-width": 15, arc: [240, 200, 0, 75, 25] });
 var loading_text = paper.text(240, 250, 'Loading').attr({ 'font-size': 20, 'fill': "#d1d2d1", 'font-family': 'Helvetica Neue", Helvetica, Arial, sans-serif', 'font-weight': 'bold' });
 var animRotation = Raphael.animation({ transform: 'r360,240,200' }, 2500).repeat(Infinity);
 loading_circle_bar.animate(animRotation);
