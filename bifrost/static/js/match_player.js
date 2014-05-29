@@ -69,6 +69,21 @@ $.get("https://s3-us-west-2.amazonaws.com/mjollnir-matches/" + bifrost_mid, func
             challenge_player.render_tick(--challenge_player.current_tick);
         }
     }
+
+    document.onkeydown = function(e) {
+        e = e || window.event;
+
+        if (e.keyCode == '37') {
+            // left arrow
+            challenge_player.pause();
+            challenge_player.previous_tick();
+        }
+        else if (e.keyCode == '39') {
+            // right arrow
+            challenge_player.pause();
+            challenge_player.next_tick();
+        }
+    };
     
     setInterval(function () {
         if (!challenge_player.is_paused) {
