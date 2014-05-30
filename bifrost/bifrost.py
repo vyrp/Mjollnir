@@ -292,7 +292,7 @@ def user_page(username):
 
         submission['name'] = challenge['name']
         submission['RD'] = round(submission['RD'], 2)
-        submission['rank'] = mongodb.submissions.find({ 'cid': submission['cid'], 'rating': { 'gt': submission['rating'] } }).count() + 1
+        submission['rank'] = mongodb.submissions.find({ 'cid': submission['cid'], 'rating': { '$gt': submission['rating'] } }).count() + 1
         submission['percentile'] = 100*float(total_submissions - submission['rank'] + 1)/total_submissions
         challenge_solutions.append(submission)
 
