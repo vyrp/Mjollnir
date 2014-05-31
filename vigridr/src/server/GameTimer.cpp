@@ -10,8 +10,8 @@ namespace mjollnir { namespace vigridr {
  *  Constants to synchronize the updating time so that the new world model
  *  is available exactely when promissed.
  */
-constexpr std::chrono::milliseconds kWorldModelUpdateMsStep1(2);
-constexpr std::chrono::milliseconds kWorldModelUpdateMsStep2(1);
+const std::chrono::milliseconds kWorldModelUpdateMsStep1(2);
+const std::chrono::milliseconds kWorldModelUpdateMsStep2(1);
 
 void GameTimer::startCycle() {
   nextUpdateTime_ = clock::now() + config::cycleDurationMs;

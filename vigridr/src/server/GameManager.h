@@ -16,7 +16,7 @@
 
 namespace mjollnir { namespace vigridr {
 
-constexpr size_t kMaxPlayers = 2;
+const size_t kMaxPlayers = 2;
 
 /*
  *  Data structure with the information about the player's command in a turn

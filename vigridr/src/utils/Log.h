@@ -1,6 +1,7 @@
 #ifndef VIGRIDR_UTILS_LOG_H
 #define VIGRIDR_UTILS_LOG_H
 
+#include <cstdio>
 #include <exception>
 #include <iostream>
 #include <utility>  
