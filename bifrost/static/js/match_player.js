@@ -11,6 +11,13 @@
 
 var paper = Raphael("match-player", "100%", "100%");
 
+
+
+
+//
+// Loading bar
+//
+
 paper.customAttributes.arc = function (centerX, centerY, startAngle, endAngle, arcEdge) {
     var radians = Math.PI / 180;
     largeArc = +(endAngle - startAngle > 180);
@@ -29,16 +36,19 @@ paper.customAttributes.arc = function (centerX, centerY, startAngle, endAngle, a
     return { path: path };
 };
 
-
-
 //TODO, extract magic numbers
-var loading_circle = paper.circle(240, 200, 25).attr({ stroke: "#f1f2f1", "stroke-width": 10 });
-var loading_circle_bar = paper.path().attr({ stroke: "#161616", "stroke-width": 15, arc: [240, 200, 0, 75, 25] });
-var loading_text = paper.text(240, 250, 'Loading').attr({ 'font-size': 20, 'fill': "#d1d2d1", 'font-family': 'Helvetica Neue", Helvetica, Arial, sans-serif', 'font-weight': 'bold' });
+var loading_circle_bar = paper.path().attr({ stroke: "#f1f2f1", "stroke-width": 10, arc: [240, 200, 0, 90, 25] });
+var loading_circle_bar2 = paper.path().attr({ stroke: "#f1f2f1", "stroke-width": 10, arc: [240, 200, 180, 270, 25] });
 var animRotation = Raphael.animation({ transform: 'r360,240,200' }, 2500).repeat(Infinity);
 loading_circle_bar.animate(animRotation);
+loading_circle_bar2.animate(animRotation);
 
 
+
+
+//
+// After the loading bar is running, we download the match info and set a completion callback.
+//
 
 $.get("https://s3-us-west-2.amazonaws.com/mjollnir-matches/" + bifrost_mid, function (data) {
     // Setup replay data
@@ -92,9 +102,8 @@ $.get("https://s3-us-west-2.amazonaws.com/mjollnir-matches/" + bifrost_mid, func
     }, 500);
 
     // Remove the loading info
-    loading_circle.remove();
     loading_circle_bar.remove();
-    loading_text.remove();
+    loading_circle_bar2.remove();
 
     // Initial draw logic
     challenge_player.render_arena();
