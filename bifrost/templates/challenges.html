@@ -9,14 +9,12 @@
         <hr class="hr-small" />
         <br/>
         {% if challenges %}
-          <dl>
-            <dt>Available challenges:</dt>
-            {% for challenge in challenges %}
-            <dd>
-              <a href="{{ url_for('.challenge_by_name', challenge_name=challenge.name) }}">{{ challenge.name }}</a>{% if challenge.dev_only %} (Dev only){% endif %}
-            </dd>
-            {% endfor %}
-          </dl>
+          {% for index, challenge in enumerate(challenges) %}
+          <a href="{{ url_for('.challenge_by_name', challenge_name=challenge.name) }}" class="thumbnail width-255 {% if index % 2 == 0 %}float-left{% else %}float-right{% endif %}">
+            <div class="text-center">{{ challenge.name }}{% if challenge.dev_only %} (Dev only){% endif %}</div>
+            <img src="{{ challenge.thumbnail }}">
+          </a>
+          {% endfor %}
         {% else %}
           <h3> Sorry ;( </h3>
           <h4> We can't find any challenges at the momment. </h4>

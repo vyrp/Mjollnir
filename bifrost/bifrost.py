@@ -63,6 +63,7 @@ class ChallengeDescriptionForm(Form):
     """
     name = TextField('Challenge name', validators=[DataRequired()])
     visualizer = TextField('Visualizer file name', validators=[DataRequired()])
+    thumbnail = TextField('Thumbnail URL', validators=[DataRequired()])
     dev_only = BooleanField('Dev only')
     pagedown = PageDownField('Challenge description', validators=[DataRequired()])
 
@@ -128,12 +129,13 @@ def markdown_to_html(content):
     return Markup(markdown.markdown(content))
 
 app.jinja_env.globals.update(format_exc = traceback.format_exc)
-app.jinja_env.globals.update(is_active_user_in=is_active_user_in)
-app.jinja_env.globals.update(len=len)
-app.jinja_env.globals.update(markdown_to_html=markdown_to_html)
-app.jinja_env.globals.update(latest_matches=latest_matches)
-app.jinja_env.globals.update(current_user_latest_matches=current_user_latest_matches)
-app.jinja_env.globals.update(ACCEPTED_LANGUAGES=ACCEPTED_LANGUAGES)
+app.jinja_env.globals.update(is_active_user_in = is_active_user_in)
+app.jinja_env.globals.update(len = len)
+app.jinja_env.globals.update(markdown_to_html = markdown_to_html)
+app.jinja_env.globals.update(latest_matches = latest_matches)
+app.jinja_env.globals.update(current_user_latest_matches = current_user_latest_matches)
+app.jinja_env.globals.update(ACCEPTED_LANGUAGES = ACCEPTED_LANGUAGES)
+app.jinja_env.globals.update(enumerate = enumerate)
 
 # Stormpath
 stormpath_manager = StormpathManager(app)
@@ -314,75 +316,54 @@ def logout():
 
 
 
-#TODO: unify editchallenge and newchallenge
-@app.route('/newchallenge', methods=['GET', 'POST'])
-@groups_allowed(['Dev'])
+@app.route('/newchallenge')
 def newchallenge():
-    """
-    Allows a user in the "Dev" admin group to submit a new challenge.
-    """
-    form = ChallengeDescriptionForm(csrf_enabled = False)
+    return redirect(url_for('.editchallenge'))
 
-    if not form.pagedown.data:
-        form.pagedown.data = '#Hey!\nEnter the <i>challenge description</i> using **Markdown**!'
-
-    if request.method == 'GET':
-        return render_template('newchallenge.html', form = form)
-
-    if form.validate_on_submit():
-        # This is potentially unsafe since there is no sanitizing on the markdown submitted to the db
-        # Won't be a problem while admins are the only ones with access to submit challenges though
-        #
-        challenge_id = uuid4()
-        document = { 'cid': str(challenge_id),
-                     'name': form.name.data,
-                     'visualizer': form.visualizer.data,
-                     'description': form.pagedown.data,
-                     'dev_only': True }
-
-        mongodb.challenges.insert(document)
-        return redirect(url_for('.challenge_by_name', challenge_name = form.name.data))
-
-    else:
-        return render_template('newchallenge.html', form = form, error = "Please enter all the required information."), 400
-
-
-
-
-#TODO: unify editchallenge and newchallenge
 @app.route('/editchallenge', methods=['GET', 'POST'])
 @groups_allowed(['Dev'])
 def editchallenge():
     """
-    Allows a user in the "Dev" admin group to edit an existing challenge.
+    Allows a user in the "Dev" admin group to create/edit a challenge.
     """
     challenge_id = request.args.get('cid')
-
-    if not challenge_id:
-        abort(404)
-
-    challenge = mongodb.challenges.find_one({ 'cid': challenge_id })
-
-    if not challenge:
-        abort(404)
+    challenge = {}
+    
+    if challenge_id:
+        challenge = mongodb.challenges.find_one({ 'cid': challenge_id })
+        if not challenge:
+            abort(404)
+    else:
+        challenge_id = str( uuid4() )
 
     form = ChallengeDescriptionForm(csrf_enabled = False)
 
     if request.method == 'GET':
-        form.name.data = challenge.get('name')
-        form.visualizer.data = challenge.get('visualizer')
-        form.dev_only.data = challenge.get('dev_only')
-        form.pagedown.data = challenge.get('description')
+        if challenge:
+            form.name.data = challenge.get('name')
+            form.visualizer.data = challenge.get('visualizer')
+            form.thumbnail.data = challenge.get('thumbnail')
+            form.dev_only.data = challenge.get('dev_only')
+            form.pagedown.data = challenge.get('description')
+        else:
+            form.dev_only.data = True
+        
         return render_template('editchallenge.html', form = form)
+
 
     if form.validate_on_submit():
         document = { 'cid': challenge_id,
                      'name': form.name.data,
                      'visualizer': form.visualizer.data,
+                     'thumbnail': form.thumbnail.data,
                      'description': form.pagedown.data,
                      'dev_only': form.dev_only.data }
 
-        mongodb.challenges.update({ 'cid': challenge_id }, document)
+        if challenge:
+            mongodb.challenges.update({ 'cid': challenge_id }, document)
+        else:
+            mongodb.challenges.insert(document)
+            
         return redirect(url_for('.challenge_by_name', challenge_name = form.name.data))
 
     else:
@@ -450,7 +431,6 @@ def challenges():
     """
     Page to display all challenges
     """
-    
     challenges = sorted_by_name( [challenge for challenge in mongodb.challenges.find() if ( not challenge['dev_only'] or is_active_user_in('Dev') )] )
     return render_template('challenges.html', challenges=challenges)
 
@@ -556,6 +536,7 @@ def match(mid):
     custom_title = ' vs '.join(match['usernames']) + ' on ' + match['challenge_name']
 
     return render_template('match.html', match = match, custom_title = custom_title)
+
 
 
 

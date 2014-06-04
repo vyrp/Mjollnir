@@ -21,7 +21,7 @@ input {
       <div class="span6">
         <form method="post" action="">
           <fieldset>
-            <legend>Edit a challenge</legend>
+            <legend>Edit/Create a challenge</legend>
             {% if error %}
               <div class="alert alert-dismissable alert-danger register-fail">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -35,12 +35,17 @@ input {
             </div>
             <br>
             <div>
-              {{ form.dev_only }} <b>{{ form.dev_only.label }}</b>
+             {{ form.dev_only(class="float-left") }}<b>{{ form.dev_only.label }}</b>
             </div>
             <br>
             <div>
               <b>{{ form.visualizer.label }}</b>
               {{ form.visualizer(class="color-white") }}
+            </div>
+            <br>
+            <div>
+              <b>{{ form.thumbnail.label }}</b>
+              {{ form.thumbnail(class="color-white") }}
             </div>
             <br>
             <div>
