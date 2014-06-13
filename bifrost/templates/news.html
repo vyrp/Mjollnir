@@ -10,7 +10,7 @@
     posted by <a href="{{url_for('user_page', username = new.author)}}">{{ new.author }}</a> on {{ timestamp_as_str(new.datetime) }} {% if is_active_user_in('Dev') %} <a href="{{ url_for('editnew', nid = new.nid) }}">(edit)</a> {% endif %}
   </p>
   <p align="justify">
-    {{ new.content }}
+    {{ markdown_to_html(new.content) }}
   </p>
   <br />
   {% endfor %}
