@@ -40,7 +40,7 @@
   height: 400px;
 }
 
-#index-logo {
+#about-logo {
     width: 100px;
     margin-left: 8px;
     height: 100px;
@@ -155,6 +155,11 @@
 
 .margin-left-16 {
   margin-left: 16px;
+}
+
+.news-subtitle {
+  margin-top: -15px;
+  color: #808088;
 }
 
 .color-white {

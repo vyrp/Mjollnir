@@ -27,9 +27,12 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand active" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='icons/odal_rune.png') }}" id="navbar-icon" />Mjöllnir</a>
+          <a class="brand active" href="{{ url_for('about') }}"><img src="{{ url_for('static', filename='icons/odal_rune.png') }}" id="navbar-icon" />Mjöllnir</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
+              <li {% if request.endpoint == 'index' %}class="active" {% endif %}>
+                <a href="{{ url_for('index') }}">News</a>
+              </li>
               <li {% if request.endpoint == 'challenges' %} class="active" {% endif %}>
                 <a href="{{ url_for('challenges') }}">Challenges</a>
               </li>
@@ -37,24 +40,27 @@
                 <a href="{{ url_for('matches') }}">Recent Matches</a>
               </li>
               {% if user.is_authenticated() %}
-              <li {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>
-                <a href="{{ url_for('dashboard') }}">Dashboard</a>
-              </li>
-                {% if is_active_user_in('Dev') %}
-              <li {% if request.endpoint == 'newchallenge' %}class="active"{% endif %}>
-                <a href="{{ url_for('newchallenge') }}">New Challenge</a>
-              </li>
-                {% endif %}
-              <li>
-                <a href="{{ url_for('logout') }}">Logout</a>
-              </li>
+                <li {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>
+                  <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                </li>
+                  {% if is_active_user_in('Dev') %}
+                  <li {% if request.endpoint == 'editchallenge' %}class="active"{% endif %}>
+                    <a href="{{ url_for('newchallenge') }}">New Challenge</a>
+                  </li>
+                  <li {% if request.endpoint == 'newnew' %}class="active" {% endif %}>
+                    <a href="{{ url_for('newnew') }}">New new</a>
+                  </li>
+                  {% endif %}
+                <li>
+                  <a href="{{ url_for('logout') }}">Logout</a>
+                </li>
               {% else %}
-              <li {% if request.endpoint == 'login' %}class="active"{% endif %}>
-                <a href="{{ url_for('login') }}">Login</a>
-              </li>
-              <li {% if request.endpoint == 'register' %}class="active"{% endif %}>
-                <a href="{{ url_for('register') }}">Register</a>
-              </li>
+                <li {% if request.endpoint == 'login' %}class="active"{% endif %}>
+                  <a href="{{ url_for('login') }}">Login</a>
+                </li>
+                <li {% if request.endpoint == 'register' %}class="active"{% endif %}>
+                  <a href="{{ url_for('register') }}">Register</a>
+                </li>
               {% endif %}
             </ul>
           </div>

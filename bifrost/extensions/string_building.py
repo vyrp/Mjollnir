@@ -21,3 +21,6 @@ def time_since_from_seconds(seconds):
         time_since += str(minutes) + 'm ago'
 
     return time_since
+
+def timestamp_as_str(date):
+    return date.strftime("%b %d '%y at %H:%M UTC")

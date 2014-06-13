@@ -58,17 +58,19 @@
     <Content Include="static\js\match_player.js" />
     <Content Include="static\js\snake.js" />
     <Content Include="static\js\tictactoe.js" />
+    <Content Include="templates\about.html" />
     <Content Include="templates\base.html" />
+    <Content Include="templates\editnew.html" />
     <Content Include="templates\match.html" />
     <Content Include="templates\challenge.html" />
     <Content Include="templates\matches.html" />
     <Content Include="templates\challenges.html" />
+    <Content Include="templates\news.html" />
     <Content Include="templates\submitsolution.html" />
     <Content Include="templates\sidebarbase.html" />
     <Content Include="templates\dashboard.html" />
     <Content Include="templates\editchallenge.html" />
     <Content Include="templates\error.html" />
-    <Content Include="templates\index.html" />
     <Content Include="templates\login.html" />
     <Content Include="templates\register.html" />
   </ItemGroup>

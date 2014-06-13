@@ -41,6 +41,7 @@ from extensions.flask_stormpath import groups_allowed
 from extensions.flask_stormpath import is_active_user_in
 from extensions.sorted_by_name import sorted_by_name
 from extensions.string_building import time_since_from_seconds
+from extensions.string_building import timestamp_as_str
 
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
@@ -66,6 +67,16 @@ class ChallengeDescriptionForm(Form):
     thumbnail = TextField('Thumbnail URL', validators=[DataRequired()])
     dev_only = BooleanField('Dev only')
     pagedown = PageDownField('Challenge description', validators=[DataRequired()])
+
+
+
+
+class NewDescriptionForm(Form):
+    """
+    WTForm to create a news entry. WTF was chosen here so we could use Flask-PageDown.
+    """
+    title = TextField('Title', validators=[DataRequired()])
+    pagedown = PageDownField('Content', validators=[DataRequired()])
 
 
 
@@ -136,6 +147,7 @@ app.jinja_env.globals.update(latest_matches = latest_matches)
 app.jinja_env.globals.update(current_user_latest_matches = current_user_latest_matches)
 app.jinja_env.globals.update(ACCEPTED_LANGUAGES = ACCEPTED_LANGUAGES)
 app.jinja_env.globals.update(enumerate = enumerate)
+app.jinja_env.globals.update(timestamp_as_str = timestamp_as_str)
 
 # Stormpath
 stormpath_manager = StormpathManager(app)
@@ -180,8 +192,80 @@ def exception_handler(error):
 ### Webpage Handlers
 @app.route('/')
 def index():
-    """Basic home page."""
-    return render_template('index.html')
+    """
+        Home page with Mjollnir news.
+        Displays the latest 3 news.
+        The HTTP parameter p specifies a specific page (skips 3*p news).
+    """
+    news_per_page = 3
+    p = request.args.get('p', 0)
+
+    news = list( mongodb.news.find().sort([('datetime', -1)]).skip(news_per_page*p).limit(news_per_page) )
+
+    return render_template('news.html', custom_title = "News", news = news, page = p)
+
+
+
+
+@app.route('/newnew')
+@groups_allowed(['Dev'])
+def newnew():
+    """ Page to add an entry to the news. """
+    return redirect(url_for('.editnew'))
+
+@app.route('/editnew', methods=['GET', 'POST'])
+@groups_allowed(['Dev'])
+def editnew():
+    """
+    Allows a user in the "Dev" admin group to create/edit a news entry.
+    """
+    nid = request.args.get('nid')
+    existing_new = {}
+    
+    if nid:
+        existing_new = mongodb.news.find_one({ 'nid': nid })
+        if not existing_new:
+            abort(404)
+        
+        date = existing_new['datetime']
+    else:
+        nid = str( uuid4() )
+        date = datetime.datetime.utcnow()
+
+    form = NewDescriptionForm(csrf_enabled = False)
+
+    if request.method == 'GET':
+        if existing_new:
+            form.title.data = existing_new.get('title')
+            form.pagedown.data = existing_new.get('content')
+        
+        return render_template('editnew.html', form = form)
+
+
+    if form.validate_on_submit():
+        document = { 'nid': nid,
+                     'title': form.title.data,
+                     'content': form.pagedown.data,
+                     'datetime': date,
+                     'author': user.username }
+
+        if existing_new:
+            mongodb.news.update({ 'nid': nid }, document)
+        else:
+            mongodb.news.insert(document)
+            
+        return redirect(url_for('.index'))
+
+    else:
+        return render_template('editnew.html', form = form, error = "Please enter all the required information."), 400
+
+
+
+
+@app.route('/about')
+def about():
+    """ About page. """
+    return render_template('about.html')
 
 
 
@@ -317,6 +401,7 @@ def logout():
 
 
 @app.route('/newchallenge')
+@groups_allowed(['Dev'])
 def newchallenge():
     return redirect(url_for('.editchallenge'))
 
