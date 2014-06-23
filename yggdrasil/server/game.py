@@ -143,3 +143,32 @@ class Game():
 
     def upload(self):
         dbmanager.upload(dict(self.result), self.game + '/server/logs')
+
+class Compiler():
+    def __init__(self, siid, pid, logger):
+        self.siid = siid
+        self.pid = pid
+        self.logger = logger
+        
+    def download(self):
+        self.ext = dbmanager.download(self.siid)
+
+    def compile(self):
+        os.chdir('/Mjollnir/vigridr/src/')
+        self.logger.info('Changing game code')
+        change_game_code(self.pid, False, False, False, NullLogger())
+        
+        os.chdir('/Mjollnir/vigridr/')
+        lang = 'csharp' if self.ext == 'cs' else self.ext
+        shutil.move('/sandboxes/downloads/' + siid, 'src/client/ClientLogic.' + self.ext)
+        self.logger.info('make client' + lang)
+        try:
+            execute('make client' + lang + ' 1> /dev/null 2> /dev/null')
+            self.result = 'OK'
+        except ExecutionError as e:
+            self.logger.info('Compilation failed')
+            self.result = 'Compilation failed'
+        execute('make remove 1> /dev/null 2> /dev/null')
+        
+    def upload(self):
+        dbmanager.upload_compilation(self.result)

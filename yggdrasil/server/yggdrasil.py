@@ -19,19 +19,33 @@ logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
 app.logger.addHandler(handler)
 
-@app.route('/run', methods=['POST'])
-def run_handler():
-    requires = ['siid1', 'siid2', 'uid1', 'uid2', 'cid']
-
-    for item in requires:
-        if not request.form[item]:
+def test(requirements, request):
+    for item in requirements:
+        if item not in request.form or not request.form[item]:
             return json.dumps({
                 'status': 'error',
                 'error': 'missing ' + item
-            })
+             })
+    return None
 
-    response = json.dumps(manager.run(*[request.form[item] for item in requires]))
+@app.route('/run', methods=['POST'])
+def run_handler():
+    requirements = ['siid1', 'siid2', 'uid1', 'uid2', 'cid']
+    missing = test(requirements, request)
+    if missing: return missing
+    
+    response = json.dumps(manager.run(*[request.form[item] for item in requirements]))
     logger.info('(%s, %s, %s) => %s' % (request.form['siid1'], request.form['siid2'], request.form['cid'], response))
+    return response
+
+@app.route('/build', methods=['POST'])
+def compile_handler():
+    requirements = ['siid', 'pid']
+    missing = test(requirements, request)
+    if missing: return missing
+    
+    response = json.dumps(manager.compile(*[request.form[item] for item in requirements]))
+    logger.info('%s => %s' % (request.form['siid'], response))
     return response
 
 @app.route('/games')

@@ -9,6 +9,10 @@ from logging.handlers import TimedRotatingFileHandler
 from Queue import Empty, Queue
 from time import sleep
 
+KILL = 'KILL'
+COMPILE = 'COMPILE'
+RUN = 'RUN'
+
 def now():
     return time.strftime('%H:%M:%S')
 
@@ -33,23 +37,29 @@ class GamesManager(threading.Thread):
         try:
             self.logger.info('[%s] === Starting game queue ===' % (now(), ))
             while self.running:
-                siid1, siid2, uid1, uid2, cid, stop = self.games_queue.get() # wait for a requested game
-                if stop:
+                siid1, siid2, uid1, uid2, cid, type = self.games_queue.get() # wait for a requested game
+
+                if type == RUN:
+                    pid = self.game_names[cid]
+
+                    self.logger.info('[%s] Starting game %s vs %s in %s' % (now(), siid1, siid2, pid))
+                    with Game(siid1, siid2, uid1, uid2, cid, pid, self.logger) as game:
+                        game.download()
+                        game.compile()
+                        game.run()
+                        game.upload()
+                        self.completed_queue.put_nowait(game.result)
+                    self.logger.info('[%s] Ended game %s vs %s in %s' % (now(), siid1, siid2, pid))
+                elif type == COMPILE:
+                    siid = siid1
+                    self.logger.info('[%s] Starting compilation of %s' % (now(), siid))
+                    compiler = Compiler(siid, pid, self.logger)
+                    compiler.download()
+                    compiler.compile()
+                    compiler.upload()
+                    self.logger.info('[%s] Ended compilation of %s' % (now(), siid))
+                else: # KILL
                     break
-
-                pid = self.game_names[cid]
-
-                self.logger.info('[%s] Starting game %s vs %s in %s' % (now(), siid1, siid2, pid))
-                with Game(siid1, siid2, uid1, uid2, cid, pid, self.logger) as game:
-                    game.download()
-                    game.compile()
-                    game.run()
-                    game.upload()
-                    self.completed_queue.put_nowait(game.result)
-                    self.logger.info('<<<<<<')
-                    self.logger.info(str(game.result))
-                    self.logger.info('>>>>>>')
-                self.logger.info('[%s] Ended game %s vs %s in %s' % (now(), siid1, siid2, pid))
                 
             self.logger.info('[%s] === Game queue stopped  ===' % (now(), ))
         except Exception as e:
@@ -72,7 +82,7 @@ class GamesManager(threading.Thread):
         pid = self.game_names[cid]
 
         try:
-            self.games_queue.put((siid1, siid2, uid1, uid2, cid, False))
+            self.games_queue.put((siid1, siid2, uid1, uid2, cid, RUN))
             self.logger.info('[%s] Enqueued game %s vs %s in %s' % (now(), siid1, siid2, pid))
             return {
                 'status': 'ok'
@@ -84,9 +94,29 @@ class GamesManager(threading.Thread):
                 'error': 'Could not enqueue the requested game'
             }
 
+    def compile(self, siid, pid):
+        if not self.is_alive() or not self.running:
+            return {
+                'status': 'error',
+                'error': 'Compilation thread not running'
+            }
+
+        try:
+            self.games_queue.put((siid, None, None, None, pid, COMPILE))
+            self.logger.info('[%s] Enqueued compilation of %s' % (now(), siid))
+            return {
+                'status': 'ok'
+            }
+        except Exception as e:
+            self.logger.info('[%s] Could not enqueue compilation of %s\n%s' % (now(), siid, str(e)))
+            return {
+                'status': 'error',
+                'error': 'Could not enqueue the requested compilation'
+            }
+
     def kill(self):
         self.running = False
-        self.games_queue.put((None, None, None, None, None, True))
+        self.games_queue.put((None, None, None, None, None, KILL))
         
     def games(self):
         completed = []
@@ -109,3 +139,6 @@ def kill():
 
 def games():
     return manager.games()
+
+def compile(siid, pid):
+    return manager.compile(siid, pid)
