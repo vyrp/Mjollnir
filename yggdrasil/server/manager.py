@@ -38,9 +38,9 @@ class GamesManager(threading.Thread):
             self.logger.info('[%s] === Starting game queue ===' % (now(), ))
             while self.running:
                 siid1, siid2, uid1, uid2, cid, type = self.games_queue.get() # wait for a requested game
-                pid = self.game_names[cid]
 
                 if type == RUN:
+                    pid = self.game_names[cid]
                     self.logger.info('[%s] Starting game %s vs %s in %s' % (now(), siid1, siid2, pid))
                     with Game(siid1, siid2, uid1, uid2, cid, pid, self.logger) as game:
                         game.download()
@@ -50,6 +50,7 @@ class GamesManager(threading.Thread):
                         self.completed_queue.put_nowait(game.result)
                     self.logger.info('[%s] Ended game %s vs %s in %s' % (now(), siid1, siid2, pid))
                 elif type == COMPILE:
+                    pid = self.game_names[cid]
                     sid = siid1
                     self.logger.info('[%s] Starting compilation of %s' % (now(), sid))
                     with Compiler(sid, pid, self.logger) as compiler:
