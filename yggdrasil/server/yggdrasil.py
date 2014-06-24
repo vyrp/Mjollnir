@@ -105,6 +105,6 @@ if __name__ == '__main__':
     os.setgid(1000)
     os.setuid(1000)
     try:
-        app.run(host='127.0.0.1', port=30403)
+        app.run(host='0.0.0.0', port=30403)
     except socket.error:
         logger.error(traceback.format_exc())
