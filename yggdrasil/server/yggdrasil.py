@@ -52,7 +52,7 @@ def compile_handler():
     missing = test(requirements, request)
     if missing: return missing
     
-    if requirements['password'] != os.environ['YGG_BUILD_PSWD']:
+    if request.form['password'] != os.environ['YGG_BUILD_PSWD']:
         return json.dumps({
             'status': 'error',
             'error': '403'

@@ -147,8 +147,8 @@ BUILD = '/sandboxes/build/'
 BUILD_ERR = BUILD + 'stderr'
 
 class Compiler():
-    def __init__(self, siid, pid, logger):
-        self.siid = siid
+    def __init__(self, sid, pid, logger):
+        self.sid = sid
         self.pid = pid
         self.logger = logger
         
@@ -165,6 +165,7 @@ class Compiler():
         return True
 
     def download(self):
+        self.siid = dbmanager.find_siid(self.sid)
         self.ext = dbmanager.download(self.siid)
 
     def compile(self):
@@ -181,13 +182,13 @@ class Compiler():
             
             try:
                 execute('make client' + lang + ' 1> /dev/null 2> ' + BUILD_ERR)
-                self.result = { 'status': 'OK' }
+                self.result = { 'status': 'Success' }
                 self.logger.info('Compilation succeded')
             except ExecutionError as e:
                 self.logger.info('Compilation failed')
                 with open(BUILD_ERR, 'r') as build_err:
                     self.result = {
-                        'status': 'failed',
+                        'status': 'Failure',
                         'error': build_err.read()
                     }
             execute('make remove 1> /dev/null 2> /dev/null')
@@ -200,15 +201,16 @@ class Compiler():
                 contents = file.read()
             
             try:
+                self.logger.info('compile python')
                 compile(contents, filename, 'exec')
-                self.result = { 'status': 'OK' }
+                self.result = { 'status': 'Success' }
                 self.logger.info('Compilation succeded')
             except SyntaxError:
                 self.result = {
-                    'status': 'failed',
+                    'status': 'Failure',
                     'error': traceback.format_exc()
                 }
                 self.logger.info('Compilation failed')
         
     def upload(self):
-        dbmanager.upload_compilation(self.siid, self.result)
+        dbmanager.upload_compilation(self.sid, self.siid, self.result)

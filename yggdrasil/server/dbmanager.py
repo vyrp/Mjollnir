@@ -47,5 +47,36 @@ def upload(match, log):
     key = matches_bucket.new_key(match['mid'])
     key.set_contents_from_filename(log)
 
-def upload_compilation(siid, result):
-    pass
+def upload_compilation(sid, siid, result):
+    submission = mongodb.submissions.find_one({ 'sid': sid })
+    
+    if submission['build_siid'] != siid:
+        return
+    
+    if result['status'] == 'Success':
+        updated_previous_submissions = submission['previous_submissions']
+        updated_previous_submissions.append({'siid': submission['siid']})
+
+        update_document = {
+            '$set': {
+                'siid': siid,
+                'previous_submissions': updated_previous_submissions,
+                'RD': max(160, submission['RD']),
+                'build_status': 'Success',
+                'build_description': '',
+                'build_siid': ''
+            }
+        }
+    else:
+        update_document = {
+            '$set': {
+                'build_status': 'Failure',
+                'build_description': result['error'][0:1024]
+            }
+        }
+
+    mongodb.submissions.update({ 'sid': sid }, update_document)
+
+def find_siid(sid):
+    submission = mongodb.submissions.find_one({ 'sid': sid })
+    return submission['build_siid']
