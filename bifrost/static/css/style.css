@@ -177,3 +177,7 @@
 .width-42 {
   width: 42px;
 }
+
+.popover {
+  width: 600px;
+}
