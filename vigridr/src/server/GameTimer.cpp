@@ -7,8 +7,8 @@
 namespace mjollnir { namespace vigridr {
 
 /**
- *  Constants to synchronize the updating time so that the new world model
- *  is available exactely when promissed.
+ *  Constants to synchronize time updating so that the new world model
+ *  is available exactly when promised.
  */
 const std::chrono::milliseconds kWorldModelUpdateMsStep1(2);
 const std::chrono::milliseconds kWorldModelUpdateMsStep2(1);
