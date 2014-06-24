@@ -32,15 +32,47 @@
         <div>
           <ul id="challenge-tabs" class="nav nav-tabs">
             <li class="active"><a href="#description" data-toggle="tab">Description</a></li>
+            <li><a href="#specs" data-toggle="tab">Technical Specs</a></li>
             <li><a href="#ranking" data-toggle="tab">Top 10</a></li>
             <li><a href="#latest-matches" data-toggle="tab">Latest Matches</a></li>
           </ul>
-          <div id="myTabContent" class="tab-content">
-            
+          <div class="tab-content">
+
             <div class="tab-pane fade active in" id="description">
               {{ markdown_to_html(challenge.description) }}
             </div>
-            
+
+            <div class="tab-pane fade" id="specs">
+
+              {{ markdown_to_html(challenge.specs) }}
+
+              <h3>Language details</h3>
+
+              <div class="tabbable tabs-left">
+                <ul id="challenge-tabs" class="nav nav-tabs">
+                  <li class="active"><a href="#specs-cs" data-toggle="tab">C&#9839;</a></li>
+                  <li><a href="#specs-cpp" data-toggle="tab">C++</a></li>
+                  <li><a href="#specs-py" data-toggle="tab">Python</a></li>
+                </ul>
+                <div class="tab-content">
+
+                  <div class="tab-pane fade active in" id="specs-cs">
+                    {{ markdown_to_html(challenge.specs_cs) }}
+                  </div>
+
+                  <div class="tab-pane fade" id="specs-cpp">
+                    {{ markdown_to_html(challenge.specs_cpp) }}
+                  </div>
+
+                  <div class="tab-pane fade" id="specs-py">
+                    {{ markdown_to_html(challenge.specs_py) }}
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+
             <div class="tab-pane fade" id="ranking">
               <table class="table table-submissions">
                 <thead>
@@ -68,16 +100,16 @@
             <div class="tab-pane fade" id="latest-matches">
               {% if matches %}
               <dl>
-              {% for match in matches %}
+                {% for match in matches %}
                 <dd>
                   <a href="{{ url_for('.match', mid = match.mid ) }}">{{ ' vs '.join(match.usernames) }}</a>
                   ({{ match.time_since }})
                 </dd>
-              {% endfor %}
+                {% endfor %}
               </dl>
               {% else %}
-                <h3> Sorry ;( </h3>
-                <h4> We can't find any recent matches at the momment. </h4>
+              <h3> Sorry ;( </h3>
+              <h4> We can't find any recent matches at the momment. </h4>
               {% endif %}
             </div>
 

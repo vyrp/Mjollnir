@@ -49,8 +49,28 @@ input {
             </div>
             <br>
             <div>
-              <b>{{ form.pagedown.label }}</b>
-                {{ form.pagedown(rows = 10, class="width-500 color-white") }}
+              <b>{{ form.description.label }}</b>
+                {{ form.description(rows = 10, class="width-500 color-white") }}
+            </div>
+            <br>
+            <div>
+              <b>{{ form.specs.label }}</b>
+              {{ form.specs(rows = 10, class="width-500 color-white") }}
+            </div>
+            <br>
+            <div>
+              <b>{{ form.specs_cs.label }}</b>
+              {{ form.specs_cs(rows = 10, class="width-500 color-white") }}
+            </div>
+            <br>
+            <div>
+              <b>{{ form.specs_cpp.label }}</b>
+              {{ form.specs_cpp(rows = 10, class="width-500 color-white") }}
+            </div>
+            <br>
+            <div>
+              <b>{{ form.specs_py.label }}</b>
+              {{ form.specs_py(rows = 10, class="width-500 color-white") }}
             </div>
 
             <br/>

@@ -58,6 +58,7 @@ from wtforms.validators import DataRequired
 
 
 ##### Classes
+## TODO: extract to another file
 class ChallengeDescriptionForm(Form):
     """
     WTForm to submit a challenge. WTF was chosen here so we could use Flask-PageDown.
@@ -66,7 +67,11 @@ class ChallengeDescriptionForm(Form):
     visualizer = TextField('Visualizer file name', validators=[DataRequired()])
     thumbnail = TextField('Thumbnail URL', validators=[DataRequired()])
     dev_only = BooleanField('Dev only')
-    pagedown = PageDownField('Challenge description', validators=[DataRequired()])
+    description = PageDownField('Challenge description', validators=[DataRequired()])
+    specs = PageDownField('General Technical Specs', validators=[DataRequired()])
+    specs_cpp = PageDownField('C++ Technical Specs', validators=[DataRequired()])
+    specs_cs = PageDownField('C# Technical Specs', validators=[DataRequired()])
+    specs_py = PageDownField('Python Technical Specs', validators=[DataRequired()])
 
 
 
@@ -82,6 +87,7 @@ class NewDescriptionForm(Form):
 
 
 ##### Things to be exported to jinja
+## TODO: extract to a configuration file?
 def current_user_latest_matches():
     return latest_matches(uid = user.custom_data['uid'])
 
@@ -429,7 +435,11 @@ def editchallenge():
             form.visualizer.data = challenge.get('visualizer')
             form.thumbnail.data = challenge.get('thumbnail')
             form.dev_only.data = challenge.get('dev_only')
-            form.pagedown.data = challenge.get('description')
+            form.description.data = challenge.get('description')
+            form.specs.data = challenge.get('specs')
+            form.specs_cpp.data = challenge.get('specs_cpp')
+            form.specs_cs.data = challenge.get('specs_cs')
+            form.specs_py.data = challenge.get('specs_py')
         else:
             form.dev_only.data = True
         
@@ -441,7 +451,11 @@ def editchallenge():
                      'name': form.name.data,
                      'visualizer': form.visualizer.data,
                      'thumbnail': form.thumbnail.data,
-                     'description': form.pagedown.data,
+                     'description': form.description.data,
+                     'specs': form.specs.data,
+                     'specs_cpp': form.specs_cpp.data,
+                     'specs_cs': form.specs_cs.data,
+                     'specs_py': form.specs_py.data,
                      'dev_only': form.dev_only.data }
 
         if challenge:
