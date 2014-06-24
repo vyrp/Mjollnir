@@ -18,7 +18,7 @@
             <th>Rank</th>
             <th>Percentile</th>
             <th>Rating</th>
-            <th>Deviation</th>
+            <th>Build Status</th>
           </tr>
         </thead>
         <tbody>
@@ -27,8 +27,8 @@
             <td><a href="{{ url_for('.challenge_by_name', challenge_name=solution.name) }}">{{ solution.name }}</a></td>
             <td>{{ solution.rank }}</td>
             <td>{{ solution.percentile }}%</td>
-            <td>{{ solution.rating }}</td>
-            <td>{{ solution.RD }}</td>
+            <td>{{ solution.rating }} &plusmn; {{ solution.RD }}</td>
+            <td><a href="#" class="build-status" data-trigger="hover" data-content="{{ solution.build_description }}">{{ solution.build_status }}</a></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -40,4 +40,15 @@
       </div>
     </div>
   </div>
+{% endblock %}
+
+
+{% block script %}
+{{ super() }}
+
+<script type="text/javascript">
+  $(function () {
+    $(".build-status").popover();
+  });
+</script>
 {% endblock %}

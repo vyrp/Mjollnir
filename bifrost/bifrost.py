@@ -7,6 +7,8 @@
 """
 
 import boto
+import httplib
+import urllib
 import datetime
 import markdown
 import os
@@ -140,6 +142,8 @@ app.config['STORMPATH_API_KEY_SECRET'] = environ.get('STORMPATH_API_KEY_SECRET')
 app.config['STORMPATH_APPLICATION'] = environ.get('STORMPATH_APPLICATION')
 app.config['MONGOLAB_URI'] = environ.get('MONGOLAB_URI')
 app.config['MAX_CONTENT_LENGTH'] = 512 * 1024 # 512kB
+app.config['YGG_BUILD_URL'] = environ.get('YGG_BUILD_URL')
+app.config['YGG_PASSWORD'] = environ.get('YGG_PASSWORD')
 
 # Export handy functions to jinja
 def markdown_to_html(content):
@@ -383,9 +387,18 @@ def user_page(username):
         total_submissions = mongodb.submissions.find({ 'cid': submission['cid'] }).count()
 
         submission['name'] = challenge['name']
-        submission['RD'] = round(submission['RD'], 2)
+        submission['RD'] = int(round(submission['RD']))
         submission['rank'] = mongodb.submissions.find({ 'cid': submission['cid'], 'rating': { '$gt': submission['rating'] } }).count() + 1
         submission['percentile'] = round(100*float(total_submissions - submission['rank'] + 1)/total_submissions, 2)
+        
+        if not submission.get('build_description', ""):
+            if submission['build_status'] == "Success":
+                submission['build_description'] = "Your latest submission to this challenge was built successfully and is already in the queue to be executed."
+            elif submission['build_status'] == "Waiting":
+                submission['build_description'] = "Our servers are currently busy, but your submission will be built soon."
+            else:
+                submission['build_description'] = "Sorry, something went wrong. We couldn't build your code and have no error message in our logs."
+
         challenge_solutions.append(submission)
 
     return render_template('dashboard.html', user_in_db = user_in_db, challenge_solutions = challenge_solutions, custom_title = username)
@@ -495,7 +508,7 @@ def challenge_by_name(challenge_name):
 
         submission['sequence'] = i
         submission['username'] = user_from_submission['username']
-        submission['RD'] = round(submission['RD'], 2)
+        submission['RD'] = int(round(submission['RD']))
         challenge_solutions.append(submission)
 
     matches = latest_matches( cid = challenge['cid'] )
@@ -576,22 +589,34 @@ def submitsolution(challenge_name):
     existing_solution = mongodb.submissions.find_one(query_existing_solution)
 
     if existing_solution:
-        # For an existing solution, we update the current siid and add the last one to the history
-        # Additionally, we increase the RD value since a new submission might change the rating
-
-        updated_previous_submissions = existing_solution['previous_submissions']
-        updated_previous_submissions.append({'siid': existing_solution['siid']})
-
-        update_document = { '$set': { 'siid': siid,
-                                      'previous_submissions': updated_previous_submissions,
-                                      'RD': max(160, existing_solution['RD']) } }
+        # For an existing solution, we have to set the 'build_' attributes and notify
+        #   the compiler service. The service is responsible for updating the database entries
+        #   when it finishes compiling.
+        
+        update_document = { '$set': { 'build_siid': siid,
+                                      'build_status': "Waiting",
+                                      'build_description': "" } }
         
         mongodb.submissions.update(query_existing_solution, update_document)
+
+
+        data = urllib.urlencode({'sid': existing_solution['sid'], 'cid': existing_solution['cid'], 'password': app.config['YGG_PASSWORD']})
+        headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
+        conn = httplib.HTTPConnection(app.config['YGG_BUILD_URL'])
+        conn.request("POST", "/build", data, headers)
+        response = conn.getresponse()
+        conn.close()
+
+        if response.status >= 300:
+            raise Exception("Invalid Yggdrasil status code: " + str(response.status) + "\n" + response.read())
 
     else:
         # For new solutions, we just add the document blueprint
 
-        document = { 'siid': siid,
+        document = { 'siid': '',
+                     'build_siid': siid,
+                     'build_status': "Waiting",
+                     'build_description': "",
                      'cid': challenge['cid'],
                      'uid': user.custom_data['uid'],
                      'sid': str(uuid4()),

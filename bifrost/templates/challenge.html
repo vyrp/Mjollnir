@@ -80,7 +80,6 @@
                     <th>Position</th>
                     <th>User</th>
                     <th>Rating</th>
-                    <th>Deviation</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -88,8 +87,7 @@
                   <tr>
                     <td>{{ solution.sequence }}</td>
                     <td><a href="{{ url_for('.user_page', username = solution.username) }}">{{ solution.username }}</a></td>
-                    <td>{{ solution.rating }}</td>
-                    <td>{{ solution.RD }}</td>
+                    <td>{{ solution.rating }} &plusmn; {{ solution.RD }}</td>
                   </tr>
                   {% endfor %}
                 </tbody>
