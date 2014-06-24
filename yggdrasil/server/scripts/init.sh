@@ -4,6 +4,7 @@ sudo rm -rf /sandboxes/
 sudo mkdir /sandboxes/
 sudo chown ubuntu:ubuntu /sandboxes/
 mkdir /sandboxes/downloads/
+mkdir /sandboxes/build/
 
 echo "=== Building all games ==="
 cd /Mjollnir/vigridr/src/

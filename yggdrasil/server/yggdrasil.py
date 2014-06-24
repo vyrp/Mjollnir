@@ -5,8 +5,10 @@ import logging
 import manager
 import os
 import signal
+import socket
 import sys
 import time
+import traceback
 from flask import Flask, request
 from logging.handlers import TimedRotatingFileHandler
 
@@ -30,6 +32,12 @@ def test(requirements, request):
 
 @app.route('/run', methods=['POST'])
 def run_handler():
+    if request.remote_addr != '127.0.0.1':
+        return json.dumps({
+            'status': 'error',
+            'error': '403'
+        }), 403
+        
     requirements = ['siid1', 'siid2', 'uid1', 'uid2', 'cid']
     missing = test(requirements, request)
     if missing: return missing
@@ -40,16 +48,28 @@ def run_handler():
 
 @app.route('/build', methods=['POST'])
 def compile_handler():
-    requirements = ['siid', 'pid']
+    requirements = ['sid', 'cid', 'password']
     missing = test(requirements, request)
     if missing: return missing
     
-    response = json.dumps(manager.compile(*[request.form[item] for item in requirements]))
-    logger.info('%s => %s' % (request.form['siid'], response))
+    if requirements['password'] != os.environ['YGG_BUILD_PSWD']:
+        return json.dumps({
+            'status': 'error',
+            'error': '403'
+        }), 403
+        
+    response = json.dumps(manager.compile(request.form['sid'], request.form['cid']))
+    logger.info('%s => %s' % (request.form['sid'], response))
     return response
 
 @app.route('/games')
 def games_handler():
+    if request.remote_addr != '127.0.0.1':
+        return json.dumps({
+            'status': 'error',
+            'error': '403'
+        }), 403
+        
     return json.dumps(manager.games())
 
 @app.errorhandler(404)
@@ -84,4 +104,7 @@ if __name__ == '__main__':
 
     os.setgid(1000)
     os.setuid(1000)
-    app.run(host='127.0.0.1', port=30403)
+    try:
+        app.run(host='127.0.0.1', port=30403)
+    except socket.error:
+        logger.error(traceback.format_exc())

@@ -1,5 +1,4 @@
-
-__all__ = ['Game']
+__all__ = ['Game', 'Compiler']
 
 #import dbmock as dbmanager
 import dbmanager
@@ -144,12 +143,27 @@ class Game():
     def upload(self):
         dbmanager.upload(dict(self.result), self.game + '/server/logs')
 
+BUILD = '/sandboxes/build/'
+BUILD_ERR = BUILD + 'stderr'
+
 class Compiler():
     def __init__(self, siid, pid, logger):
         self.siid = siid
         self.pid = pid
         self.logger = logger
         
+    def __enter__(self):
+        return self
+        
+    def __exit__(self, t, v, tr):
+        shutil.rmtree(BUILD, True)
+        os.mkdir(BUILD)
+        if t:
+            self.logger.error('From Compiler.__exit__:')
+            for line in traceback.format_exception(t, v, tr):
+                self.logger.error(line[:-1])
+        return True
+
     def download(self):
         self.ext = dbmanager.download(self.siid)
 
@@ -160,15 +174,41 @@ class Compiler():
         
         os.chdir('/Mjollnir/vigridr/')
         lang = 'csharp' if self.ext == 'cs' else self.ext
-        shutil.move('/sandboxes/downloads/' + siid, 'src/client/ClientLogic.' + self.ext)
-        self.logger.info('make client' + lang)
-        try:
-            execute('make client' + lang + ' 1> /dev/null 2> /dev/null')
-            self.result = 'OK'
-        except ExecutionError as e:
-            self.logger.info('Compilation failed')
-            self.result = 'Compilation failed'
-        execute('make remove 1> /dev/null 2> /dev/null')
+        
+        if self.ext == 'cs' or self.ext == 'cpp':
+            shutil.move('/sandboxes/downloads/' + self.siid, 'src/client/ClientLogic.' + self.ext)
+            self.logger.info('make client' + lang)
+            
+            try:
+                execute('make client' + lang + ' 1> /dev/null 2> ' + BUILD_ERR)
+                self.result = { 'status': 'OK' }
+                self.logger.info('Compilation succeded')
+            except ExecutionError as e:
+                self.logger.info('Compilation failed')
+                with open(BUILD_ERR, 'r') as build_err:
+                    self.result = {
+                        'status': 'failed',
+                        'error': build_err.read()
+                    }
+            execute('make remove 1> /dev/null 2> /dev/null')
+            
+        elif self.ext == 'py':
+            filename = BUILD + 'ClientLogic.' + self.ext
+            shutil.move('/sandboxes/downloads/' + self.siid, filename)
+            contents = ''
+            with open(filename, 'r') as file:
+                contents = file.read()
+            
+            try:
+                compile(contents, filename, 'exec')
+                self.result = { 'status': 'OK' }
+                self.logger.info('Compilation succeded')
+            except SyntaxError:
+                self.result = {
+                    'status': 'failed',
+                    'error': traceback.format_exc()
+                }
+                self.logger.info('Compilation failed')
         
     def upload(self):
-        dbmanager.upload_compilation(self.result)
+        dbmanager.upload_compilation(self.siid, self.result)

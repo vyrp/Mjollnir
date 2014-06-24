@@ -1,10 +1,10 @@
-__all__ = ['run', 'kill', 'games']
+__all__ = ['run', 'kill', 'games', 'compile']
 
 import json
 import logging
 import threading
 import time
-from game import Game
+from game import Compiler, Game
 from logging.handlers import TimedRotatingFileHandler
 from Queue import Empty, Queue
 from time import sleep
@@ -38,10 +38,9 @@ class GamesManager(threading.Thread):
             self.logger.info('[%s] === Starting game queue ===' % (now(), ))
             while self.running:
                 siid1, siid2, uid1, uid2, cid, type = self.games_queue.get() # wait for a requested game
+                pid = self.game_names[cid]
 
                 if type == RUN:
-                    pid = self.game_names[cid]
-
                     self.logger.info('[%s] Starting game %s vs %s in %s' % (now(), siid1, siid2, pid))
                     with Game(siid1, siid2, uid1, uid2, cid, pid, self.logger) as game:
                         game.download()
@@ -51,13 +50,13 @@ class GamesManager(threading.Thread):
                         self.completed_queue.put_nowait(game.result)
                     self.logger.info('[%s] Ended game %s vs %s in %s' % (now(), siid1, siid2, pid))
                 elif type == COMPILE:
-                    siid = siid1
-                    self.logger.info('[%s] Starting compilation of %s' % (now(), siid))
-                    compiler = Compiler(siid, pid, self.logger)
-                    compiler.download()
-                    compiler.compile()
-                    compiler.upload()
-                    self.logger.info('[%s] Ended compilation of %s' % (now(), siid))
+                    sid = siid1
+                    self.logger.info('[%s] Starting compilation of %s' % (now(), sid))
+                    with Compiler(sid, pid, self.logger) as compiler:
+                        compiler.download()
+                        compiler.compile()
+                        compiler.upload()
+                    self.logger.info('[%s] Ended compilation of %s' % (now(), sid))
                 else: # KILL
                     break
                 
@@ -94,21 +93,28 @@ class GamesManager(threading.Thread):
                 'error': 'Could not enqueue the requested game'
             }
 
-    def compile(self, siid, pid):
+    def compile(self, sid, cid):
         if not self.is_alive() or not self.running:
             return {
                 'status': 'error',
                 'error': 'Compilation thread not running'
             }
 
+        if cid not in self.game_names:
+            self.logger.warn("[%s] cid %s doesn't exist" % (now(), cid))
+            return {
+                'status': 'error',
+                'error': "cid %s doesn't exist" % (cid,)
+            }
+
         try:
-            self.games_queue.put((siid, None, None, None, pid, COMPILE))
-            self.logger.info('[%s] Enqueued compilation of %s' % (now(), siid))
+            self.games_queue.put((sid, None, None, None, cid, COMPILE))
+            self.logger.info('[%s] Enqueued compilation of %s' % (now(), sid))
             return {
                 'status': 'ok'
             }
         except Exception as e:
-            self.logger.info('[%s] Could not enqueue compilation of %s\n%s' % (now(), siid, str(e)))
+            self.logger.info('[%s] Could not enqueue compilation of %s\n%s' % (now(), sid, str(e)))
             return {
                 'status': 'error',
                 'error': 'Could not enqueue the requested compilation'
@@ -140,5 +146,5 @@ def kill():
 def games():
     return manager.games()
 
-def compile(siid, pid):
-    return manager.compile(siid, pid)
+def compile(sid, cid):
+    return manager.compile(sid, cid)

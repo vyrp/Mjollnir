@@ -46,3 +46,6 @@ def upload(match, log):
     mongodb.matches.insert(match)
     key = matches_bucket.new_key(match['mid'])
     key.set_contents_from_filename(log)
+
+def upload_compilation(siid, result):
+    pass
