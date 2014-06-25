@@ -76,7 +76,8 @@ def process_matches():
         for user in match['users']:
             params = {'siid': user['siid']}
             sub = mongodb.submissions.find_one(params)
-            match_submissions.append(sub)
+            if sub:
+                match_submissions.append(sub)
 
         players_before_match = [player_before_match(sub, match) for sub in match_submissions]
         
@@ -148,6 +149,18 @@ def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=m
 
     for challenge in challenges.find():
         subs = list(submissions.find({'cid': challenge['cid']}))
+        
+        for sub in subs:
+            if not sub['siid']:
+                values = { 'sid': sub['sid'],
+                           'cid': sub['cid'],
+                           'password': environ.get('YGG_BUILD_PSWD') }
+        
+            	encoded = urllib.urlencode(values)                
+                urllib2.urlopen('http://127.0.0.1:30403/build', data=encoded)
+        
+        subs = filter(lambda sub: sub['siid'], subs)
+        
         ratings = [sub['rating'] for sub in subs]
 
         subs.sort(key = submission_priority, reverse = True)

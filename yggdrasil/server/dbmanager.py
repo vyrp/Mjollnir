@@ -55,7 +55,8 @@ def upload_compilation(sid, siid, result):
     
     if result['status'] == 'Success':
         updated_previous_submissions = submission['previous_submissions']
-        updated_previous_submissions.append({'siid': submission['siid']})
+        if submission['siid']:
+            updated_previous_submissions.append({'siid': submission['siid']})
 
         update_document = {
             '$set': {

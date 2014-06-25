@@ -29,6 +29,9 @@ class CommandThread(threading.Thread):
 class ExecutionError(Exception):
     pass
 
+class SiidNullError(Exception):
+    pass
+
 def execute(command):
     result = os.system(command)
     if result != 0:
@@ -166,6 +169,8 @@ class Compiler():
 
     def download(self):
         self.siid = dbmanager.find_siid(self.sid)
+        if not self.siid:
+            raise SiidNullError('sid = ' + self.sid)
         self.ext = dbmanager.download(self.siid)
 
     def compile(self):

@@ -40,7 +40,9 @@ def run_handler():
         
     requirements = ['siid1', 'siid2', 'uid1', 'uid2', 'cid']
     missing = test(requirements, request)
-    if missing: return missing, 400
+    if missing:
+        logger.info('MISSING: ' + str(request.form))
+        return missing, 400
     
     response = json.dumps(manager.run(*[request.form[item] for item in requirements]))
     logger.info('(%s, %s, %s) => %s' % (request.form['siid1'], request.form['siid2'], request.form['cid'], response))
