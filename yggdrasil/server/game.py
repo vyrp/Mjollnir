@@ -119,6 +119,7 @@ class Game():
         server.join()
         
         if client1.result != 0 or client2.result != 0 or server.result != 0:
+            dbmanager.upload_runtime_error(self.siid1 if client1.result != 0 else self.siid2)
             raise ExecutionError(
                 'Failed to execute: client1(%d) client2(%d) server(%d)' %
                 (client1.result, client2.result, server.result)

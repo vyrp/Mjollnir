@@ -1,7 +1,6 @@
-__all__ = ['download', 'upload']
-
 import boto
 import os
+from bson.errors import InvalidStringData
 from datetime import datetime
 from pymongo import MongoClient
 from uuid import uuid4
@@ -75,9 +74,26 @@ def upload_compilation(sid, siid, result):
                 'build_description': result['error'][0:1024]
             }
         }
-
-    mongodb.submissions.update({ 'sid': sid }, update_document)
+        try:
+            mongodb.submissions.update({ 'sid': sid }, update_document)
+        except InvalidStringData:
+            update_document = {
+                '$set': {
+                    'build_status': 'Failure',
+                    'build_description': 'Unkown error'
+                }
+            }
+            mongodb.submissions.update({ 'sid': sid }, update_document)
 
 def find_siid(sid):
     submission = mongodb.submissions.find_one({ 'sid': sid })
     return submission['build_siid']
+
+def upload_runtime_error(siid):
+    update_document = {
+        '$set': {
+            'runtime_status': 'Failure'
+        }
+    }
+    mongodb.submissions.update({ 'siid': siid }, update_document)
+    

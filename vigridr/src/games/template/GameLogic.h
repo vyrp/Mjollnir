@@ -58,11 +58,11 @@ class GameLogic {
   int32_t player1_;
   int32_t player2_;
   int32_t winner_;
-  static constexpr int32_t kNoWinner = -1;
+  static const int32_t kNoWinner = -1;
   bool hasFinished_;
 
 };
 
-}}  // namespaces 
+}}  // namespaces
 
 #endif  // VIGRIDR_SERVER_GAME_LOGIC_H

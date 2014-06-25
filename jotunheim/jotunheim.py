@@ -159,7 +159,10 @@ def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=m
             	encoded = urllib.urlencode(values)                
                 urllib2.urlopen('http://127.0.0.1:30403/build', data=encoded)
         
-        subs = filter(lambda sub: sub['siid'], subs)
+        subs = filter(
+            lambda sub: sub['siid'] and ('runtime_status' not in sub or sub['runtime_status'] != 'Failure'),
+            subs
+        )
         
         ratings = [sub['rating'] for sub in subs]
 
