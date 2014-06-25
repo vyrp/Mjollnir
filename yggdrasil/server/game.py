@@ -1,6 +1,3 @@
-__all__ = ['Game', 'Compiler']
-
-#import dbmock as dbmanager
 import dbmanager
 import os
 import shutil

@@ -83,7 +83,8 @@ def upload_compilation(sid, siid, result):
                     'build_description': 'Unkown error'
                 }
             }
-            mongodb.submissions.update({ 'sid': sid }, update_document)
+
+    mongodb.submissions.update({ 'sid': sid }, update_document)
 
 def find_siid(sid):
     submission = mongodb.submissions.find_one({ 'sid': sid })

@@ -151,7 +151,7 @@ def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=m
         subs = list(submissions.find({'cid': challenge['cid']}))
         
         for sub in subs:
-            if not sub['siid']:
+            if 'build_status' in sub and sub['build_status'] == 'Waiting':
                 values = { 'sid': sub['sid'],
                            'cid': sub['cid'],
                            'password': environ.get('YGG_BUILD_PSWD') }
