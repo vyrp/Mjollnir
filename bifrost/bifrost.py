@@ -208,7 +208,7 @@ def index():
         The HTTP parameter p specifies a specific page (skips 3*p news).
     """
     news_per_page = 3
-    p = request.args.get('p', 0)
+    p = int(request.args.get('p', 0))
 
     news = list( mongodb.news.find().sort([('datetime', -1)]).skip(news_per_page*p).limit(news_per_page) )
 
