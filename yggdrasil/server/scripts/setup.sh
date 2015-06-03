@@ -1,8 +1,9 @@
 #!/bin/bash -e
+
 echo "=== Creating sandboxes folder ==="
 sudo rm -rf /sandboxes/
 sudo mkdir /sandboxes/
-sudo chown ubuntu:ubuntu /sandboxes/
+sudo chown $(id -un):$(id -gn) /sandboxes/
 mkdir /sandboxes/downloads/
 mkdir /sandboxes/build/
 
