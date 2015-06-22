@@ -63,6 +63,6 @@ class GameLogic {
 
 };
 
-}}  // namespaces 
+}}  // namespaces
 
 #endif  // VIGRIDR_SERVER_GAME_LOGIC_H
