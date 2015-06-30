@@ -12,6 +12,7 @@ import urllib
 import datetime
 import markdown
 import os
+import shutil
 import traceback
 from os import environ
 from uuid import uuid4
@@ -133,6 +134,9 @@ ACCEPTED_LANGUAGES = {'cs40': 'C# 4.0 (mono)',
 
 
 ##### Initialization
+DEBUG = str(environ.get('MJOLLNIR_DEBUG')).lower()
+DEBUG = (DEBUG == '1' or DEBUG == 'true')
+
 app = Flask(__name__)
 
 # Set environment variables
@@ -158,6 +162,7 @@ app.jinja_env.globals.update(current_user_latest_matches = current_user_latest_m
 app.jinja_env.globals.update(ACCEPTED_LANGUAGES = ACCEPTED_LANGUAGES)
 app.jinja_env.globals.update(enumerate = enumerate)
 app.jinja_env.globals.update(timestamp_as_str = timestamp_as_str)
+app.jinja_env.globals.update(MJOLLNIR_DEBUG = DEBUG)
 
 # Stormpath
 stormpath_manager = StormpathManager(app)
@@ -168,7 +173,31 @@ mongo_client = MongoClient(app.config['MONGOLAB_URI'])
 mongodb = mongo_client['mjollnir-db']
 
 # Amazon S3
-s3 = boto.connect_s3()
+if DEBUG:
+    S3 = '/sandboxes/s3/'
+    def upload_solution(siid, language, file):
+        with open(S3 + 'solutions/' + siid + '.' + language, 'w') as f:
+            f.write(file.read())
+
+    @app.route('/mjollnir-matches/<mid>', methods=['GET'])
+    def s3_mjollnir_matches(mid):
+        filename = S3 + 'matches/' + mid
+
+        if not os.path.isfile(filename):
+            abort(404)
+
+        file_content = ''
+        with open(filename, 'r') as f:
+            file_content = f.read()
+        return file_content
+else:
+    s3 = boto.connect_s3()
+    solutions_bucket = s3.get_bucket('mjollnir-solutions')
+
+    def upload_solution(siid, language, file):
+        key = solutions_bucket.new_key(siid)
+        key.set_metadata('language', language)
+        key.set_contents_from_file(file, headers=None, replace=True, cb=None, num_cb=10, policy=None, md5=None)
 
 # Pagedown
 pagedown = PageDown(app)
@@ -578,11 +607,7 @@ def submitsolution(challenge_name):
     siid = str(uuid4())
 
     # Upload the source file to the 'mjollnir-solutions' S3 bucket using the siid as the key
-    filename = secure_filename(file.filename)
-    solutions_bucket = s3.get_bucket('mjollnir-solutions')
-    key = solutions_bucket.new_key(siid)
-    key.set_metadata('language', language)
-    key.set_contents_from_file(file, headers=None, replace=True, cb=None, num_cb=10, policy=None, md5=None) 
+    upload_solution(siid, language, file)
 
     # Update/Create a database entry for this submission
     query_existing_solution = { 'uid': user.custom_data['uid'], 'cid': challenge['cid'] }

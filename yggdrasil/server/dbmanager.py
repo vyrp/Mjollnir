@@ -1,17 +1,15 @@
-import boto
-import os
 from bson.errors import InvalidStringData
 from datetime import datetime
+from os import environ
 from pymongo import MongoClient
 from uuid import uuid4
 
+DEBUG = str(environ.get('MJOLLNIR_DEBUG')).lower()
+DEBUG = (DEBUG == '1' or DEBUG == 'true')
+
 DOWNLOADS = '/sandboxes/downloads/'
 
-s3 = boto.connect_s3()
-solutions_bucket = s3.get_bucket('mjollnir-solutions')
-matches_bucket = s3.get_bucket('mjollnir-matches')
-
-mongo_client = MongoClient(os.environ['MONGOLAB_URI'])
+mongo_client = MongoClient(environ['MONGOLAB_URI'])
 mongodb = mongo_client['mjollnir-db']
 
 extensions = {
@@ -26,25 +24,56 @@ class SolutionNotFoundError(Exception):
 class SolutionWithoutLanguageError(Exception):
     pass
 
-def download(siid):
-    key = solutions_bucket.get_key(siid)
-    if not key:
-        raise SolutionNotFoundError('siid = ' + siid)
+class SiidWithMultipleLanguages(Exception):
+    pass
 
-    language = key.get_metadata('language')
-    if not language:
-        raise SolutionWithoutLanguageError('siid = ' + siid)
-    
-    ext = extensions[language]
-    key.get_contents_to_filename(DOWNLOADS + siid)
-    
-    return ext
+if DEBUG:
+    import glob
+    import shutil
 
-def upload(match, log):
-    match['datetime'] = datetime.fromtimestamp(match['datetime'])
-    mongodb.matches.insert(match)
-    key = matches_bucket.new_key(match['mid'])
-    key.set_contents_from_filename(log)
+    S3 = '/sandboxes/s3/'
+
+    def download(siid):
+        files = glob.glob(S3 + 'solutions/' + siid + '.*')
+        l = len(files)
+        if l == 0:
+            raise SolutionNotFoundError('siid = ' + siid)
+        elif l > 1:
+            raise SiidWithMultipleLanguages('siid = ' + siid + ', ' + str(l) + ' languages')
+
+        shutil.copy(files[0], DOWNLOADS + siid)
+        return extensions[files[0].split('.')[-1]]
+
+    def upload(match, log):
+        match['datetime'] = datetime.fromtimestamp(match['datetime'])
+        mongodb.matches.insert(match)
+        with open(S3 + 'matches/' + match['mid'], 'w') as f:
+            f.write(log)
+else:
+    import boto
+    s3 = boto.connect_s3()
+    solutions_bucket = s3.get_bucket('mjollnir-solutions')
+    matches_bucket = s3.get_bucket('mjollnir-matches')
+
+    def download(siid):
+        key = solutions_bucket.get_key(siid)
+        if not key:
+            raise SolutionNotFoundError('siid = ' + siid)
+
+        language = key.get_metadata('language')
+        if not language:
+            raise SolutionWithoutLanguageError('siid = ' + siid)
+
+        ext = extensions[language]
+        key.get_contents_to_filename(DOWNLOADS + siid)
+
+        return ext
+
+    def upload(match, log):
+        match['datetime'] = datetime.fromtimestamp(match['datetime'])
+        mongodb.matches.insert(match)
+        key = matches_bucket.new_key(match['mid'])
+        key.set_contents_from_filename(log)
 
 def upload_compilation(sid, siid, result):
     submission = mongodb.submissions.find_one({ 'sid': sid })

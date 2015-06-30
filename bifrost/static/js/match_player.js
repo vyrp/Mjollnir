@@ -49,8 +49,7 @@ loading_circle_bar2.animate(animRotation);
 //
 // After the loading bar is running, we download the match info and set a completion callback.
 //
-
-$.get("https://s3-us-west-2.amazonaws.com/mjollnir-matches/" + bifrost_mid, function (data) {
+$.get(MJOLLNIR_MATCHES + bifrost_mid, function (data) {
     // Setup replay data
     challenge_player.match_data = JSON.parse(data);
 
