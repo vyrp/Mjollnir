@@ -24,7 +24,7 @@ const size_t kMaxPlayers = 2;
 class PlayerTurnData {
  public:
   void init(int32_t id);
-  void setCommand(Command command, time_point time);  
+  void setCommand(Command command, time_point time);
   void clearCommand();
   void setIsTurn(bool isTurn);
 

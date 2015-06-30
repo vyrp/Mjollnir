@@ -89,7 +89,7 @@ void GameManager::nextTurn() {
   std::lock(lock0, lock1, lock2);
   if (config::gameType == GameType::TURN) {
     for (size_t i = 0; i < kMaxPlayers; ++i) {
-        playerTurnData_[i].setIsTurn(!playerTurnData_[i].isTurn());   
+        playerTurnData_[i].setIsTurn(!playerTurnData_[i].isTurn());
     }
   }
   gameInfo_.cycle++;
@@ -155,7 +155,7 @@ void GameManager::updaterTask() {
 
     // only execute movements if it is the player's turn
     int32_t countWrongPlayers = 0;  // how many players sent invalid command
-    int32_t correctPlayer = 0;  // if one is wrong this variable  
+    int32_t correctPlayer = 0;  // if one is wrong this variable
     for (auto& playerMove : movements) {
       if (!playerMove.isTurn()) {
         correctPlayer = playerMove.getId();  // if it is not my turn i'm valid
@@ -218,7 +218,7 @@ void GameManager::getGameInfo(GameInfo& gameInfo, int32_t playerId) {
   }
   LOG("%d %d",
       gameInfo.updateTimeLimitMs, gameInfo.nextWorldModelTimeEstimateMs);
-}  
+}
 
 void GameManager::getGameInit(GameInit& gameInit, int32_t playerId) {
   getGameInfo(gameInit.gameInfo, playerId);

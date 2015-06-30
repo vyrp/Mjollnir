@@ -70,7 +70,7 @@ public class CSharpClient
             TProtocol protocol = new TBinaryProtocol(transport);
             Game.Client client = new Game.Client(protocol);
             transport.Open();
-            playGame(client);         
+            playGame(client);
             transport.Close();
         }
         catch (TApplicationException x)

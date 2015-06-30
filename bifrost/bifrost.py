@@ -117,7 +117,7 @@ def latest_matches(uid = None, cid = None, limit = 8):
         match['opponents'] = [ username for username in match['usernames'] if username != username_for_given_uid ]
 
         time_delta = datetime.datetime.utcnow() - match['datetime']
-        match['time_since'] = time_since_from_seconds( time_delta.total_seconds() )      
+        match['time_since'] = time_since_from_seconds( time_delta.total_seconds() )
 
         latest.append(match)
 
@@ -222,7 +222,7 @@ def page_not_found(error):
 def exception_handler(error):
     """
     Handler for HTTP 500 on unexpected exceptions.
-    """   
+    """
     return render_template('error.html', description = '500: Internal Server Error', error = error), 500
 
 
@@ -675,7 +675,7 @@ def match(mid):
     users = list( mongodb.users.find({ 'uid': { '$in': [ user['uid'] for user in match['users'] ] } }) )
 
     time_delta = datetime.datetime.utcnow() - match['datetime']
-    match['time_since'] = time_since_from_seconds( time_delta.total_seconds() )      
+    match['time_since'] = time_since_from_seconds( time_delta.total_seconds() )
     match['challenge_name'] = challenge['name']
     match['cid'] = challenge['cid']
     match['visualizer'] = challenge['visualizer']

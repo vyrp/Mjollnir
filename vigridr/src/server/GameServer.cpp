@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);
 
   auto gameManager = std::make_shared<GameManager>(FLAGS_port1, FLAGS_port2);
-  auto serviceInit = [&](int32_t port) {  
+  auto serviceInit = [&](int32_t port) {
     boost::shared_ptr<GameService> handler(new GameService(gameManager, port));
 
     boost::shared_ptr<TProcessor> processor(new GameProcessor(handler));
@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
     });
     LOG("Starting server...");
     server.serve();
-    LOG("Done");  
+    LOG("Done");
   };
   std::thread player1Service(serviceInit, FLAGS_port1);
   std::thread player2Service(serviceInit, FLAGS_port2);

@@ -78,4 +78,4 @@ class GlickoPlayer:
         new_RD = RD_after_match(self, results)
 
         self.rating = int(self.rating + rating_delta + 0.5)
-        self.RD = new_RD    
+        self.RD = new_RD

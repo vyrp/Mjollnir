@@ -53,10 +53,10 @@ class GameLogicTest : public ::testing::Test {
 
 //   ASSERT_FALSE(game1.update(command1, 9091));
 //   ASSERT_FALSE(game1.update(command2, 9090));
-//   ASSERT_EQ(expTable, game1.getWorldModel().table);  
+//   ASSERT_EQ(expTable, game1.getWorldModel().table);
 // }
 
-// TEST_F(GameLogicTest, TestDraw) {  
+// TEST_F(GameLogicTest, TestDraw) {
 //   std::vector<std::vector<int> > indexes {
 //     {2,2,9090},
 //     {0,0,9091},

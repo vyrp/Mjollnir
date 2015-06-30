@@ -92,7 +92,7 @@ def process_matches():
             new_RD = players_after_match[player_index].RD
 
             match_submissions[player_index]['rating'] = new_rating
-            match_submissions[player_index]['RD'] = new_RD     
+            match_submissions[player_index]['RD'] = new_RD
             match_submissions[player_index].setdefault('rating_after_match', []).append( (match['mid'], new_rating) )
             mongodb.submissions.save( match_submissions[player_index] )
         
@@ -156,7 +156,7 @@ def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=m
                            'cid': sub['cid'],
                            'password': environ.get('YGG_BUILD_PSWD') }
         
-            	encoded = urllib.urlencode(values)                
+            	encoded = urllib.urlencode(values)
                 urllib2.urlopen('http://127.0.0.1:30403/build', data=encoded)
         
         subs = filter(

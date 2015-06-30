@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <exception>
 #include <iostream>
-#include <utility>  
+#include <utility>
 #include <memory>
 #include <mutex>
 

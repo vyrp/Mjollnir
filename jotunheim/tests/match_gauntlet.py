@@ -17,7 +17,7 @@ class StubCollectionFinder(list):
 
 challenge_ids = [str(uuid4()) for x in xrange(2)]
 user_names = ["Fenrir", "Sleipnir", "Lenneth", "Arngrim", "Loki"]
-user_ids = [str(uuid4()) for x in xrange(len(user_names))]    
+user_ids = [str(uuid4()) for x in xrange(len(user_names))]
 
 challenges = [{'cid': cid} for cid in challenge_ids]
 submissions = []
@@ -89,7 +89,7 @@ while True:
     inp = raw_input()
     if inp == 'p':
         uid = uuid4()
-        for cid in challenge_ids:    
+        for cid in challenge_ids:
             real_performance[cid,uid]=(random.randint(1200, 2000), random.randint(10, 30))
             submissions.append({'cid': cid, 'uid': uid, 'rating':1500, 'RD':300, 'name': 'New User'} )
     elif inp == 'q':

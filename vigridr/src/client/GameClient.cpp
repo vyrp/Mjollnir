@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
     boost::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
     boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
     GameClient client(protocol);
-    transport->open();  
+    transport->open();
     playGame(client);
     transport->close();
   } catch (TException &tx) {

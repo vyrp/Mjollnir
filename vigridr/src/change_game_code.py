@@ -86,7 +86,7 @@ def change_game_code(game, copy_sample_clients, copy_tests, copy_obj, used_logge
 
   # The thrift commands are sorted to make it look as if the thrift
   # has been compiled (don't change this order)
-  copy(thrift_files, thrifts_dir)  
+  copy(thrift_files, thrifts_dir)
   if copy_obj:
     touch(thrift_compiled_file)
   copy_gen(gen_files, thrifts_dir)

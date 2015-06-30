@@ -11,7 +11,7 @@
 namespace mjollnir { namespace vigridr {
 
 /**
- *  This class should be implemented for each game providing the  
+ *  This class should be implemented for each game providing the
  *  logic necessary to run the game
  */
 class GameLogic {
