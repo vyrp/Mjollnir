@@ -29,14 +29,14 @@ class Logger {
   //private constructor to make it singleton
   Logger() {}
 
- public: 
+ public:
   static std::shared_ptr<Logger> instance();
 
   template <typename... Args>
-  bool crash(const char* file, const int line, 
+  bool crash(const char* file, const int line,
              const char* condition, const char* message, Args... args) {
     std::unique_lock<std::mutex> lock(stderrMutex);
-    std::cerr << "\033[1;31m[" << file << ":" << line << "] CHECK failed: " 
+    std::cerr << "\033[1;31m[" << file << ":" << line << "] CHECK failed: "
               << condition << "\033[0m" << std::endl;
     std::cerr << "Error message: ";
     fprintf(stderr, message, std::forward<Args>(args)..., 0);
@@ -48,11 +48,11 @@ class Logger {
   template <typename... Args>
   bool log(const char* file, const int line, const char* message, Args... args) {
     std::unique_lock<std::mutex> lock(stderrMutex);
-    std::cerr << "[" << file << ":" << line << "]: "; 
+    std::cerr << "[" << file << ":" << line << "]: ";
     fprintf(stderr, message, std::forward<Args>(args)..., 0);
     std::cerr << std::endl;
     return false;
-  } 
+  }
 
 };
 

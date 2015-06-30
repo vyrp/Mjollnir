@@ -6,7 +6,7 @@
 """
 
 def time_since_from_seconds(seconds):
-    days = int( seconds // 86400 ) 
+    days = int( seconds // 86400 )
     hours = int( (seconds % 86400) // 3600 )
     minutes = int( (seconds % 3600) // 60 )
 

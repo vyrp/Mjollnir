@@ -1,5 +1,5 @@
 """
-Implements the glicko rating system. 
+Implements the glicko rating system.
 For further details on how the system works and what the rating and RD values mean,
 see original description at http://www.glicko.net/glicko/glicko.pdf
 """
@@ -23,7 +23,7 @@ def g(RD):
     return 1./den
 
 def E(player, opp):
-    """ 
+    """
     Denotes the probability that player will win the match.
     """
     den = 1 + 10**(-g(opp.RD)*(player.rating-opp.rating)/400)
@@ -38,20 +38,20 @@ def RD_factor(player, opponents):
     return q**2 * adjust
 
 def rating_change(player, results):
-    """ 
-    Returns by how much player's rating should change after the given match. 
+    """
+    Returns by how much player's rating should change after the given match.
     Score is given from player's point of view.
     """
     d = RD_factor(player, results.keys())
     
     adjust = 0
     for opp, score in results.items():
-        adjust += g(opp.RD) * (score - E(player, opp)) 
+        adjust += g(opp.RD) * (score - E(player, opp))
     
     return q * adjust / (1./player.RD**2 + d)
 
 def RD_after_match(player, results):
-    """ 
+    """
     Returns new RD for player after the given match.
     """
     d = RD_factor(player, results.keys())

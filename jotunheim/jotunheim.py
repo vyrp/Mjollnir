@@ -19,7 +19,7 @@ mongodb = mongo_client['mjollnir-db']
 
 def player_before_match(submission, match):
     """
-    Returns a glicko.GlickoPlayer corresponding to this submission, taking into 
+    Returns a glicko.GlickoPlayer corresponding to this submission, taking into
     account the inactivity period between matches.
     """
     player = glicko.GlickoPlayer(submission['rating'], submission['RD'])
@@ -53,9 +53,9 @@ def new_ratings(players_before_match, match):
     return players_after_match
 
 def process_matches():
-    """ 
+    """
     Changes rankings according to all of the match results that are on the database,
-    but have not been processed since the last run. 
+    but have not been processed since the last run.
     """
 
     #find unprocessed matches
@@ -137,7 +137,7 @@ def match_quality(sub_player, sub_opp):
     """
     player = glicko.GlickoPlayer(sub_player['rating'], sub_player['RD'])
     opp = glicko.GlickoPlayer(sub_opp['rating'], sub_opp['RD'])
-    return 1 - abs(0.5 - glicko.E(player, opp)) 
+    return 1 - abs(0.5 - glicko.E(player, opp))
 
 def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=mongodb.submissions):
     """
@@ -174,7 +174,7 @@ def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=m
             suggested_matches.append( (challenge, [sub, best_opponent]) )
     		
     for match in suggested_matches:
-    	values = {'cid': match[0]['cid'], 
+    	values = {'cid': match[0]['cid'],
     			  'siid1': match[1][0]['siid'],
     			  'uid1': match[1][0]['uid'],
     			  'siid2': match[1][1]['siid'],

@@ -20,5 +20,5 @@ remove:
 
 clean: remove
 
-test: $(BIN)/$(TARGETS)	
+test: $(BIN)/$(TARGETS)
 	$(foreach target, $(TARGETS), ./$(BIN)/$(target);)

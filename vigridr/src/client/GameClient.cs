@@ -34,11 +34,11 @@ public class CSharpClient
             stopwatch.Start ();
             WorldModel wm = gameInfo.WorldModel;
             printWorldModel(wm);
-            if (gameInfo.GameStatus == GameStatus.FINISHED) 
+            if (gameInfo.GameStatus == GameStatus.FINISHED)
             {
                 break;
             }
-            if (gameInfo.IsMyTurn) 
+            if (gameInfo.IsMyTurn)
             {
                 Command command = solution.playTurn(wm);
                 client.sendCommand(command);
@@ -49,10 +49,10 @@ public class CSharpClient
     public static void Main(string[] args)
     {
         int port = 9090;
-        for (int i = 0; i < args.Length; i++) 
+        for (int i = 0; i < args.Length; i++)
         {
             switch(args[i])
-            { 
+            {
                 case "--port":
                     port = int.Parse(args[++i]);
                     break;

@@ -5,7 +5,7 @@
 #include "../thrifts/gen-cpp/WorldModel_types.h"
 #include "../thrifts/gen-cpp/GameDescription_types.h"
 
-namespace mjollnir { namespace vigridr { 
+namespace mjollnir { namespace vigridr {
 
 class GameLogic {
  public:
@@ -37,6 +37,6 @@ class GameLogic {
   const size_t maxValue_ = 10;
 };
 
-}}  // namespaces 
+}}  // namespaces
 
 #endif  // VIGRIDR_SERVER_GAME_LOGIC_H

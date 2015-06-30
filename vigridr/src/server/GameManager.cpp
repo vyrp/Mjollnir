@@ -34,16 +34,16 @@ void PlayerTurnData::setIsTurn(bool isTurn) {
   isTurn_ = isTurn;
 }
 
-GameManager::GameManager(int32_t playerId0, int32_t playerId1) 
+GameManager::GameManager(int32_t playerId0, int32_t playerId1)
   : idToIdx_({{playerId0, 0}, {playerId1, 1}}),
     idxToId_({{playerId0, playerId1}}),
     gameLogic_(playerId0, playerId1) {
   initializeGame(playerId0, playerId1);
-  updaterThread_ = std::thread([this]() { 
-    updaterTask(); 
+  updaterThread_ = std::thread([this]() {
+    updaterTask();
     // calling game end handlers callback
-    for (auto& handler : gameEndHandlers_) { 
-      handler(); 
+    for (auto& handler : gameEndHandlers_) {
+      handler();
     }
   });
 }
@@ -90,7 +90,7 @@ void GameManager::nextTurn() {
   if (config::gameType == GameType::TURN) {
     for (size_t i = 0; i < kMaxPlayers; ++i) {
         playerTurnData_[i].setIsTurn(!playerTurnData_[i].isTurn());   
-    } 
+    }
   }
   gameInfo_.cycle++;
   gameInfo_.gameStatus = GameStatus::RUNNING;
@@ -100,7 +100,7 @@ void GameManager::nextTurn() {
   timer_.startCycle();
 }
 
-bool 
+bool
 checkCommands(const std::array<PlayerTurnData, kMaxPlayers>& playerTurnData,
               int32_t& correctPlayer) {
   int32_t wrongPlayerCount = 0;
@@ -116,7 +116,7 @@ checkCommands(const std::array<PlayerTurnData, kMaxPlayers>& playerTurnData,
   return wrongPlayerCount == 0;
 }
 
-void 
+void
 clearCommands(std::array<PlayerTurnData, kMaxPlayers>& playerTurnData) {
   if(playerTurnData[0].isTurn()) { playerTurnData[0].clearCommand(); }
   if(playerTurnData[1].isTurn()) { playerTurnData[1].clearCommand(); }
@@ -133,7 +133,7 @@ void GameManager::updaterTask() {
       std::unique_lock<std::mutex> lock0(playerMutex_[0], std::defer_lock);
       std::unique_lock<std::mutex> lock1(playerMutex_[1], std::defer_lock);
       // locks player 1 and 2 simultaneously so that there is no dead lock
-      std::lock(lock0, lock1); 
+      std::lock(lock0, lock1);
       // check wheather the players sent the command if just one sent gets him
       int32_t correctPlayer;
       bool errorHappened = !checkCommands(playerTurnData_, correctPlayer);
@@ -148,7 +148,7 @@ void GameManager::updaterTask() {
       clearCommands(playerTurnData_);
     }
     // sorting the player movements by update time (who sent first moves first)
-    std::sort(movements.begin(), movements.end(), 
+    std::sort(movements.begin(), movements.end(),
       [](const PlayerTurnData& a, const PlayerTurnData& b) {
         return a.getLastUpdatedTime() < b.getLastUpdatedTime();
     });
@@ -157,11 +157,11 @@ void GameManager::updaterTask() {
     int32_t countWrongPlayers = 0;  // how many players sent invalid command
     int32_t correctPlayer = 0;  // if one is wrong this variable  
     for (auto& playerMove : movements) {
-      if (!playerMove.isTurn()) { 
+      if (!playerMove.isTurn()) {
         correctPlayer = playerMove.getId();  // if it is not my turn i'm valid
-        continue; 
+        continue;
       }
-      bool validCommand = 
+      bool validCommand =
         gameLogic_.update(playerMove.getCommand(), playerMove.getId());
       if (!validCommand) {
         countWrongPlayers++;
@@ -216,7 +216,7 @@ void GameManager::getGameInfo(GameInfo& gameInfo, int32_t playerId) {
     std::unique_lock<std::mutex> lock(playerMutex_[idx]);
     gameInfo.isMyTurn = playerTurnData_[idx].isTurn();
   }
-  LOG("%d %d", 
+  LOG("%d %d",
       gameInfo.updateTimeLimitMs, gameInfo.nextWorldModelTimeEstimateMs);
 }  
 

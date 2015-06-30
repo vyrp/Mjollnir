@@ -2,7 +2,7 @@
 
 namespace mjollnir { namespace vigridr {
 
-GameService::GameService(std::shared_ptr<GameManager> gameManager, int32_t playerId) 
+GameService::GameService(std::shared_ptr<GameManager> gameManager, int32_t playerId)
   : gameManager_(std::move(gameManager)),
     playerId_(playerId) {
 }

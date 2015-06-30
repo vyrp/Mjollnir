@@ -10,7 +10,7 @@ using boost::property_tree::ptree;
 using boost::property_tree::read_json;
 using boost::property_tree::write_json;
 
-namespace mjollnir { namespace vigridr { 
+namespace mjollnir { namespace vigridr {
 
 std::vector<WorldModel> wmList;
 GameDescription gd1,gd2;
@@ -32,7 +32,7 @@ ptree createPt(const WorldModel& wm) {
   for (auto player : wm.players) {
     ptree playerPt;
     ptree bodyPt;
-    for (auto piece : player.body) { 
+    for (auto piece : player.body) {
       ptree piecePt;
       piecePt.push_back(std::make_pair("x", ptree(std::to_string(piece.x))));
       piecePt.push_back(std::make_pair("y", ptree(std::to_string(piece.y))));
@@ -49,7 +49,7 @@ void GameLogger::logWorldModel(const WorldModel& wm) {
   wmList.push_back(wm);
 }
 
-void GameLogger::logGameDescription(const GameDescription& description1, 
+void GameLogger::logGameDescription(const GameDescription& description1,
                                     const std::string& player1,
                                     const GameDescription& description2,
                                     const std::string& player2) {
@@ -66,10 +66,10 @@ void GameLogger::flushLog() {
   }
   ptree gamePt;
   gamePt.push_back(std::make_pair("wmList", wmListPt));
-  gamePt.push_back(std::make_pair("gameDescription", 
+  gamePt.push_back(std::make_pair("gameDescription",
                    createGameDescriptionPt()));
   std::ofstream file;
-  file.open("logs"); 
+  file.open("logs");
   write_json (file, gamePt, false);
   file.close();
 }

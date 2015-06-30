@@ -18,7 +18,7 @@
 DEFINE_int32(port, 9090, "Port used to connect with the server.");
 
 const char* const kVersion = "v1.1";
-const char* const kUsageMessage = 
+const char* const kUsageMessage =
   "This program is the client for mjollnir matches";
 
 using ::apache::thrift::protocol::TBinaryProtocol;

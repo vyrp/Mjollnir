@@ -16,7 +16,7 @@ if not args.port:
 if not args.thrift:
     args.thrift = '../../third-parties/python/lib'
 
-sys.path.append('gen-py') 
+sys.path.append('gen-py')
 sys.path.insert(0, glob.glob(args.thrift)[0])
 
 from thrift import Thrift

@@ -17,7 +17,7 @@ DEFINE_int32(port1, 9090, "Port used by the first client.");
 DEFINE_int32(port2, 9091, "Port used by the second client.");
 
 const char* const kVersion = "v1.1";
-const char* const kUsageMessage = 
+const char* const kUsageMessage =
   "This program is the server for mjollnir matches";
 
 using ::apache::thrift::protocol::TBinaryProtocolFactory;
@@ -50,13 +50,13 @@ int main(int argc, char **argv) {
     boost::shared_ptr<TProtocolFactory> protocolFactory(
       new TBinaryProtocolFactory());
 
-    TSimpleServer server(processor, serverTransport, 
+    TSimpleServer server(processor, serverTransport,
                          transportFactory, protocolFactory);
 
     // finishing server when game ends
-    gameManager->onGameEnd([&] () { 
+    gameManager->onGameEnd([&] () {
       LOG("Stopping server");
-      server.stop(); 
+      server.stop();
     });
     LOG("Starting server...");
     server.serve();

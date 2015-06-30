@@ -40,7 +40,7 @@ int32_t GameTimer:: getWorldModelTime() {
     nextWorldModelTime_-clock::now()).count();
 }
 
-int32_t GameTimer::getPlayerUpdateTime() { 
+int32_t GameTimer::getPlayerUpdateTime() {
   return std::chrono::duration_cast<std::chrono::milliseconds>(
     nextUpdateTime_-clock::now()).count();
 }

@@ -17,7 +17,7 @@ const std::chrono::milliseconds cycleDurationMs(1000);  // >= 3ms
  */
 const std::chrono::seconds firstCycleDurationS(4);
 
-/** 
+/**
  *  An upper bound on the time the server takes to update the world model
  */
 const std::chrono::milliseconds updateTimeUpperBoundMs(10);

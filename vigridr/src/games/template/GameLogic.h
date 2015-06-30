@@ -8,7 +8,7 @@
 #include "../thrifts/gen-cpp/WorldModel_types.h"
 #include "../thrifts/gen-cpp/GameDescription_types.h"
 
-namespace mjollnir { namespace vigridr { 
+namespace mjollnir { namespace vigridr {
 
 /**
  *  This class should be implemented for each game providing the  

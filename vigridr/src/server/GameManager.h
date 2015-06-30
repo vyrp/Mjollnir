@@ -45,7 +45,7 @@ class PlayerTurnData {
 
 /**
  *  The GameManager gets the requests from both player, and synchronizes them.
- *  Protocol: 
+ *  Protocol:
  *  1- Clients say ready() and get gameInfo with first world model time in ms.
  *  2- Clients ask for gameInfo() when world model is ready.
  *  3- Clients proccess gameInfo and make decision before updateTimeLimitMs.

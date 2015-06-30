@@ -10,7 +10,7 @@ namespace mjollnir { namespace vigridr {
 
 /**
  *  Service that handles the clients requests. Each client communicates
- *  with the server through a different port. So each client talks with his 
+ *  with the server through a different port. So each client talks with his
  *  own instance of the game service.
  */
 class GameService : virtual public GameIf {

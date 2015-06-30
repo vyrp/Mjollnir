@@ -6,7 +6,7 @@ if __name__ == "__main__":
 import random
 import itertools
 from os import environ, system
-from uuid import uuid4 
+from uuid import uuid4
 import jotunheim
 import glicko
 
@@ -44,7 +44,7 @@ def print_rankings(cid):
 
 def execute_matches(suggested_matches):
     """
-    Simulates running the matches by using the real performances of the test users 
+    Simulates running the matches by using the real performances of the test users
     and sending match results through the database.
     """
     for match in suggested_matches:
@@ -59,7 +59,7 @@ def execute_matches(suggested_matches):
             if index != 0 and performances[index-1][0] > performances[index][0]:
                 rank += 1
 
-            db_match['users'].append({'uid': performances[index][1], 'rank': rank}) 
+            db_match['users'].append({'uid': performances[index][1], 'rank': rank})
 
         players_before_match = []
         
@@ -88,7 +88,7 @@ while True:
     print 'Press Enter for the next iteration...'
     inp = raw_input()
     if inp == 'p':
-        uid = uuid4() 
+        uid = uuid4()
         for cid in challenge_ids:    
             real_performance[cid,uid]=(random.randint(1200, 2000), random.randint(10, 30))
             submissions.append({'cid': cid, 'uid': uid, 'rating':1500, 'RD':300, 'name': 'New User'} )

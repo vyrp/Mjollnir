@@ -7,7 +7,7 @@ public class Solution
     public Random random;
     public Command playTurn(WorldModel wm) {
         Command command = new Command(new Coordinate());
-        while(true) 
+        while(true)
         {
             int x = random.Next(3);
             int y = random.Next(3);

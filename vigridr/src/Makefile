@@ -50,7 +50,7 @@ clean:
 	$(MAKE) $(MFLAGS) clean -C server
 	$(MAKE) $(MFLAGS) clean -C test
 
-.PHONY: remove	
+.PHONY: remove
 remove:
 	$(MAKE) $(MFLAGS) remove -C client
 	$(MAKE) $(MFLAGS) remove -C server

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <stdio.h>
 
-namespace mjollnir { namespace vigridr { 
+namespace mjollnir { namespace vigridr {
 
 GameLogic::GameLogic(int32_t playerId1, int32_t playerId2) {
   player1_ = playerId1;
@@ -32,7 +32,7 @@ int32_t GameLogic::getWinner() const {
 GameDescription GameLogic::getGameDescription(int32_t playerId) const {
   GameDescription gameDescription;
   // TODO: implement game description logic
-  return gameDescription; 
+  return gameDescription;
 }
 
 }}  // namespaces

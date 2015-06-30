@@ -105,7 +105,7 @@ def latest_matches(uid = None, cid = None, limit = 8):
 
     matches = list( mongodb.matches.find(query).sort([('datetime', -1)]).limit(limit) )
     challenges = list( mongodb.challenges.find({ 'cid': { '$in': [ match['cid'] for match in matches ] } }) )
-    users = list( mongodb.users.find({ 'uid': { '$in': [ user['uid'] for user in chain.from_iterable(match['users'] for match in matches) ] } }) ) 
+    users = list( mongodb.users.find({ 'uid': { '$in': [ user['uid'] for user in chain.from_iterable(match['users'] for match in matches) ] } }) )
     username_for_given_uid = ([user['username'] for user in users if user['uid'] == uid] or [None])[0]
     # Maybe we should be using SQL :)
 
@@ -362,7 +362,7 @@ def login():
             # TODO: change this after current users log in?
             uid = str(uuid4())
 
-            mongodb.users.insert({ 
+            mongodb.users.insert({
                 'uid': uid,
                 'username': _user.username,
                 'email': _user.email

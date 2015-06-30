@@ -109,7 +109,7 @@ obj/
 *.app
 
 ###
-### Thrift 
+### Thrift
 ###
 
 # Thrift auto generated folders

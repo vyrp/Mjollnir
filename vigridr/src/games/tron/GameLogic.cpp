@@ -2,7 +2,7 @@
 #include <iostream>
 #include <stdio.h>
 
-namespace mjollnir { namespace vigridr { 
+namespace mjollnir { namespace vigridr {
 
 GameLogic::GameLogic(int32_t playerId1, int32_t playerId2) {
   player1_ = playerId1;
@@ -54,10 +54,10 @@ bool GameLogic::update(Command command, int32_t playerId) {
   size_t idx = 0;
   if(playerId == player1_){
     idx = 0;
-  } 
+  }
   else if(playerId == player2_){
     idx = 1;
-  } 
+  }
   else {
     return false;
   }
@@ -99,7 +99,7 @@ GameDescription GameLogic::getGameDescription(int32_t playerId) const {
   gameDescription.field.width = kWidth;
   gameDescription.field.height = kHeight;
   gameDescription.myIndex = (playerId == player1_) ? 0 : 1;
-  return gameDescription; 
+  return gameDescription;
 }
 
 }}  // namespaces

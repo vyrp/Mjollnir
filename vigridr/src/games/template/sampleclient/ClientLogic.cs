@@ -6,7 +6,7 @@ public class Solution
     {
     }
 
-    public Command playTurn(WorldModel wm) 
+    public Command playTurn(WorldModel wm)
     {
        return null;
     }

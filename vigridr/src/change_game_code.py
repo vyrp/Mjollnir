@@ -84,7 +84,7 @@ def change_game_code(game, copy_sample_clients, copy_tests, copy_obj, used_logge
     test_files = glob.glob(os.path.join(game_dir, "test/*"))
     copy(test_files, test_dir)
 
-  # The thrift commands are sorted to make it look as if the thrift 
+  # The thrift commands are sorted to make it look as if the thrift
   # has been compiled (don't change this order)
   copy(thrift_files, thrifts_dir)  
   if copy_obj:

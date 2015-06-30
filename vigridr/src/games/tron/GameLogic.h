@@ -8,7 +8,7 @@
 #include "../thrifts/gen-cpp/WorldModel_types.h"
 #include "../thrifts/gen-cpp/GameDescription_types.h"
 
-namespace mjollnir { namespace vigridr { 
+namespace mjollnir { namespace vigridr {
 
 class GameLogic {
  public:
@@ -34,7 +34,7 @@ class GameLogic {
   static constexpr int32_t kHeight = 20;
 
   // Initial conditions
-  const std::vector<std::pair<int, int>> kpInit[2] = 
+  const std::vector<std::pair<int, int>> kpInit[2] =
     {{{1,1}, {2,1}, {3,1}},
      {{kWidth-2,kWidth-2}, {kWidth-3,kWidth-2}, {kWidth-4,kWidth-2}}};
 
@@ -43,6 +43,6 @@ class GameLogic {
   static constexpr int32_t kEmpty = -1;
 };
 
-}}  // namespaces 
+}}  // namespaces
 
 #endif  // VIGRIDR_SERVER_GAME_LOGIC_H

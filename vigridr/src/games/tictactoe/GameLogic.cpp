@@ -2,7 +2,7 @@
 #include <iostream>
 #include <stdio.h>
 
-namespace mjollnir { namespace vigridr { 
+namespace mjollnir { namespace vigridr {
 
 GameLogic::GameLogic(int32_t playerId1, int32_t playerId2) {
   player1_ = playerId1;
@@ -18,7 +18,7 @@ GameLogic::GameLogic(int32_t playerId1, int32_t playerId2) {
 }
 
 bool GameLogic::update(Command command, int32_t playerId) {
-  if(!hasFinished_ && 
+  if(!hasFinished_ &&
      checkTableCoordinate_(command.coordinate, Marker::UNMARKED)) {
     if (playerId == player1_) {
       setTableCoordinate_(command.coordinate, Marker::X);
@@ -80,7 +80,7 @@ bool GameLogic::randomPlay_(int32_t playerId) {
     for(auto& element : line)
       if(element == Marker::UNMARKED) {
         if(playerId == player1_) {
-          element = Marker::X; 
+          element = Marker::X;
           return true;
         }
         else if(playerId == player2_) {
@@ -124,7 +124,7 @@ bool GameLogic::checkDiagonals_(const WorldModel& wm, Marker player) {
 }
 
 bool GameLogic::checkVictory_(const WorldModel& wm, Marker player, int32_t playerId) {
-  if(checkLines_(worldModel_, player) || 
+  if(checkLines_(worldModel_, player) ||
      checkColumns_(worldModel_, player) ||
      checkDiagonals_(worldModel_, player) ) {
     winner_ = playerId;
