@@ -57,12 +57,14 @@ def copy_force(files, dest_dir):
 class DefaultLogger():
   def info(self, msg):
     print msg
+  def err(self, msg):
+    print >> sys.stderr, msg
 
 def change_game_code(game, copy_sample_clients, copy_tests, copy_obj, used_logger=DefaultLogger()):
   global logger
   logger = used_logger
   if game not in os.listdir(games_dir):
-    logger.info('The game "' + game + '" is not in games folder')
+    logger.err('The game "' + game + '" is not in games folder')
     return 1
 
   game_dir = os.path.join(games_dir, game)
@@ -99,7 +101,7 @@ def change_game_code(game, copy_sample_clients, copy_tests, copy_obj, used_logge
 
 if __name__ == "__main__":
   doall = "--all" in sys.argv;
-  change_game_code(sys.argv[1], \
-                   "--with-client" in sys.argv or doall, \
-                   "--with-test" in sys.argv or doall, \
-                   "--with-obj" in sys.argv or doall)
+  exit(change_game_code(sys.argv[1], \
+                        "--with-client" in sys.argv or doall, \
+                        "--with-test" in sys.argv or doall, \
+                        "--with-obj" in sys.argv or doall))
