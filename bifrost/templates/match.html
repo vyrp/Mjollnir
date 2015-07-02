@@ -65,9 +65,9 @@
   <script src="{{ url_for('static', filename='js/' + match.visualizer) }}"></script>
   <script type="text/javascript">
     {% if MJOLLNIR_DEBUG %}
-      var MJOLLNIR_MATCHES = "https://s3-us-west-2.amazonaws.com/mjollnir-matches/";
+      var MJOLLNIR_MATCHES = "https://localhost:5000/mjollnir-matches/";
     {% else %}
-      var MJOLLNIR_MATCHES = "http://localhost:5000/mjollnir-matches/";
+      var MJOLLNIR_MATCHES = "http://s3-us-west-2.amazonaws.com/mjollnir-matches/";
     {% endif %}
   </script>
   <script src="{{ url_for('static', filename='js/match_player.js') }}"></script>
