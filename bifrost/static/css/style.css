@@ -14,7 +14,10 @@
 #navbar-icon {
   width: 20px;
   height: 20px;
-  margin-bottom: 3px;
+}
+
+#navbar-brandname {
+  margin-left: 20px;
 }
 
 #title-sidebar {
@@ -180,4 +183,12 @@
 
 .popover {
   width: 600px;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
 }
