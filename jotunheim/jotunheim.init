@@ -38,8 +38,7 @@ VERBOSE=yes
 
 # Load environment variables
 . /etc/environment
-export MONGOLAB_URI="$MONGOLAB_URI"
-export YGG_BUILD_PSWD="$YGG_BUILD_PSWD"
+export $(cut -d= -f1 /etc/environment)
 
 #
 # Function that starts the daemon/service

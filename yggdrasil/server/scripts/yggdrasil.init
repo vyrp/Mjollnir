@@ -33,8 +33,7 @@ VERBOSE=yes
 
 # Load environment variables
 . /etc/environment
-export MONGOLAB_URI="$MONGOLAB_URI"
-export YGG_BUILD_PSWD="$YGG_BUILD_PSWD"
+export $(cut -d= -f1 /etc/environment)
 
 # Define LSB log_* functions.
 # Depend on lsb-base (>= 3.2-14) to ensure that this file is present
