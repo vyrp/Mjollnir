@@ -59,7 +59,7 @@ def process_matches():
     """
 
     #find unprocessed matches
-    jotunheim_info = mongodb.jotunheim.find_one(sort=[('last_processed', -1)])
+    jotunheim_info = mongodb.jotunheim.find_one(sort=[('last_processed', -1)]) or {'last_processed': datetime.datetime.fromtimestamp(0)}
     last_processed = jotunheim_info['last_processed']
 
     response = urllib2.urlopen("http://127.0.0.1:30403/games")
