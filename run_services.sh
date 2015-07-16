@@ -8,7 +8,7 @@ usage() {
 bif() {
     echo "Running Bifrost, log at /Mjollnir/bifrost/bifrost.log"
     cd /Mjollnir/bifrost
-    foreman start &>> bifrost.log &
+    ps aux | grep -v grep | grep -q foreman || foreman start &>> bifrost.log &
 }
 
 jot() {
