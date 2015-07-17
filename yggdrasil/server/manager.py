@@ -63,6 +63,7 @@ class GamesManager(threading.Thread):
                 
             self.logger.info('[%s] === Game queue stopped  ===' % (now(), ))
         except Exception as e:
+            self.running = False
             self.logger.info('[%s] === Game queue interrupted ===\n%s' % (now(), str(e)))
 
     def run_game(self, siid1, siid2, uid1, uid2, cid):

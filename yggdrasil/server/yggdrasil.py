@@ -99,17 +99,23 @@ def signal_handler(sig, frame):
     else:
         sig = str(sig)
 
-    logger.warn('=== Process stopped (%s) at %s ===' % (sig, time.strftime('%H:%M:%S')))
     manager.kill()
-    sys.exit(-1)
+
+    message = '=== Process stopped (%s) at %s ===' % (sig, time.strftime('%H:%M:%S'))
+    logger.warn(message)
+    print message
+
+    sys.exit(1)
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 
-    os.setgid(1000)
-    os.setuid(1000)
+    print '=== Yggdrasil started at %s ===' % time.strftime('%H:%M:%S')
+    sys.stdout.flush()
+
     try:
         app.run(host='0.0.0.0', port=30403)
-    except socket.error:
+    except Exception as e:
         logger.error(traceback.format_exc())
+        signal_handler('Exception', None)

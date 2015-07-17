@@ -11,6 +11,9 @@ import json
 import time
 import glicko
 import random
+import signal
+import sys
+import traceback
 
 MONGOLAB_URI = environ.get('MONGOLAB_URI')
 
@@ -186,6 +189,18 @@ def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=m
     
     return suggested_matches
 
+def signal_handler(sig, frame):
+    if sig == signal.SIGINT:
+        sig = "SIGINT"
+    elif sig == signal.SIGTERM:
+        sig = "SIGTERM"
+    else:
+        sig = str(sig)
+
+    print '=== Process stopped (%s) at %s ===' % (sig, time.strftime('%H:%M:%S'))
+
+    sys.exit(1)
+
 def main():
     while True:
         last_processed = process_matches()
@@ -194,4 +209,14 @@ def main():
         time.sleep(60*5*len(suggested_matches))
 
 if __name__ == "__main__":
-    main()
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    print '=== Jotunheim started at %s ===' % time.strftime('%H:%M:%S')
+    sys.stdout.flush()
+
+    try:
+        main()
+    except Exception as e:
+        print traceback.format_exc()
+        signal_handler('Exception', None)
