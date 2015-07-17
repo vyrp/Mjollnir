@@ -112,7 +112,7 @@ stop_mon() {
 stop_ygg() {
     stop_jot quiet
 
-    if pgrep -f jotunheim 1> /dev/null; then
+    if pgrep -f yggdrasil 1> /dev/null; then
         echo "Stopping Yggdrasil, log at /Mjollnir/yggdrasil/server/logs/yggdrasil.log"
         sudo service yggdrasil stop 1> /dev/null
     elif [ "$1" != "quiet" ]; then
@@ -120,7 +120,7 @@ stop_ygg() {
     fi
 }
 
-## Stop functions ##
+## Status functions ##
 
 status() {
     if pgrep -f $1 1> /dev/null; then
