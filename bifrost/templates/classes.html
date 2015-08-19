@@ -1,0 +1,52 @@
+{% extends "sidebarbase.html" %}
+
+
+{% block main %}
+  <div class="dashboard">
+    <div class="row">
+      <div class="col-lg-12">
+        <h2>Classes</h2>
+        <hr class="hr-small"/>
+        
+        {% if classes %}
+        <table class="table table-submissions">
+        <thead>
+          <tr>
+            <th>Classes</th>
+            <th>Situation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for classroom in classes %}
+          <tr>
+            <td><a href="{{ url_for('.classroom', gid=classroom.gid) }}">{{ classroom.name }}</a></td>
+            <td>
+              {% if classroom.users and username in classroom.users %}
+                Joined
+              {% else %}
+                <a href="{{ url_for('.joinclass', gid=classroom.gid) }}">Join</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        </table>
+        {% else %}
+          No classes to show
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+
+{% block script %}
+{{ super() }}
+
+<script type="text/javascript">
+  $(function () {
+    $(".build-status").popover();
+  });
+</script>
+{% endblock %}

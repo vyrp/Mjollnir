@@ -1,0 +1,53 @@
+{% extends "sidebarbase.html" %}
+
+
+{% block head %}
+{{ super() }}
+{{ pagedown.html_head() }}
+<style>
+.flask-pagedown-input {
+  color: #000000;
+}
+input {
+  color: #000000;
+}
+</style>
+{% endblock %}
+
+
+{% block main %}
+  <div class="newclass">
+    <div class="row">
+      <div class="span6">
+        <form method="post" action="">
+          <fieldset>
+            <legend>Edit/Create a class</legend>
+            {% if error %}
+              <div class="alert alert-dismissable alert-danger register-fail">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ error }}
+              </div>
+            {% endif %}
+
+            <div>
+              <b>{{ form.name.label }}</b>
+              {{ form.name(class="color-white") }}
+            </div>
+            <br>
+            <div>
+             {{ form.admin_only(class="float-left") }}<b>{{ form.admin_only.label }}</b>
+            </div>
+            <br>
+            
+            <br/>
+            <br/>
+
+            <div class="col-lg-10 col-lg-offset-4">
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

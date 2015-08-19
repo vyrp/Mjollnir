@@ -55,6 +55,7 @@ from werkzeug.utils import secure_filename
 
 from wtforms.fields import TextField
 from wtforms.fields import BooleanField
+from wtforms.fields import SelectMultipleField
 from wtforms.validators import DataRequired
 
 
@@ -75,6 +76,17 @@ class ChallengeDescriptionForm(Form):
     specs_cpp = PageDownField('C++ Technical Specs', validators=[DataRequired()])
     specs_cs = PageDownField('C# Technical Specs', validators=[DataRequired()])
     specs_py = PageDownField('Python Technical Specs', validators=[DataRequired()])
+
+
+
+
+#TODO: Add challenges from a suspension list
+class ClassDescriptionForm(Form):
+    """
+    WTForm to create a class.
+    """
+    name = TextField('Class name')
+    admin_only = BooleanField('Admin only')   
 
 
 
@@ -385,6 +397,33 @@ def login():
 
 
 
+@app.route('/classes')
+@login_required
+def classes_dashboard():
+    """
+    Renders a list of classes the user can see
+    """
+    username = user.username
+    if not username:
+        abort(400)
+
+    user_in_db = mongodb.users.find_one({ 'username': username })
+
+    if not user_in_db:
+        abort(404)
+
+    classes = list( mongodb.classes.find() )
+
+    if classes:
+        for classroom in classes:
+            if classroom['admin_only'] and username not in classroom['admins']:
+                classes.remove(classroom)
+
+    return render_template('classes.html', username = username, classes = classes)
+
+
+
+
 # Might be better to use only /user/<username>
 @app.route('/dashboard')
 @login_required
@@ -444,6 +483,79 @@ def logout():
     """
     logout_user()
     return redirect(url_for('index'))
+
+
+
+
+#TODO: Add permission to Prof group
+@app.route('/newclass')
+@groups_allowed(['Dev', 'Admin'])
+def newclass():
+    return redirect(url_for('.editclass'))
+
+
+
+#TODO: Add permission to Prof group
+#TODO: enable csrf?
+@app.route('/editclass', methods=['GET', 'POST'])
+@groups_allowed(['Dev', 'Admin'])
+def editclass():
+    """
+    Allows a user in the "Dev" admin group to create/edit classes
+    """
+    class_id = request.args.get('gid')
+    classroom = {}
+    username = user.username
+
+    if class_id:
+        classroom = mongodb.classes.find_one({ 'gid': class_id })
+        if not classroom:
+            abort(404)
+    else:
+        class_id = str( uuid4() )
+
+    form = ClassDescriptionForm(csrf_enabled = False)
+    
+    if request.method == 'GET':
+        if classroom:
+            form.name.data = classroom.get('name')
+            form.admin_only.data = classroom.get('admin_only') 
+        else:
+            form.admin_only.data = True
+     
+        return render_template('editclass.html', form = form)
+
+    if form.validate_on_submit():
+        document = { 'gid': class_id,
+                     'name': form.name.data,
+                     'admin_only': form.admin_only.data,
+                     'users': [username],
+                     'admins': [username] }
+
+        if classroom:
+            mongodb.classes.update({ 'gid': class_id }, document)
+        else:
+            mongodb.classes.insert(document)
+            
+        return redirect(url_for('.classroom', gid = class_id))
+
+    else:
+        return render_template('editclass.html', form = form, error = "Please enter all the required information."), 400
+
+
+
+
+@app.route('/class/<gid>')
+def classroom(gid):
+    """
+    Page to display a class given a gid.
+    """
+    classroom = mongodb.classes.find_one({"gid": gid})
+
+    if not classroom or ( user.username not in classroom['admins'] and classroom['admin_only'] ):
+        abort(404)
+
+    return render_template('class.html', classroom = classroom)
 
 
 
@@ -574,6 +686,38 @@ def challenges():
     """
     challenges = sorted_by_name( [challenge for challenge in mongodb.challenges.find() if ( not challenge['dev_only'] or is_active_user_in('Dev') )] )
     return render_template('challenges.html', challenges=challenges)
+
+@app.route('/join/<gid>', methods=['GET', 'POST'])
+@login_required
+def joinclass(gid):
+    """
+    Allows a user to join a class
+    """
+    username = user.username
+    if not username:
+        abort(400)
+
+    classroom = mongodb.classes.find_one({ 'gid': gid })
+    if not classroom:
+        abort(404)
+
+    mongodb.classes.update(
+        { 'gid': gid },
+        { '$push':
+            {
+                'users': username
+            }
+        }
+    )
+
+    classes = list( mongodb.classes.find() )
+
+    if classes:
+        for classroom in classes:
+            if classroom['admin_only'] and username not in classroom['admins']:
+                classes.remove(classroom)
+
+    return render_template('classes.html', username = username, classes = classes)
 
 
 

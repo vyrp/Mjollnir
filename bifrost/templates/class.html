@@ -1,0 +1,63 @@
+{% extends "sidebarbase.html" %}
+
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block main %}
+  <div class="class">
+    <div class="row">
+      <div class="col-lg-12">
+        {% if error %}
+          <div class="alert alert-dismissable alert-danger register-fail">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ error }}
+          </div>
+        {% endif %}
+        <div class="height-60">
+          <div class="float-left width-400">
+            <h2>{{ classroom.name }}</h2>
+          </div>
+        </div>
+
+        {% if is_active_user_in('Dev') or user.username in classroom.admins %}
+        <p align="right"><a href="{{ url_for('editclass', gid = classroom.gid) }}">Edit Class</a></p>
+        <br/>
+        {% endif %}
+
+        <div>
+          <ul id="challenge-tabs" class="nav nav-tabs">
+            <li class="active"><a href="#description" data-toggle="tab">Description</a></li>
+            <li><a href="#admins" data-toggle="tab">Admins</a></li>
+            <li><a href="#users" data-toggle="tab">Users</a></li>
+          </ul>
+          <div class="tab-content">
+
+            <div class="tab-pane fade active in" id="description">
+              Admin only? {{ classroom.admin_only }}
+            </div>
+
+            <div class="tab-pane fade" id="admins">
+              
+              {% for admin in classroom.admins %}
+                {{ admin }}<br/>
+              {% endfor %}
+
+            </div>
+
+            <div class="tab-pane fade" id="users">
+              
+              {% for user in classroom.users %}
+                {{ user }}<br/>
+              {% endfor %}
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+{% endblock %}

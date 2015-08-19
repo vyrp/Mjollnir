@@ -43,12 +43,20 @@
                 <li {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>
                   <a href="{{ url_for('dashboard') }}">Dashboard</a>
                 </li>
+                <li {% if request.endpoint == 'classes_dashboard' %}class="active"{% endif %}>
+                  <a href="{{ url_for('classes_dashboard') }}">Classes</a>
+                </li>
                   {% if is_active_user_in('Dev') %}
                   <li {% if request.endpoint == 'editchallenge' %}class="active"{% endif %}>
                     <a href="{{ url_for('newchallenge') }}">New Challenge</a>
                   </li>
                   <li {% if request.endpoint == 'newnew' %}class="active" {% endif %}>
-                    <a href="{{ url_for('newnew') }}">New new</a>
+                    <a href="{{ url_for('newnew') }}">New New</a>
+                  </li>
+                  {% endif %}
+                  {% if is_active_user_in('Dev') or is_active_user_in('Admin') %}
+                  <li {% if request.endpoint == 'editclass' %}class="active"{% endif %}>
+                    <a href="{{ url_for('newclass') }}">New Class</a>
                   </li>
                   {% endif %}
                 <li>
