@@ -687,11 +687,14 @@ def challenges():
     challenges = sorted_by_name( [challenge for challenge in mongodb.challenges.find() if ( not challenge['dev_only'] or is_active_user_in('Dev') )] )
     return render_template('challenges.html', challenges=challenges)
 
+
+
+
 @app.route('/join/<gid>', methods=['GET', 'POST'])
 @login_required
 def joinclass(gid):
     """
-    Allows a user to join a class
+    Allows a user to join/unsubsribe a class
     """
     username = user.username
     if not username:
@@ -701,14 +704,24 @@ def joinclass(gid):
     if not classroom:
         abort(404)
 
-    mongodb.classes.update(
-        { 'gid': gid },
-        { '$push':
-            {
-                'users': username
+    if username not in classroom['users']:
+        mongodb.classes.update(
+            { 'gid': gid },
+            { '$push':
+                {
+                    'users': username
+                }
             }
-        }
-    )
+        )
+    else:
+        mongodb.classes.update(
+            { 'gid': gid },
+            { '$pull':
+                {
+                    'users': username
+                }
+            }
+        )
 
     classes = list( mongodb.classes.find() )
 

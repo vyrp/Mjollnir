@@ -22,7 +22,7 @@
             <td><a href="{{ url_for('.classroom', gid=classroom.gid) }}">{{ classroom.name }}</a></td>
             <td>
               {% if classroom.users and username in classroom.users %}
-                Joined
+                <a href="{{ url_for('.joinclass', gid=classroom.gid) }}">Leave</a>
               {% else %}
                 <a href="{{ url_for('.joinclass', gid=classroom.gid) }}">Join</a>
               {% endif %}
