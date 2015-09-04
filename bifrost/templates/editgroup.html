@@ -16,12 +16,12 @@ input {
 
 
 {% block main %}
-  <div class="newclass">
+  <div class="newgroup">
     <div class="row">
       <div class="span6">
         <form method="post" action="">
           <fieldset>
-            <legend>Edit/Create a class</legend>
+            <legend>Edit/Create a group</legend>
             {% if error %}
               <div class="alert alert-dismissable alert-danger register-fail">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -32,6 +32,11 @@ input {
             <div>
               <b>{{ form.name.label }}</b>
               {{ form.name(class="color-white") }}
+            </div>
+            <br>
+            <div>
+              <b>{{ form.description.label }}</b>
+              {{ form.description(rows = 5, class="width-500 color-white") }}
             </div>
             <br>
             <div>

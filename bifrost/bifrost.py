@@ -18,6 +18,7 @@ from os import environ
 from uuid import uuid4
 from itertools import chain
 
+
 from flask import (
     Flask,
     abort,
@@ -55,9 +56,7 @@ from werkzeug.utils import secure_filename
 
 from wtforms.fields import TextField
 from wtforms.fields import BooleanField
-from wtforms.fields import SelectMultipleField
 from wtforms.validators import DataRequired
-
 
 
 
@@ -80,12 +79,12 @@ class ChallengeDescriptionForm(Form):
 
 
 
-#TODO: Add challenges from a suspension list
-class ClassDescriptionForm(Form):
+class GroupDescriptionForm(Form):
     """
-    WTForm to create a class.
+    WTForm to create a group.
     """
-    name = TextField('Class name')
+    name = TextField('Group name')
+    description = PageDownField('Group description')
     admin_only = BooleanField('Admin only')   
 
 
@@ -144,7 +143,6 @@ ACCEPTED_LANGUAGES = {'cs40': 'C# 4.0 (mono)',
 
 
 
-
 ##### Initialization
 DEBUG = str(environ.get('MJOLLNIR_DEBUG')).lower()
 DEBUG = (DEBUG == '1' or DEBUG == 'true')
@@ -175,6 +173,7 @@ app.jinja_env.globals.update(ACCEPTED_LANGUAGES = ACCEPTED_LANGUAGES)
 app.jinja_env.globals.update(enumerate = enumerate)
 app.jinja_env.globals.update(timestamp_as_str = timestamp_as_str)
 app.jinja_env.globals.update(MJOLLNIR_DEBUG = DEBUG)
+
 
 # Stormpath
 stormpath_manager = StormpathManager(app)
@@ -213,8 +212,6 @@ else:
 
 # Pagedown
 pagedown = PageDown(app)
-
-
 
 
 ##### Website
@@ -397,11 +394,11 @@ def login():
 
 
 
-@app.route('/classes')
+@app.route('/groups')
 @login_required
-def classes_dashboard():
+def groups_dashboard():
     """
-    Renders a list of classes the user can see
+    Renders a list of groups the user can see
     """
     username = user.username
     if not username:
@@ -412,14 +409,15 @@ def classes_dashboard():
     if not user_in_db:
         abort(404)
 
-    classes = list( mongodb.classes.find() )
+    #TODO: find right groups using a decent query, common
+    groups = list( mongodb.groups.find() )
 
-    if classes:
-        for classroom in classes:
-            if classroom['admin_only'] and username not in classroom['admins']:
-                classes.remove(classroom)
+    if groups:
+        for group in groups:
+            if group['admin_only'] and username not in group['admins']:
+                groups.remove(group)
 
-    return render_template('classes.html', username = username, classes = classes)
+    return render_template('groups.html', username = username, groups = groups)
 
 
 
@@ -430,19 +428,20 @@ def classes_dashboard():
 def dashboard():
     return user_page(user.username)
 
+
+
+
 @app.route('/user/<username>')
 def user_page(username):
     """
     Renders a user's profile.
     """
+
     if not username:
         abort(400)
-
     user_in_db = mongodb.users.find_one({ 'username': username })
-
     if not user_in_db:
         abort(404)
-
     submissions = mongodb.submissions.find({ 'uid': user_in_db['uid'] })
     challenge_solutions = []
 
@@ -488,74 +487,76 @@ def logout():
 
 
 #TODO: Add permission to Prof group
-@app.route('/newclass')
+@app.route('/newgroup')
 @groups_allowed(['Dev', 'Admin'])
-def newclass():
-    return redirect(url_for('.editclass'))
+def newgroup():
+    return redirect(url_for('.editgroup'))
 
 
 
-#TODO: Add permission to Prof group
+
 #TODO: enable csrf?
-@app.route('/editclass', methods=['GET', 'POST'])
+@app.route('/editgroup', methods=['GET', 'POST'])
 @groups_allowed(['Dev', 'Admin'])
-def editclass():
+def editgroup():
     """
-    Allows a user in the "Dev" admin group to create/edit classes
+    Allows a user in the "Dev" admin group to create/edit groups
     """
-    class_id = request.args.get('gid')
-    classroom = {}
+    group_id = request.args.get('gid')
+    group = {}
     username = user.username
 
-    if class_id:
-        classroom = mongodb.classes.find_one({ 'gid': class_id })
-        if not classroom:
+    if group_id:
+        group = mongodb.groups.find_one({ 'gid': group_id })
+        if not group:
             abort(404)
     else:
-        class_id = str( uuid4() )
+        group_id = str( uuid4() )
 
-    form = ClassDescriptionForm(csrf_enabled = False)
+    form = GroupDescriptionForm(csrf_enabled = False)
     
     if request.method == 'GET':
-        if classroom:
-            form.name.data = classroom.get('name')
-            form.admin_only.data = classroom.get('admin_only') 
+        if group:
+            form.name.data = group.get('name')
+            form.admin_only.data = group.get('admin_only')
+            form.description.data = group.get('description') 
         else:
             form.admin_only.data = True
      
-        return render_template('editclass.html', form = form)
+        return render_template('editgroup.html', form = form)
 
     if form.validate_on_submit():
-        document = { 'gid': class_id,
+        document = { 'gid': group_id,
                      'name': form.name.data,
                      'admin_only': form.admin_only.data,
                      'users': [username],
-                     'admins': [username] }
+                     'admins': [username],
+                     'description': form.description.data }
 
-        if classroom:
-            mongodb.classes.update({ 'gid': class_id }, document)
+        if group:
+            mongodb.groups.update({ 'gid': group_id }, document)
         else:
-            mongodb.classes.insert(document)
+            mongodb.groups.insert(document)
             
-        return redirect(url_for('.classroom', gid = class_id))
+        return redirect(url_for('.group', gid = group_id))
 
     else:
-        return render_template('editclass.html', form = form, error = "Please enter all the required information."), 400
+        return render_template('editgroup.html', form = form, error = "Please enter all the required information."), 400
 
 
 
 
-@app.route('/class/<gid>')
-def classroom(gid):
+@app.route('/group/<gid>')
+def group(gid):
     """
-    Page to display a class given a gid.
+    Page to display a group given a gid.
     """
-    classroom = mongodb.classes.find_one({"gid": gid})
+    group = mongodb.groups.find_one({"gid": gid})
 
-    if not classroom or ( user.username not in classroom['admins'] and classroom['admin_only'] ):
+    if not group or ( user.username not in group['admins'] and group['admin_only'] ):
         abort(404)
 
-    return render_template('class.html', classroom = classroom)
+    return render_template('group.html', group = group)
 
 
 
@@ -692,20 +693,20 @@ def challenges():
 
 @app.route('/join/<gid>', methods=['GET', 'POST'])
 @login_required
-def joinclass(gid):
+def joingroup(gid):
     """
-    Allows a user to join/unsubsribe a class
+    Allows a user to join/leave a group
     """
     username = user.username
     if not username:
         abort(400)
 
-    classroom = mongodb.classes.find_one({ 'gid': gid })
-    if not classroom:
+    group = mongodb.groups.find_one({ 'gid': gid })
+    if not group:
         abort(404)
 
-    if username not in classroom['users']:
-        mongodb.classes.update(
+    if username not in group['users']:
+        mongodb.groups.update(
             { 'gid': gid },
             { '$push':
                 {
@@ -714,7 +715,7 @@ def joinclass(gid):
             }
         )
     else:
-        mongodb.classes.update(
+        mongodb.groups.update(
             { 'gid': gid },
             { '$pull':
                 {
@@ -723,14 +724,14 @@ def joinclass(gid):
             }
         )
 
-    classes = list( mongodb.classes.find() )
+    groups = list( mongodb.groups.find() )
 
-    if classes:
-        for classroom in classes:
-            if classroom['admin_only'] and username not in classroom['admins']:
-                classes.remove(classroom)
+    if groups:
+        for group in groups:
+            if group['admin_only'] and username not in group['admins']:
+                groups.remove(group)
 
-    return render_template('classes.html', username = username, classes = classes)
+    return render_template('groups.html', username = username, groups = groups)
 
 
 
@@ -866,11 +867,10 @@ def teapot():
 
 
 
-
 # On unix systems the project should be executed using Gunicorn and Foreman.
 # Since Gunicorn doesn't run in windows yet, we let Flask itself handle the requests on nt systems.
 if os.name == 'nt':
     if __name__ == "__main__":
-        app.run(host='0.0.0.0', port=8080)
+        app.run(host='0.0.0.0', port=8080, debug=True)
 else:
     print "Try 'foreman start'"
