@@ -147,3 +147,4 @@ yggdrasil/tests/results
 
 # Logs
 yggdrasil/server/logs/
+bifrost/logs/

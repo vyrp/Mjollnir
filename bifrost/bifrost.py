@@ -14,6 +14,7 @@ import markdown
 import os
 import shutil
 import traceback
+import logging
 from os import environ
 from uuid import uuid4
 from itertools import chain
@@ -53,6 +54,7 @@ from pymongo.errors import PyMongoError
 from stormpath.error import Error as StormpathError
 
 from werkzeug.utils import secure_filename
+from logging.handlers import TimedRotatingFileHandler
 
 from wtforms.fields import TextField
 from wtforms.fields import BooleanField
@@ -148,6 +150,13 @@ DEBUG = str(environ.get('MJOLLNIR_DEBUG')).lower()
 DEBUG = (DEBUG == '1' or DEBUG == 'true')
 
 app = Flask(__name__)
+handler = TimedRotatingFileHandler('/Mjollnir/bifrost/logs/bifrost.log', when='midnight', backupCount=7)
+logger = logging.getLogger('werkzeug')
+logger.setLevel(logging.INFO)
+logger.addHandler(handler)
+app.logger.setLevel(logging.INFO)
+app.logger.addHandler(handler)
+
 
 # Set environment variables
 app.config['SECRET_KEY'] = environ.get('STORMPATH_SECRET_KEY')
@@ -232,6 +241,9 @@ def exception_handler(error):
     """
     Handler for HTTP 500 on unexpected exceptions.
     """
+    strtime = datetime.datetime.now().strftime('%Y-%m-%d - %H:%M:%S')
+    logger.info('====  ' + strtime + '  ====', )
+    logger.info(traceback.format_exc(error))
     return render_template('error.html', description = '500: Internal Server Error', error = error), 500
 
 
