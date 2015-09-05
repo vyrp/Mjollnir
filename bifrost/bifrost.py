@@ -9,6 +9,7 @@
 import boto
 import httplib
 import urllib
+import urllib2
 import datetime
 import markdown
 import os
@@ -58,8 +59,9 @@ from logging.handlers import TimedRotatingFileHandler
 
 from wtforms.fields import TextField
 from wtforms.fields import BooleanField
+from wtforms.fields import SelectField
+from wtforms.fields import IntegerField
 from wtforms.validators import DataRequired
-
 
 
 ##### Classes
@@ -98,6 +100,18 @@ class NewDescriptionForm(Form):
     """
     title = TextField('Title', validators=[DataRequired()])
     pagedown = PageDownField('Content', validators=[DataRequired()])
+
+
+
+
+class CustomMatchesForm(Form):
+    """
+    WTForm to specify custom matches
+    """
+    #TODO: Limit max size
+    rounds = IntegerField('1')
+    challenge = SelectField('Challenge') 
+    player = SelectField('Player')
 
 
 
@@ -866,6 +880,56 @@ def matches():
     """
     matches = latest_matches(limit = 10)
     return render_template('matches.html', matches = matches)
+
+
+
+
+#TODO: We are using users username in the dropdown list, we need to change it to name and surname
+@app.route('/custommatches/<gid>', methods=['GET', 'POST'])
+@login_required
+def custommatches(gid):
+    """
+    Allows users to control matches
+    """
+    group = mongodb.groups.find_one({ 'gid': gid })
+    if not group:
+        abort(404)
+
+    form = CustomMatchesForm(csrf_enabled = False)
+    user_id = user.custom_data['uid']
+    # user_in_db = mongodb.users.find_one({ 'username': username })
+
+    group_users = list()
+    for player in group['users']:
+        group_users.append((mongodb.users.find_one({ 'username': player})['uid'], player))
+    group_users.remove((user_id, user.username))
+
+    challenges = mongodb.challenges.find()
+    form.challenge.choices = [(challenge['cid'], challenge['name']) for challenge in challenges]
+    form.player.choices = group_users
+
+    if request.method == 'GET':
+        form.rounds.data = 1
+        return render_template('custommatches.html', form = form)
+
+    if form.validate_on_submit():
+        rounds = form.rounds.data
+        challenge = form.challenge.data
+        user_challenged = form.player.data
+
+        submission1 = mongodb.submissions.find_one({ 'uid': user_id, 'cid': challenge })
+        submission2 = mongodb.submissions.find_one({ 'uid': user_challenged, 'cid': challenge })
+        values = {  'cid': challenge,
+                    'siid1': submission1['siid'],
+                    'uid1': user_id,
+                    'siid2': submission2['siid'],
+                    'uid2': user_challenged }
+        encoded = urllib.urlencode(values)
+
+        for _ in range(rounds): 
+            response = urllib2.urlopen('http://127.0.0.1:30403/run', data=encoded)
+
+        return redirect(url_for('.matches'))
 
 
 
