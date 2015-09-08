@@ -41,9 +41,30 @@
             </div>
 
             <div class="tab-pane fade" id="play">
-              Play here.              
+              <form method="post" action="">
+                <fieldset>
+                  <legend>Customize Matches</legend>
+                  <div>
+                    <b>{{ form.challenge.label }}</b>
+                    {{ form.challenge(class="color-white") }}
+                  </div>
+                  <br>
+                  <div>
+                    <b>{{ form.player.label }}</b>
+                    {{ form.player(class="color-white") }}
+                  </div>
+                  <br>
+                  <div>
+                    <b>Rounds</b><br>
+                    {{ form.rounds(class="color-white") }}
+                  </div>
+                  <br>
+                  <div class="col-lg-10 col-lg-offset-4">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                  </div>
+                </fieldset>
+              </form>
             </div>
-
             <div class="tab-pane fade" id="group-info">
               Admin only? {{ group.admin_only }}
               <br><br />
