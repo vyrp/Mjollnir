@@ -7,7 +7,7 @@ Usage:
 
 Where:
     <game> one of: $(ls /Mjollnir/vigridr/src/games/ | grep -v json | xargs)
-    <language> one of: py cs cpp
+    <language> one of: cpp cs java py
 EOM
 exit 1
 fi
@@ -29,18 +29,22 @@ echo "Copied server"
 
 client() {
     case "$1" in
-        py)
-            make clientpy &>/dev/null
-            cp -r bin/py/* ~/game/$2
+        cpp)
+            make clientcpp &>/dev/null
+            cp bin/cpp/* ~/game/$2
+            rm ~/game/$2/server
         ;;
         cs)
             make clientcsharp &>/dev/null
             cp bin/csharp/* ~/game/$2
         ;;
-        cpp)
-            make clientcpp &>/dev/null
-            cp bin/cpp/* ~/game/$2
-            rm ~/game/$2/server
+        java)
+            make clientjava #&>/dev/null
+            cp bin/java/* ~/game/$2
+        ;;
+        py)
+            make clientpy &>/dev/null
+            cp -r bin/py/* ~/game/$2
         ;;
         *)
             echo "Wrong language"

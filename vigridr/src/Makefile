@@ -2,13 +2,14 @@ THRIFTDIR = thrifts
 THRIFTS =  $(shell find $(THRIFTDIR) -type f -name *.thrift)
 THRIFTSGENCPP = $(shell echo $(THRIFTS) | sed s,\\s,\\n,g | sed s,/[^/]*\.thrift,/gen-cpp,g | sort -u)
 
-all: clientcpp clientcsharp clientpy server buildtests
+all: clientcpp clientcsharp clientjava clientpy server buildtests
 
 $(THRIFTSGENCPP): ../obj/thrift
 	rm -rf $(THRIFTSGENCPP)
 	$(foreach file, $(THRIFTS), thrift --gen cpp:pure_enums -o $(shell dirname $(file)) $(file);)
-	$(foreach file, $(THRIFTS), thrift --gen py -o $(shell dirname $(file)) $(file);)
 	$(foreach file, $(THRIFTS), thrift --gen csharp -o $(shell dirname $(file)) $(file);)
+	$(foreach file, $(THRIFTS), thrift --gen java -o $(shell dirname $(file)) $(file);)
+	$(foreach file, $(THRIFTS), thrift --gen py -o $(shell dirname $(file)) $(file);)
 	$(foreach folder, $(THRIFTSGENCPP), rm -f $(folder)/*.skeleton.cpp; mkdir -p ../obj/$(folder);)
 
 ../obj/thrift: $(THRIFTS)
@@ -21,6 +22,10 @@ clientcpp: $(THRIFTSGENCPP)
 .PHONY: clientcsharp
 clientcsharp: $(THRIFTSGENCPP)
 	@$(MAKE) csharp $(MFLAGS) -C client
+
+.PHONY: clientjava
+clientjava: $(THRIFTSGENCPP)
+	@$(MAKE) java $(MFLAGS) -C client
 
 .PHONY: clientpy
 clientpy: $(THRIFTSGENCPP)
@@ -41,7 +46,6 @@ buildtests: $(THRIFTSGENCPP)
 .PHONY: deleteclients
 deleteclients:
 	$(MAKE) $(MFLAGS) delete -C client
-
 
 .PHONY: clean
 clean:

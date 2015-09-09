@@ -1,5 +1,5 @@
 ALLDIRECTORIES := $(shell find -type d | grep 'src')
-DIRECTORIES := $(ALLDIRECTORIES:./src/%=./obj/%)  ./bin ./bin/cpp ./bin/csharp ./bin/py
+DIRECTORIES := $(ALLDIRECTORIES:./src/%=./obj/%)  ./bin ./bin/cpp ./bin/csharp ./bin/java ./bin/py
 
 all: $(DIRECTORIES)
 	@$(MAKE) $(MFLAGS) -C src
@@ -9,6 +9,9 @@ clientcpp: $(DIRECTORIES)
 
 clientcsharp: $(DIRECTORIES)
 	@$(MAKE) clientcsharp $(MFLAGS) -C src
+
+clientjava: $(DIRECTORIES)
+	@$(MAKE) clientjava $(MFLAGS) -C src
 
 clientpy: $(DIRECTORIES)
 	@$(MAKE) clientpy $(MFLAGS) -C src

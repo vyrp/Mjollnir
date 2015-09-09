@@ -114,9 +114,10 @@ obj/
 
 # Thrift auto generated folders
 gen-cpp/
-gen-html/
-gen-py/
 gen-csharp/
+gen-html/
+gen-java/
+gen-py/
 
 # Thrift auto generated files
 *.skeleton.cpp
