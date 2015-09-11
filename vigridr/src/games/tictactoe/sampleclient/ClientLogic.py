@@ -4,7 +4,6 @@ from Command.ttypes import Coordinate
 from GameModel.ttypes import GameStatus
 
 from random import randint
-import time
 
 class Solution:
     def __init__(self, gameInit):
