@@ -4,20 +4,14 @@ from Command.ttypes import Coordinate
 from GameModel.ttypes import GameStatus
 
 from random import randint
+import time
 
 class Solution:
-    def play_turn(self, wm):
-        for i in range(3):
-            for j in range(3):
-                if wm.table[i][j] == Marker.X:
-                    print 'X',
-                elif wm.table[i][j] == Marker.O:
-                    print 'O',
-                else:
-                    print '.',
-            print
-        print
+    def __init__(self, gameInit):
+        print "Python Client"
+        print "PlayerType: " + Marker._VALUES_TO_NAMES[gameInit.gameDescription.myType]
 
+    def play_turn(self, wm):
         command = Command(Coordinate())
         while True:
             x = randint(0,2)
@@ -26,10 +20,7 @@ class Solution:
                 command.coordinate.x = x
                 command.coordinate.y = y
                 break
+        print repr(command.coordinate)
+
         return command
 
-    def __init__(self, gameInit):
-        if gameInit.gameDescription.myType == Marker.X:
-            print "PlayerType: X"
-        else:
-            print "PlayerType: O"

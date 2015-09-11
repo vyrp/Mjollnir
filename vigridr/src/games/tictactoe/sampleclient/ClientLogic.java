@@ -6,18 +6,15 @@ public class ClientLogic {
 
     public ClientLogic(GameInit gameInit) {
         random = new Random();
+
+        System.out.println("Java Client");
+        System.out.println("PlayerType: " + gameInit.gameDescription.myType);
     }
 
     public Command playTurn(WorldModel wm) {
         Command command = new Command(new Coordinate());
 
-        Marker[][] table = new Marker[3][];
-        int i = 0;
-        for (List<Marker> row : wm.table) {
-            table[i] = new Marker[3];
-            row.toArray(table[i]);
-            i++;
-        }
+        Marker[][] table = toMatrix(wm.table);
 
         while(true) {
             int x = random.nextInt(3);
@@ -28,7 +25,22 @@ public class ClientLogic {
                 break;
             }
         }
+
+        System.out.println(command.coordinate.toString());
         return command;
     }
 
+    private Marker[][] toMatrix(List<List<Marker>> table) {
+        Marker[][] matrix = new Marker[3][];
+
+        int i = 0;
+        for (List<Marker> row : table) {
+            matrix[i] = new Marker[3];
+            row.toArray(matrix[i]);
+            i++;
+        }
+
+        return matrix;
+    }
 }
+
