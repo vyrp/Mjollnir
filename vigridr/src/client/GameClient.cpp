@@ -39,11 +39,6 @@ using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using std::chrono::high_resolution_clock;
 
-//DEBUG
-void printWorldModel(const WorldModel& wm) {
-  
-}
-
 void synchronize(int32_t t) {
   auto sleeptime = high_resolution_clock::now() + milliseconds(t);
   std::this_thread::sleep_until(sleeptime);
@@ -62,7 +57,6 @@ void playGame(GameClient& client) {
     client.getGameInfo(gameInfo);
     startTime = high_resolution_clock::now();
     const WorldModel& wm = gameInfo.worldModel;
-    printWorldModel(wm);
     if (gameInfo.gameStatus == GameStatus::FINISHED) {
       break;
     }

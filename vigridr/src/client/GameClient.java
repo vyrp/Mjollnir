@@ -7,12 +7,6 @@ import org.apache.thrift.TException;
 
 public class GameClient
 {
-    // DEBUG
-    public static void printWorldModel(WorldModel wm) {
-
-    }
-
-
     public static void synchronize(long t) {
         if(t > 0) {
             try {
@@ -36,7 +30,6 @@ public class GameClient
             gameInfo = client.getGameInfo();
             start = System.nanoTime();
             WorldModel wm = gameInfo.getWorldModel();
-            printWorldModel(wm);
             if (GameStatus.FINISHED.equals(gameInfo.getGameStatus())) {
                 break;
             }

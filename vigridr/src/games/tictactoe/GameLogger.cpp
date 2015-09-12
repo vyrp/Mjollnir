@@ -43,6 +43,26 @@ void GameLogger::logWorldModel(const WorldModel& wm) {
   wmList.push_back(wm);
 }
 
+char toChar(Marker m) {
+  switch(m) {
+    case Marker::X: return 'X';
+    case Marker::O: return 'O';
+    default: return '.';
+  }
+}
+
+void GameLogger::printWorldModel(const WorldModel& wm) {
+  std::ostringstream oss;
+  for (int i=0; i<3; i++) {
+    for (int j=0; j<3; j++) {
+      oss << toChar(wm.table[i][j]) << ' ';
+    }
+    oss << std::endl;
+  }
+  oss << std::endl;
+  std::cerr << oss.str();
+}
+
 void GameLogger::logGameDescription(const GameDescription& description1,
                                     const std::string& player1,
                                     const GameDescription& description2,

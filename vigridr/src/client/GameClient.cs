@@ -8,12 +8,6 @@ using System.Diagnostics;
 
 public class CSharpClient
 {
-    // DEBUG
-    public static void printWorldModel(WorldModel wm) {
-
-    }
-
-
     public static void synchronize(int t) {
         if(t > 0)
             Thread.Sleep(t);
@@ -33,7 +27,6 @@ public class CSharpClient
             stopwatch.Reset();
             stopwatch.Start ();
             WorldModel wm = gameInfo.WorldModel;
-            printWorldModel(wm);
             if (gameInfo.GameStatus == GameStatus.FINISHED)
             {
                 break;

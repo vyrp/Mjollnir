@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <vector>
+#include <array>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -15,6 +16,7 @@ namespace mjollnir { namespace vigridr {
 std::vector<WorldModel> wmList;
 GameDescription gd1,gd2;
 std::string player1Id,player2Id;
+char symbols[] = "XO";
 
 
 ptree createGameDescriptionPt() {
@@ -47,6 +49,30 @@ ptree createPt(const WorldModel& wm) {
 
 void GameLogger::logWorldModel(const WorldModel& wm) {
   wmList.push_back(wm);
+}
+
+void GameLogger::printWorldModel(const WorldModel& wm) {
+  const int32_t w = gd1.field.width;
+  const int32_t h = gd1.field.height;
+  
+  std::vector<std::vector<char>> field(h, std::vector<char>(w+2, '.'));
+  for (int i=0; i<h; i++) {
+    field[i][w] = '\n';
+    field[i][w+1] = '\0';
+  }
+  
+  for (size_t i=0; i<wm.players.size(); i++) {
+    const auto& player = wm.players[i];
+    for (const auto& coor : player.body) {
+      field[coor.y][coor.x] = symbols[i];
+    }
+  }
+  
+  std::ostringstream oss;
+  for (int i=0; i<h; i++) {
+    oss << field[i].data();
+  }
+  std::cerr << oss.str();
 }
 
 void GameLogger::logGameDescription(const GameDescription& description1,

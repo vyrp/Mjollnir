@@ -56,6 +56,7 @@ void GameManager::finalizeGame() {
   gameInfo_.gameStatus = GameStatus::FINISHED;
   gameInfo_.worldModel = gameLogic_.getWorldModel();
   GameLogger::logWorldModel(gameInfo_.worldModel);
+  GameLogger::printWorldModel(gameInfo_.worldModel);
   GameLogger::flushLog();
 }
 
@@ -96,6 +97,7 @@ void GameManager::nextTurn() {
   gameInfo_.gameStatus = GameStatus::RUNNING;
   gameInfo_.worldModel = gameLogic_.getWorldModel();
   GameLogger::logWorldModel(gameInfo_.worldModel);
+  GameLogger::printWorldModel(gameInfo_.worldModel);
   timer_.sleepUntilWorldModelTime();
   timer_.startCycle();
 }
@@ -216,8 +218,7 @@ void GameManager::getGameInfo(GameInfo& gameInfo, int32_t playerId) {
     std::unique_lock<std::mutex> lock(playerMutex_[idx]);
     gameInfo.isMyTurn = playerTurnData_[idx].isTurn();
   }
-  LOG("%d %d",
-      gameInfo.updateTimeLimitMs, gameInfo.nextWorldModelTimeEstimateMs);
+  // LOG("%d %d", gameInfo.updateTimeLimitMs, gameInfo.nextWorldModelTimeEstimateMs);
 }
 
 void GameManager::getGameInit(GameInit& gameInit, int32_t playerId) {
