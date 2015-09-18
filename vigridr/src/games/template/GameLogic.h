@@ -10,6 +10,8 @@
 
 namespace mjollnir { namespace vigridr {
 
+  struct TotalWorldModel {};
+
 /**
  *  This class should be implemented for each game providing the
  *  logic necessary to run the game
@@ -35,6 +37,12 @@ class GameLogic {
   WorldModel getWorldModel() const;
 
   /**
+   *  Returns the total world model which is the world model for
+   *  partially observable games
+   */
+  TotalWorldModel getTotalWorldModel() const;
+
+  /**
    *  Tells weather the game has finished or not
    */
   bool isFinished() const;
@@ -55,6 +63,7 @@ class GameLogic {
 
  private:
   WorldModel worldModel_;
+  TotalWorldModel twm_;
   int32_t player1_;
   int32_t player2_;
   int32_t winner_;

@@ -7,11 +7,14 @@
 
 namespace mjollnir { namespace vigridr {
 
+struct TotalWorldModel {};
+
 class GameLogic {
  public:
   GameLogic(int32_t playerId1, int32_t playerId2);
   bool update(Command command, int32_t playerId);
   WorldModel getWorldModel() const;
+  TotalWorldModel getTotalWorldModel() const;
   bool isFinished() const;
   int32_t getWinner() const;
   GameDescription getGameDescription(int32_t playerId) const;
@@ -31,6 +34,7 @@ class GameLogic {
   bool checkVictory_(Command command, int32_t playerId);
   bool randomPlay_(int32_t playerId);
   WorldModel worldModel_;
+  TotalWorldModel twm_;
   int32_t player1_, player2_, winner_;
   bool hasFinished_;
   const size_t minValue_ = 0;

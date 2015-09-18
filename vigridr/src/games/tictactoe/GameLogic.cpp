@@ -142,4 +142,8 @@ bool GameLogic::checkDraw_(const WorldModel& wm) {
   return true;
 }
 
+TotalWorldModel GameLogic::getTotalWorldModel() const {
+  return twm_;
+}
+
 }}  // namespaces

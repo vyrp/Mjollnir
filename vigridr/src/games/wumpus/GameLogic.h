@@ -7,7 +7,30 @@
 
 namespace mjollnir { namespace vigridr {
 
-struct TotalWorldModel {};
+enum Direction{
+  UP,
+  RIGHT,
+  DOWN,
+  LEFT
+};
+
+struct Coordinate{
+  int32_t x, y;
+};
+
+struct WorldSquare{
+  bool gold = false;
+  bool wumpus = false;
+  bool player = false;
+  bool pit = false;
+  bool breeze = false;
+  bool stench = false;
+};
+
+struct TotalWorldModel{
+  std::vector<std::vector<WorldSquare>> map;
+  Direction playerDirection;
+};
 
 class GameLogic {
  public:
@@ -30,21 +53,22 @@ class GameLogic {
    *  Specific function to use at GameLogicTest test suite.
    *  Internally should use setTableCoordinate()
    */
-  void setTableCoordinate(const Coordinate& coordinate, Marker marker);
  private:
-  bool checkLines_(const WorldModel& wm, Marker player);
-  bool checkColumns_(const WorldModel& wm, Marker player);
-  bool checkDiagonals_(const WorldModel& wm, Marker player);
-  bool checkVictory_(const WorldModel& wm, Marker player, int32_t playerId);
-  bool checkDraw_(const WorldModel& wm);
-  void setTableCoordinate_(const Coordinate& coordinate, Marker marker);
-  bool checkTableCoordinate_(const Coordinate& coordinate, Marker marker);
+  void initializeWorld_(void);
+  bool checkBump_(int32_t x, int32_t y);
+  void resetSensors_(void);
+  void updateWorldSquare_(int32_t x, int32_t y);
+  void updateSensors_(WorldSquare& ws, int32_t x, int32_t y);
+  void updateWorldModel_(Action action);
   bool randomPlay_(int32_t playerId);
+  
   WorldModel worldModel_;
   TotalWorldModel twm_;
-  int32_t player1_, player2_, winner_;
-  bool hasFinished_;
-  const size_t boardSize_ = 3;
+  int32_t player1_, player2_, winner_, score_;
+  bool hasFinished_, wumpusAlive_, canShoot_, hasGold_;
+  const size_t worldSize_ = 4;
+  Direction facing_ = RIGHT;
+  Coordinate playerPosition_, wumpusPosition_;
 };
 
 }}  // namespaces

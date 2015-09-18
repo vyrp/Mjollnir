@@ -73,4 +73,8 @@ void GameLogic::setWinner(int32_t value) {
   winner_ = value;
 }
 
+TotalWorldModel GameLogic::getTotalWorldModel() const {
+  return twm_;
+}
+
 }}  // namespaces

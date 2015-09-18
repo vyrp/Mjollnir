@@ -25,7 +25,7 @@ ptree createPt(const WorldModel& wm) {
   return ptree(std::to_string(wm.sampleData));
 }
 
-void GameLogger::logWorldModel(const WorldModel& wm) {
+void GameLogger::logWorldModel(const WorldModel& wm, const TotalWorldModel& twm) {
   wmList.push_back(wm);
 }
 

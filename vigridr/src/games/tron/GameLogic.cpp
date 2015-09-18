@@ -102,4 +102,8 @@ GameDescription GameLogic::getGameDescription(int32_t playerId) const {
   return gameDescription;
 }
 
+TotalWorldModel GameLogic::getTotalWorldModel() const {
+  return twm_;
+}
+
 }}  // namespaces

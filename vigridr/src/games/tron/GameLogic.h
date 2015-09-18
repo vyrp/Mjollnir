@@ -10,6 +10,8 @@
 
 namespace mjollnir { namespace vigridr {
 
+struct TotalWorldModel {};
+
 class GameLogic {
  public:
   GameLogic(int32_t playerId1, int32_t playerId2);
@@ -18,13 +20,14 @@ class GameLogic {
   bool isFinished();
   int32_t getWinner();
   GameDescription getGameDescription(int32_t playerId) const;
-
+  TotalWorldModel getTotalWorldModel() const;
 
  private:
   bool isValidCoordinate(Coordinate pos);
   Coordinate getUpdatedHeadPosition(Coordinate pos, Direction dir);
 
   WorldModel worldModel_;
+  TotalWorldModel twm_;
   int32_t player1_, player2_, winner_;
   static constexpr int32_t kNoWinner = -1;
   bool hasFinished_;

@@ -28,7 +28,7 @@ ptree createGameDescriptionPt() {
   return gdPt;
 }
 
-void GameLogger::logWorldModel(const WorldModel& wm) {
+void GameLogger::logWorldModel(const WorldModel& wm, const TotalWorldModel& twm) {
   wmList.push_back(wm);
 }
 

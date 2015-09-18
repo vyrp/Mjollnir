@@ -57,6 +57,7 @@ void GameManager::finalizeGame() {
   gameInfo_.worldModel = gameLogic_.getWorldModel();
   GameLogger::logWorldModel(gameInfo_.worldModel);
   GameLogger::printWorldModel(gameInfo_.worldModel);
+  GameLogger::logWorldModel(gameInfo_.worldModel, gameLogic_.getTotalWorldModel());
   GameLogger::flushLog();
 }
 
@@ -98,6 +99,7 @@ void GameManager::nextTurn() {
   gameInfo_.worldModel = gameLogic_.getWorldModel();
   GameLogger::logWorldModel(gameInfo_.worldModel);
   GameLogger::printWorldModel(gameInfo_.worldModel);
+  GameLogger::logWorldModel(gameInfo_.worldModel, gameLogic_.getTotalWorldModel());
   timer_.sleepUntilWorldModelTime();
   timer_.startCycle();
 }
