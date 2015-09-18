@@ -18,40 +18,35 @@ std::vector<TotalWorldModel> twmList;
 GameDescription gd1, gd2;
 std::string player1Id, player2Id;
 
-ptree createPt(const TotalWorldModel& twm) {
-  ptree twmPt;
+std::string worldSquareStr(WorldSquare elem){
   std::string elemStr;
+
+  elemStr = "";
+  if(elem.player) 
+    elemStr = elemStr + "A";
+  elemStr = elemStr + "-";
+  if(elem.breeze)
+    elemStr = elemStr + "B";
+  elemStr = elemStr + "-";
+  if(elem.gold)
+    elemStr = elemStr + "G";
+  if(elem.pit) 
+    elemStr = elemStr + "P";
+  elemStr = elemStr + "-";
+  if(elem.stench)
+    elemStr = elemStr + "S";
+  elemStr = elemStr + "-";
+  if(elem.wumpus)
+    elemStr = elemStr + "W";
+
+  return elemStr;
+}
+
+std::string playerDirectionStr(Direction playerDirection){
+
   std::string directionStr;
 
-  ptree tablePt;
-  for (auto line : twm.map) {
-    ptree linePt;
-    for (auto elem : line) {
-      
-      elemStr = "";
-      if(elem.player) 
-        elemStr = elemStr + "A";
-      elemStr = elemStr + "-";
-      if(elem.breeze)
-        elemStr = elemStr + "B";
-      elemStr = elemStr + "-";
-      if(elem.gold)
-        elemStr = elemStr + "G";
-      if(elem.pit) 
-        elemStr = elemStr + "P";
-      elemStr = elemStr + "-";
-      if(elem.stench)
-        elemStr = elemStr + "S";
-      elemStr = elemStr + "-";
-      if(elem.wumpus)
-        elemStr = elemStr + "W";
-      
-      linePt.push_back(std::make_pair("", ptree(elemStr)));
-    }
-    tablePt.push_back(std::make_pair("", linePt));
-  }
-  
-  switch(twm.playerDirection){
+  switch(playerDirection){
     case UP:
       directionStr = "UP";
       break;
@@ -66,8 +61,39 @@ ptree createPt(const TotalWorldModel& twm) {
       break;
   }
 
+  return directionStr;
+}
+
+
+void GameLogger::printWorldModel(const WorldModel& wm, const TotalWorldModel& twm) {
+  std::ostringstream oss;
+  
+  for (auto line : twm.map) {
+    for (auto elem : line) {
+      oss << worldSquareStr(elem) << " | ";
+    }
+    oss << std::endl;
+  }
+  oss << "player direction: " <<playerDirectionStr(twm.playerDirection);
+  oss << std::endl;
+  std::cerr << oss.str();
+}
+
+
+ptree createPt(const TotalWorldModel& twm) {
+  ptree twmPt;
+
+  ptree tablePt;
+  for (auto line : twm.map) {
+    ptree linePt;
+    for (auto elem : line) {
+      linePt.push_back(std::make_pair("", ptree(worldSquareStr(elem))));
+    }
+    tablePt.push_back(std::make_pair("", linePt));
+  }
+  
   twmPt.push_back(std::make_pair("world map",tablePt));
-  twmPt.push_back(std::make_pair("player direction", ptree(directionStr)));
+  twmPt.push_back(std::make_pair("player direction", ptree(playerDirectionStr(twm.playerDirection))));
 
   return twmPt;
 }

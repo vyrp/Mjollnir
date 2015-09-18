@@ -32,7 +32,7 @@ void GameLogger::logWorldModel(const WorldModel& wm, const TotalWorldModel& twm)
   wmList.push_back(wm);
 }
 
-void GameLogger::printWorldModel(const WorldModel& wm) {
+void GameLogger::printWorldModel(const WorldModel& wm, const TotalWorldModel& twm) {
   std::ostringstream oss;
   oss << "target: " << wm.target << std::endl;
   oss << "last guess: " << wm.guess << std::endl;

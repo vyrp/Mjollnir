@@ -55,8 +55,7 @@ GameManager::~GameManager() {
 void GameManager::finalizeGame() {
   gameInfo_.gameStatus = GameStatus::FINISHED;
   gameInfo_.worldModel = gameLogic_.getWorldModel();
-  GameLogger::logWorldModel(gameInfo_.worldModel);
-  GameLogger::printWorldModel(gameInfo_.worldModel);
+  GameLogger::printWorldModel(gameInfo_.worldModel, gameLogic_.getTotalWorldModel());
   GameLogger::logWorldModel(gameInfo_.worldModel, gameLogic_.getTotalWorldModel());
   GameLogger::flushLog();
 }
@@ -97,8 +96,7 @@ void GameManager::nextTurn() {
   gameInfo_.cycle++;
   gameInfo_.gameStatus = GameStatus::RUNNING;
   gameInfo_.worldModel = gameLogic_.getWorldModel();
-  GameLogger::logWorldModel(gameInfo_.worldModel);
-  GameLogger::printWorldModel(gameInfo_.worldModel);
+  GameLogger::printWorldModel(gameInfo_.worldModel, gameLogic_.getTotalWorldModel());
   GameLogger::logWorldModel(gameInfo_.worldModel, gameLogic_.getTotalWorldModel());
   timer_.sleepUntilWorldModelTime();
   timer_.startCycle();

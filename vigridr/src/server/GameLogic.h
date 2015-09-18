@@ -37,7 +37,8 @@ class GameLogic {
   WorldModel getWorldModel() const;
 
   /**
-   *
+   *  Returns the total world model which is the world model for
+   *  partially observable games
    */
   TotalWorldModel getTotalWorldModel() const;
 

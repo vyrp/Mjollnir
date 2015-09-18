@@ -6,17 +6,23 @@ public class Solution
 {
     public Random random;
     public Command playTurn(WorldModel wm) {
-        Command command = new Command(new Coordinate());
-        while(true)
-        {
-            int x = random.Next(3);
-            int y = random.Next(3);
-            if (wm.Table[x][y] == Marker.UNMARKED) {
-                command.Coordinate.X = x;
-                command.Coordinate.Y = y;
-                break;
-            }
+        Command command = new Command();
+        int move = random.Next(4);
+
+        if (move == 0) {
+            Console.WriteLine("FORWARD");
+            command.Action = Action.FORWARD;
+        } else if(move == 1){
+            Console.WriteLine("TURNRIGHT");
+            command.Action = Action.TURNRIGHT;
+        } else if(move == 2){
+            Console.WriteLine("TURNLEFT");
+            command.Action = Action.TURNLEFT;
+        } else {
+            Console.WriteLine("STAY");
+            command.Action = Action.STAY;
         }
+
         return command;
     }
 

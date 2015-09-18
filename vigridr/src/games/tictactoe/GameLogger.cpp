@@ -51,7 +51,7 @@ char toChar(Marker m) {
   }
 }
 
-void GameLogger::printWorldModel(const WorldModel& wm) {
+void GameLogger::printWorldModel(const WorldModel& wm, const TotalWorldModel& twm) {
   std::ostringstream oss;
   for (int i=0; i<3; i++) {
     for (int j=0; j<3; j++) {

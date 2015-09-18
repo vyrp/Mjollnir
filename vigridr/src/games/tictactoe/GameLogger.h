@@ -12,8 +12,7 @@ namespace mjollnir { namespace vigridr {
 
 class GameLogger {
  public:
-  static void logWorldModel(const WorldModel& wm);
-  static void printWorldModel(const WorldModel& wm);
+  static void printWorldModel(const WorldModel& wm, const TotalWorldModel& twm);
   static void logWorldModel(const WorldModel& wm, const TotalWorldModel& twm);
   static void logGameDescription(const GameDescription& description1,
                                  const std::string& player1,

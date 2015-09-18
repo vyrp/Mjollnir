@@ -51,7 +51,7 @@ void GameLogger::logWorldModel(const WorldModel& wm, const TotalWorldModel& twm)
   wmList.push_back(wm);
 }
 
-void GameLogger::printWorldModel(const WorldModel& wm) {
+void GameLogger::printWorldModel(const WorldModel& wm, const TotalWorldModel& twm) {
   const int32_t w = gd1.field.width;
   const int32_t h = gd1.field.height;
   
