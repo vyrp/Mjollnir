@@ -104,11 +104,11 @@ class NewDescriptionForm(Form):
 
 
 
+#TODO: Limit number of rounds
 class CustomMatchForm(Form):
     """
-    WTForm to specify custom matches
+    WTForm to specify a custom match
     """
-    #TODO: Limit max size
     rounds = IntegerField('1')
     challenge = SelectField('Challenge') 
     player = SelectField('Player')
@@ -157,8 +157,6 @@ ACCEPTED_LANGUAGES = {'cs40': 'C# 4.0 (mono)',
                       'cpp11': 'C++11 (g++ 4.7.3)',
                       'python27': 'Python (2.7.3)'}
 ALL_PLAYERS = "all-players-play"
-BUILD_STATUS_SUCCESS = "Success"
-BUILD_STATUS_WAITING = "Waiting"
 
 
 ##### Initialization
@@ -487,9 +485,9 @@ def user_page(username):
         submission['percentile'] = round(100*float(total_submissions - submission['rank'] + 1)/total_submissions, 2)
         
         if not submission.get('build_description', ""):
-            if submission['build_status'] == BUILD_STATUS_SUCCESS:
+            if submission['build_status'] == "Success":
                 submission['build_description'] = "Your latest submission to this challenge was built successfully and is already in the queue to be executed."
-            elif submission['build_status'] == BUILD_STATUS_WAITING:
+            elif submission['build_status'] == "Waiting":
                 submission['build_description'] = "Our servers are currently busy, but your submission will be built soon."
             else:
                 submission['build_description'] = "Sorry, something went wrong. We couldn't build your code and have no error message in our logs."
@@ -580,7 +578,7 @@ def group(gid):
     """
     Page to display a group given a gid.
     """
-    group = mongodb.groups.find_one({"gid": gid})
+    group = mongodb.groups.find_one({'gid': gid})
     if not group or ( user.username not in group['admins'] and group['admin_only'] ):
         abort(404)
     
@@ -601,83 +599,20 @@ def group(gid):
 
     if request.method == 'GET':
         form.rounds.data = 1
-        logger.info("rendering")
         return render_template('group.html', group = group, form = form)
 
     if form.validate_on_submit():
-        logger.info("validate on submit 1")
         rounds = form.rounds.data
         cid = form.challenge.data
-        logger.info(">>>>>> CID: " + cid)
         user_challenged = form.player.data
-        logger.info("validate on submit 2")        
         if user_challenged == ALL_PLAYERS:
-            logger.info("validate on submit 3")
-            resp = allXall(cid = cid, rounds = rounds, group = group)
-            logger.info("validate on submit 4")
+            allXall(cid = cid, rounds = rounds, group = group)
             return redirect(url_for('.matches'))
-        else:
-            logger.info("validate on submit 5")
-            error = playerXplayer(cid = cid, uid1 = user_id, uid2 = user_challenged, rounds = rounds)
-            if error:
-                return render_template('group.html', group = group, form = form, error = error)
-            else:
-                return redirect(url_for('.matches'))
-
-
-
-
-#TODO: it will change when k players can play the game
-def allXall(cid, rounds, group):
-    """ 
-    Make all possible pairs of players in a group play
-    """
-    users = [mongodb.users.find_one({ 'username': username }) for username in group['users']]
-    i = 0
-    while i < len(users):
-        j = i
-        while j < len(users):
-            if users[i] is not users[j]:
-                success = playerXplayer(cid = cid, uid1 = users[i]['uid'], uid2 = users[j]['uid'], rounds=rounds)
-            j = j + 1
-        i = i + 1                
-    return True
-
-
-
-
-#TODO: It will change when k players can play the game
-def playerXplayer(cid, uid1, uid2, rounds):
-    """ 
-    Make match between two players or give a error message if the match is not possible.
-    """
-    sub1 = mongodb.submissions.find_one({ 'uid': uid1, 'cid': cid })
-    sub2 = mongodb.submissions.find_one({ 'uid': uid2, 'cid': cid })
-
-    if sub1 and sub2 and sub1['build_status'] == BUILD_STATUS_SUCCESS and sub2['build_status'] == BUILD_STATUS_SUCCESS:
-        values = {  'cid': cid,
-                    'siid1': sub1['siid'],
-                    'uid1': uid1,
-                    'siid2': sub2['siid'],
-                    'uid2': uid2 }
-        logger.info(values)
-        encoded = urllib.urlencode(values)
-
-        for _ in range(rounds): 
-            logger.info("Inside for")
-            response = urllib2.urlopen('http://127.0.0.1:30403/run', data=encoded)
-
-        return False
-    elif sub1 and not sub2:
-        return "Your opponent has no submission for this chalenge."
-    elif not sub1 and sub2:
-        return "You don't have a submission for this challenge."
-    elif sub1['build_status'] != BUILD_STATUS_SUCCESS:
-        return "Build was not seccessful in your latest submission."
-    elif sub2['build_status'] != BUILD_STATUS_SUCCESS:
-        return "Build was not seccessful in your opponent's latest submission."
-    else:
-        return "You and your opponent have no submission for this challenge."
+        error = playerXplayer(cid = cid, uid1 = user_id, uid2 = user_challenged, rounds = rounds)
+        if error:
+            return render_template('group.html', group = group, form = form, error = error)
+        
+        return redirect(url_for('.matches'))
 
 
 
@@ -975,6 +910,53 @@ def matches():
     """
     matches = latest_matches(limit = 10)
     return render_template('matches.html', matches = matches)
+
+
+# The way we match the players will change when k players can play
+def allXall(cid, rounds, group):
+    """ 
+    Make all possible pairs of players in a group play
+    """
+    users = [mongodb.users.find_one({ 'username': username }) for username in group['users']]
+    for i in xrange(len(users)):
+        for j in xrange(i, len(users)):
+            if users[i] is not users[j]:
+                playerXplayer(cid = cid, uid1 = users[i]['uid'], uid2 = users[j]['uid'], rounds = rounds)
+
+
+
+
+def playerXplayer(cid, uid1, uid2, rounds):
+    """ 
+    Make match between two players or give an error message if the match is not possible.
+    """
+    sub1 = mongodb.submissions.find_one({ 'uid': uid1, 'cid': cid })
+    sub2 = mongodb.submissions.find_one({ 'uid': uid2, 'cid': cid })
+
+    if sub1 and sub2 and sub1['build_status'] == "Success" and sub2['build_status'] == "Success":
+        values = {  'cid': cid,
+                    'siid1': sub1['siid'],
+                    'uid1': uid1,
+                    'siid2': sub2['siid'],
+                    'uid2': uid2 }
+        encoded = urllib.urlencode(values)
+
+        for _ in xrange(rounds): 
+            response = urllib2.urlopen('http://127.0.0.1:30403/run', data=encoded)
+
+        return False
+    if sub1 and not sub2:
+        return "Your opponent has no submission for this chalenge."
+    if not sub1 and sub2:
+        return "You don't have a submission for this challenge."
+    if not sub1 and not sub2:
+        return "You and your opponent have no submission for this challenge."
+    #TODO: We should use a previous successful submission if we can
+    if sub1['build_status'] != "Success":
+        return "Build was not successful in your latest submission."
+    if sub2['build_status'] != "Success":
+        return "Build was not successful in your opponent's latest submission."
+    return "Some error occurred with your submission or in your opponent's submission."
 
 
 
