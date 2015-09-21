@@ -156,7 +156,7 @@ def latest_matches(uid = None, cid = None, limit = 8):
 ACCEPTED_LANGUAGES = {'cs40': 'C# 4.0 (mono)',
                       'cpp11': 'C++11 (g++ 4.7.3)',
                       'python27': 'Python (2.7.3)'}
-ALL_PLAYERS = "all-players-play"
+ALL_PLAYERS = 'all-players-play'
 
 
 ##### Initialization
@@ -258,7 +258,7 @@ def exception_handler(error):
     strtime = datetime.datetime.now().strftime('%Y-%m-%d - %H:%M:%S')
     logger.info('====  ' + strtime + '  ====', )
     logger.info(traceback.format_exc(error))
-    return render_template('error.html', description = '500: Internal Server Error', error = error), 500
+    return render_template('error.html', description = "500: Internal Server Error", error = error), 500
 
 
 
@@ -267,16 +267,16 @@ def exception_handler(error):
 @app.route('/')
 def index():
     """
-        Home page with Mjollnir news.
-        Displays the latest 3 news.
-        The HTTP parameter p specifies a specific page (skips 3*p news).
+    Home page with Mjollnir news.
+    Displays the latest 3 news.
+    The HTTP parameter p specifies a specific page (skips 3*p news).
     """
     news_per_page = 3
     p = int(request.args.get('p', 0))
 
     news = list( mongodb.news.find().sort([('datetime', -1)]).skip(news_per_page*p).limit(news_per_page) )
 
-    return render_template('news.html', custom_title = "News", news = news, page = p)
+    return render_template('news.html', custom_title = 'News', news = news, page = p)
 
 
 
@@ -338,7 +338,9 @@ def editnew():
 
 @app.route('/about')
 def about():
-    """ About page. """
+    """ 
+    About page. 
+    """
     return render_template('about.html')
 
 
@@ -590,7 +592,7 @@ def group(gid):
         group_users.append((mongodb.users.find_one({ 'username': player})['uid'], player))
     group_users.remove((user_id, user.username))
     if user.username in group['admins']:
-        group_users.append((ALL_PLAYERS, "All Players"))
+        group_users.append((ALL_PLAYERS, 'All Players'))
 
     challenges = mongodb.challenges.find()
     challenges_choices = [(challenge['cid'], challenge['name']) for challenge in challenges]
@@ -687,7 +689,7 @@ def challenge_by_name(challenge_name):
     """
     Page to display a challenge given a problem name.
     """
-    challenge = mongodb.challenges.find_one({"name": challenge_name})
+    challenge = mongodb.challenges.find_one({'name': challenge_name})
 
     if not challenge or ( not is_active_user_in('Dev') and challenge['dev_only'] ):
         abort(404)
@@ -726,7 +728,7 @@ def challenge():
     if not challenge_id:
         abort(404)
 
-    challenge = mongodb.challenges.find_one({"cid": challenge_id})
+    challenge = mongodb.challenges.find_one({'cid': challenge_id})
 
     if challenge and ( is_active_user_in('Dev') or not challenge['dev_only'] ):
         return render_template('challenge.html', challenge=challenge)
@@ -798,7 +800,7 @@ def submitsolution(challenge_name):
     """
     Allows a user to submit/update (override) a solution to an existing challenge.
     """
-    challenge = mongodb.challenges.find_one({"name": challenge_name})
+    challenge = mongodb.challenges.find_one({'name': challenge_name})
 
     if not challenge or ( not is_active_user_in('Dev') and challenge['dev_only'] ):
         abort(404)
@@ -840,9 +842,9 @@ def submitsolution(challenge_name):
 
 
         data = urllib.urlencode({'sid': existing_solution['sid'], 'cid': existing_solution['cid'], 'password': app.config['YGG_PASSWORD']})
-        headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
+        headers = {'Content-type': 'application/x-www-form-urlencoded', 'Accept': 'text/plain'}
         conn = httplib.HTTPConnection(app.config['YGG_BUILD_URL'])
-        conn.request("POST", "/build", data, headers)
+        conn.request('POST', '/build', data, headers)
         response = conn.getresponse()
         conn.close()
 
@@ -918,10 +920,9 @@ def allXall(cid, rounds, group):
     Make all possible pairs of players in a group play
     """
     users = [mongodb.users.find_one({ 'username': username }) for username in group['users']]
-    for i in xrange(len(users)):
-        for j in xrange(i, len(users)):
-            if users[i] is not users[j]:
-                playerXplayer(cid = cid, uid1 = users[i]['uid'], uid2 = users[j]['uid'], rounds = rounds)
+    for i in xrange(len(users) - 1):
+        for j in xrange(i + 1, len(users)):
+            playerXplayer(cid = cid, uid1 = users[i]['uid'], uid2 = users[j]['uid'], rounds = rounds)
 
 
 
