@@ -360,8 +360,8 @@ def register():
             'email': request.form.get('email'),
             'username': request.form.get('username'),
             'password': request.form.get('password'),
-            'given_name': request.form.get('username'),
-            'surname': 'Xupa Croata',
+            'given_name': request.form.get('given_name'),
+            'surname': request.form.get('surname'),
         })
         _user.__class__ = User
     except StormpathError, err:
