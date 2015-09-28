@@ -89,7 +89,10 @@ class GroupDescriptionForm(Form):
     """
     name = TextField('Group name')
     description = PageDownField('Group description')
-    admin_only = BooleanField('Admin only')   
+    admin_only = BooleanField('Admin only') 
+
+    # In some groups we want to maintain anonymity by showing only the usernames  
+    users_name_type = SelectField('Choose user name type', choices = [('username', 'Username'), ('full_name', 'Full name')])
 
 
 
@@ -112,7 +115,7 @@ class CustomMatchForm(Form):
     rounds = IntegerField('1')
     challenge = SelectField('Challenge') 
     player = SelectField('Player')
-
+    
 
 
 
@@ -402,7 +405,9 @@ def login():
             mongodb.users.insert({
                 'uid': uid,
                 'username': _user.username,
-                'email': _user.email
+                'email': _user.email,
+                'given_name': _user.given_name,
+                'surname': _user.surname
             })
 
             _user.custom_data['uid'] = uid
@@ -547,7 +552,8 @@ def editgroup():
         if group:
             form.name.data = group.get('name')
             form.admin_only.data = group.get('admin_only')
-            form.description.data = group.get('description') 
+            form.description.data = group.get('description')
+            form.users_name_type.data = group.get('users_name_type') 
         else:
             form.admin_only.data = True
      
@@ -557,13 +563,18 @@ def editgroup():
         document = { 'gid': group_id,
                      'name': form.name.data,
                      'admin_only': form.admin_only.data,
-                     'users': [username],
-                     'admins': [username],
-                     'description': form.description.data }
+                     'description': form.description.data,
+                     'users_name_type': form.users_name_type.data
+                   }
 
         if group:
+            document['users'] = group['users']
+            document['admins'] = group['admins']
             mongodb.groups.update({ 'gid': group_id }, document)
+            
         else:
+            document['users'] = [username]
+            document['admins'] = [username]
             mongodb.groups.insert(document)
             
         return redirect(url_for('.group', gid = group_id))
@@ -589,8 +600,21 @@ def group(gid):
 
     group_users = list()
     for player in group['users']:
-        group_users.append((mongodb.users.find_one({ 'username': player})['uid'], player))
-    group_users.remove((user_id, user.username))
+
+        user_in_db = mongodb.users.find_one({ 'username': player})
+        uid = user_in_db['uid']
+        name = player
+
+        if group['users_name_type'] == 'full_name':
+            # In case the user don't have a full name (old users)
+            if 'given_name' in user_in_db and 'surname' in user_in_db:
+                name = user_in_db['given_name'] + ' ' + user_in_db['surname']
+
+        # We are considering that players can't play with themselves 
+        if uid != user_id:
+            group_users.append((uid, name))
+    
+    
     if user.username in group['admins']:
         group_users.append((ALL_PLAYERS, 'All Players'))
 
