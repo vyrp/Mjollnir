@@ -108,8 +108,8 @@ class Game():
         # Hack for the case of just one player
         # TODO: Fix it!
         if len(self.uids) == 1:
-            command = 'cd server && ./server --player1 %s --player2 %s --port1 %s --port2 %s 1> result 2> /dev/null' %
-            (self.uids[0], self.uids[0], '9090', '9091') 
+            command = ('cd server && ./server --player1 %s --player2 %s --port1 %s --port2 %s 1> result 2> /dev/null' %
+            (self.uids[0], self.uids[0], '9090', '9091'))
 
         server = CommandThread(command)
         clients = []
@@ -126,7 +126,7 @@ class Game():
         if len(self.uids) == 1:
             clients.append( 
                 CommandThread (
-                    'cd client2 && ./client --port 9091 1> /dev/null 2> /dev/null'
+                    'cd client1 && ./client --port 9091 1> /dev/null 2> /dev/null'
                 )
             ) 
 
@@ -156,6 +156,7 @@ class Game():
         with open('server/result', 'r') as file:
             winner = file.read()
         
+        print "winner: " + winner
         if winner == '-1':
             self.logger.info('Result: tie')
             for idx in range(len(self.uids)):

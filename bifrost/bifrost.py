@@ -631,6 +631,9 @@ def group(gid):
         rounds = form.rounds.data
         cid = form.challenge.data
         user_challenged = form.player.data
+        if cid == '7fb1cdb8-4fc8-4412-a045-50dd6b2a8283':
+            playOneplayerGame(cid = cid, uid = user_id, rounds = rounds)
+            return redirect(url_for('.matches'))
         if user_challenged == ALL_PLAYERS:
             allXall(cid = cid, rounds = rounds, group = group)
             return redirect(url_for('.matches'))
@@ -938,6 +941,8 @@ def matches():
     return render_template('matches.html', matches = matches)
 
 
+
+
 # The way we match the players will change when k players can play
 def allXall(cid, rounds, group):
     """ 
@@ -948,6 +953,30 @@ def allXall(cid, rounds, group):
         for j in xrange(i + 1, len(users)):
             playerXplayer(cid = cid, uid1 = users[i]['uid'], uid2 = users[j]['uid'], rounds = rounds)
 
+
+
+def playOneplayerGame(cid, uid, rounds):
+    """ 
+    Play match of game with one player or give an error message if the match is not possible.
+    """
+    sub = mongodb.submissions.find_one({ 'uid': uid, 'cid': cid })
+
+    if sub and sub['build_status'] == "Success":
+        values = {  'cid': cid,
+                    'siids': [sub['siid']],
+                    'uids': [uid] }
+        encoded = urllib.urlencode(values)
+
+        for _ in xrange(rounds): 
+            response = urllib2.urlopen('http://127.0.0.1:30403/run', data=encoded)
+
+        return False
+    if not sub:
+        return "You don't have a submission for this challenge."
+    #TODO: We should use a previous successful submission if we can
+    if sub['build_status'] != "Success":
+        return "Build was not successful in your latest submission."
+    return "Some error occurred with your submission."
 
 
 

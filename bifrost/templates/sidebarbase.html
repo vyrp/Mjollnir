@@ -17,7 +17,12 @@
       <dl>
       <dt>Latest matches</dt>
       {% for match in current_user_latest_matches() %}
-        <dd><a href="{{ url_for('.match', mid = match.mid) }}"> {{ match.challenge_name }} vs {{ ', '.join(match.opponents) }}</a></dd>
+        <dd><a href="{{ url_for('.match', mid = match.mid) }}"> 
+              {{ match.challenge_name }} 
+              {% if len(match.apponents) > 0 %} 
+                vs {{ ', '.join(match.opponents) }}
+              {% endif %}
+            </a></dd>
       {% endfor %}
     </dl>
     {% endblock %}
