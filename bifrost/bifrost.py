@@ -167,6 +167,15 @@ DEBUG = str(environ.get('MJOLLNIR_DEBUG')).lower()
 DEBUG = (DEBUG == '1' or DEBUG == 'true')
 
 app = Flask(__name__)
+
+BIFROST_LOG = '/Mjollnir/bifrost/logs/bifrost.log'
+
+# If log doesn't exist, create folder if necessary and create it
+if not os.path.isfile(BIFROST_LOG):
+    if not os.path.isdir(os.path.dirname(BIFROST_LOG)):
+        os.mkdir(os.path.dirname(BIFROST_LOG))
+    open(BIFROST_LOG, "w") # Create file. No need to close since RefCount == 0
+
 handler = TimedRotatingFileHandler('/Mjollnir/bifrost/logs/bifrost.log', when='midnight', backupCount=7)
 logger = logging.getLogger('werkzeug')
 logger.setLevel(logging.INFO)
