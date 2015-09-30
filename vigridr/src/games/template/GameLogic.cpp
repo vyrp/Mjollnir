@@ -5,6 +5,7 @@
 namespace mjollnir { namespace vigridr {
 
 GameLogic::GameLogic(int32_t playerId1, int32_t playerId2) {
+  const std::string kNoWinner = "-1";
   player1_ = playerId1;
   player2_ = playerId2;
   winner_ = kNoWinner;
@@ -25,7 +26,7 @@ bool GameLogic::isFinished() const {
   return hasFinished_;
 }
   
-int32_t GameLogic::getWinner() const {
+std::string GameLogic::getWinner() const {
   return winner_;
 }
 

@@ -12,7 +12,7 @@ GameLogic::GameLogic(int32_t playerId1, int32_t playerId2) {
   player2_ = playerId2;
   facing_ = RIGHT;
   wumpusAlive_ = true;
-  winner_ = -1;
+  winner_ = "-1";
   score_ = 0;
   playerPosition_.x = worldSize_ - 1;
   playerPosition_.y = 0;
@@ -155,7 +155,7 @@ void GameLogic::updateWorldModel_(Action action){
         if((twm_.map[playerPosition_.x][playerPosition_.y].wumpus) || 
             twm_.map[playerPosition_.x][playerPosition_.y].pit)  {
           hasFinished_ = true;
-          winner_ = COMPUTER;
+          winner_ = "s:" + std::to_string(score_);
         } else {
           if(twm_.map[playerPosition_.x][playerPosition_.y].gold){
             worldModel_.sensors.glitter = true;          
@@ -225,11 +225,10 @@ void GameLogic::updateWorldModel_(Action action){
       if(playerPosition_.x == 0 && playerPosition_.y == 0){
         if(hasGold_){
           score_ += 1000;
-          winner_ = player1_;
         } else {
           score_--;
-          winner_ = player2_;
         }
+        winner_ = "s:" + std::to_string(score_);
         hasFinished_ = true;
       } else {
         score_--;
@@ -269,11 +268,11 @@ void GameLogic::setHasFinished(bool value) {
   hasFinished_ = value;
 }
   
-int32_t GameLogic::getWinner() const {
+std::string GameLogic::getWinner() const {
   return winner_;
 }
 
-void GameLogic::setWinner(int32_t value) {
+void GameLogic::setWinner(std::string value) {
   winner_ = value;
 }
 

@@ -7,7 +7,7 @@ namespace mjollnir { namespace vigridr {
 GameLogic::GameLogic(int32_t playerId1, int32_t playerId2) {
   player1_ = playerId1;
   player2_ = playerId2;
-  winner_ = -1;
+  winner_ = "-1";
   hasFinished_ = false;
   std::vector<std::vector<Marker> > table {
       {Marker::UNMARKED,Marker::UNMARKED,Marker::UNMARKED},
@@ -67,11 +67,11 @@ void GameLogic::setHasFinished(bool value) {
   hasFinished_ = value;
 }
   
-int32_t GameLogic::getWinner() const {
+std::string GameLogic::getWinner() const {
   return winner_;
 }
 
-void GameLogic::setWinner(int32_t value) {
+void GameLogic::setWinner(std::string value) {
   winner_ = value;
 }
 
@@ -127,7 +127,7 @@ bool GameLogic::checkVictory_(const WorldModel& wm, Marker player, int32_t playe
   if(checkLines_(worldModel_, player) ||
      checkColumns_(worldModel_, player) ||
      checkDiagonals_(worldModel_, player) ) {
-    winner_ = playerId;
+    winner_ = std::to_string(playerId);
     return true;
   }
   return false;

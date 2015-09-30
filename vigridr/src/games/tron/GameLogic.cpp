@@ -7,7 +7,7 @@ namespace mjollnir { namespace vigridr {
 GameLogic::GameLogic(int32_t playerId1, int32_t playerId2) {
   player1_ = playerId1;
   player2_ = playerId2;
-  winner_ = kNoWinner;
+  winner_ = std::to_string(kNoWinner);
   hasFinished_ = false;
   for (int32_t i = 0; i < kWidth; ++i) {
     for (int32_t j = 0; j < kHeight; ++j) {
@@ -71,11 +71,11 @@ bool GameLogic::update(Command command, int32_t playerId) {
     field_[nextHeadPosition.x][nextHeadPosition.y] = playerId;
   }
   else {
-    if (winner_ == kNoWinner) {
-      winner_ = (player1_ == playerId) ? player2_ : player1_;
+    if (winner_ == std::to_string(kNoWinner)) {
+      winner_ = (player1_ == playerId) ? std::to_string(player2_) : std::to_string(player1_);
     }
     else {
-      winner_ = kNoWinner;  // tie
+      winner_ = std::to_string(kNoWinner);  // tie
     }
     hasFinished_ = true;
   }
@@ -90,7 +90,7 @@ bool GameLogic::isFinished() {
   return hasFinished_;
 }
   
-int32_t GameLogic::getWinner() {
+std::string GameLogic::getWinner() {
   return winner_;
 }
 

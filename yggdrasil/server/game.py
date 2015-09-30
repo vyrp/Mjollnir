@@ -105,6 +105,12 @@ class Game():
             command = command + '--port' + str(idx + 1) + ' 909' + str(idx) + ' '
         command = command + '1> result 2> /dev/null'
 
+        # Hack for the case of just one player
+        # TODO: Fix it!
+        if len(self.uids) == 1:
+            command = 'cd server && ./server --player1 %s --player2 %s --port1 %s --port2 %s 1> result 2> /dev/null' %
+            (self.uids[0], self.uids[0], '9090', '9091') 
+
         server = CommandThread(command)
         clients = []
 
@@ -112,6 +118,15 @@ class Game():
             clients.append( 
                 CommandThread (
                     'cd client' + str(idx + 1) + ' && ./client --port 909' + str(idx) + ' 1> /dev/null 2> /dev/null'
+                )
+            ) 
+
+        # Hack for the case of just one player
+        # TODO: Fix it!
+        if len(self.uids) == 1:
+            clients.append( 
+                CommandThread (
+                    'cd client2 && ./client --port 9091 1> /dev/null 2> /dev/null'
                 )
             ) 
 

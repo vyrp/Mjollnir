@@ -172,18 +172,26 @@ void GameManager::updaterTask() {
       }
     }
     bool finished = gameLogic_.isFinished();
-    int32_t winner = gameLogic_.getWinner();
+    std::string winner = gameLogic_.getWinner();
 
     // if one player sent an invalid command the other one wins
     if(countWrongPlayers == 1) {
-      winner = correctPlayer;
+      winner = std::to_string(correctPlayer);
       finished = true;
     } else if (countWrongPlayers == 2) {
-      winner = -1;
+      winner = "-1";
       finished = true;
     }
     if (finished) {
-      LOG("Winner is %d", winner);
+
+      // we cannot print std::string on LOG, so we have to change it to a char*
+      char * writable = new char[winner.size() + 1];
+      std::copy(winner.begin(), winner.end(), writable);
+      writable[winner.size()] = '\0';
+
+      LOG("Winner is %s", writable);
+      delete[] writable;
+
       // print winner so that the caller knows how game ended
       std::cout << winner;
       break;

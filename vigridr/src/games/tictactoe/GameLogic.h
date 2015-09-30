@@ -4,6 +4,7 @@
 #include "../thrifts/gen-cpp/Command_types.h"
 #include "../thrifts/gen-cpp/WorldModel_types.h"
 #include "../thrifts/gen-cpp/GameDescription_types.h"
+#include <string>
 
 namespace mjollnir { namespace vigridr {
 
@@ -15,7 +16,7 @@ class GameLogic {
   bool update(Command command, int32_t playerId);
   WorldModel getWorldModel() const;
   bool isFinished() const;
-  int32_t getWinner() const;
+  std::string getWinner() const;
   GameDescription getGameDescription(int32_t playerId) const;
   TotalWorldModel getTotalWorldModel() const;
   /**
@@ -25,7 +26,7 @@ class GameLogic {
   /**
    *  Specific function to use at GameLogicTest test suite
    */
-  void setWinner(int32_t value);
+  void setWinner(std::string value);
   /**
    *  Specific function to use at GameLogicTest test suite.
    *  Internally should use setTableCoordinate()
@@ -42,7 +43,8 @@ class GameLogic {
   bool randomPlay_(int32_t playerId);
   WorldModel worldModel_;
   TotalWorldModel twm_;
-  int32_t player1_, player2_, winner_;
+  int32_t player1_, player2_;
+  std::string winner_;
   bool hasFinished_;
   const size_t boardSize_ = 3;
 };

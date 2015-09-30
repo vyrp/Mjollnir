@@ -17,7 +17,7 @@ class GameLogicTest : public ::testing::Test {
       }
     }
     game1.setHasFinished(false);
-    game1.setWinner(-1);
+    game1.setWinner("-1");
   }
 
   GameLogic game1;
@@ -75,7 +75,7 @@ TEST_F(GameLogicTest, TestDraw) {
     game1.update(command, line[2]);
   }
   EXPECT_TRUE(game1.isFinished());
-  ASSERT_TRUE(game1.getWinner() == -1);
+  ASSERT_TRUE(game1.getWinner() == "-1");
 }
 
 TEST_F(GameLogicTest, TestWinningTables) {
@@ -93,7 +93,7 @@ TEST_F(GameLogicTest, TestWinningTables) {
     game1.update(command, line[2]);
   }
   EXPECT_TRUE(game1.isFinished());
-  ASSERT_TRUE(game1.getWinner() == 9090);
+  ASSERT_TRUE(game1.getWinner() == "9090");
 
   CleanTable();
   indexes = std::vector<std::vector<int> > {
@@ -109,7 +109,7 @@ TEST_F(GameLogicTest, TestWinningTables) {
     game1.update(command, line[2]);
   }
   EXPECT_TRUE(game1.isFinished());
-  ASSERT_TRUE(game1.getWinner() == 9091);
+  ASSERT_TRUE(game1.getWinner() == "9091");
 }
 
 TEST_F(GameLogicTest, TwoWinners) {
@@ -128,7 +128,7 @@ TEST_F(GameLogicTest, TwoWinners) {
     game1.update(command, line[2]);
   }
   EXPECT_TRUE(game1.isFinished());
-  ASSERT_TRUE(game1.getWinner() == 9090);
+  ASSERT_TRUE(game1.getWinner() == "9090");
 }
 
 }}  // namespaces

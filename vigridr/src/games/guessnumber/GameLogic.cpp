@@ -8,7 +8,7 @@ GameLogic::GameLogic(int32_t playerId1, int32_t playerId2) {
   player1_ = playerId1;
   player2_ = playerId2;
   srand(time(NULL));
-  winner_ = -1;
+  winner_ = "-1";
   hasFinished_ = false;
   worldModel_.target = rand()%maxValue_ + 1;
 }
@@ -47,7 +47,7 @@ bool GameLogic::randomPlay_(int32_t playerId) {
 
 bool GameLogic::checkVictory_(Command command, int32_t playerId) {
   if(command.number == worldModel_.target) {
-    winner_ = playerId;
+    winner_ = std::to_string(playerId);
     return true;
   }
   return false;
@@ -65,11 +65,11 @@ void GameLogic::setHasFinished(bool value) {
   hasFinished_ = value;
 }
   
-int32_t GameLogic::getWinner() const {
+std::string GameLogic::getWinner() const {
   return winner_;
 }
 
-void GameLogic::setWinner(int32_t value) {
+void GameLogic::setWinner(std::string value) {
   winner_ = value;
 }
 

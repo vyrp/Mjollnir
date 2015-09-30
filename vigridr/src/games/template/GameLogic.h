@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <utility>
+#include <string>
 
 #include "../thrifts/gen-cpp/Command_types.h"
 #include "../thrifts/gen-cpp/WorldModel_types.h"
@@ -50,8 +51,9 @@ class GameLogic {
   /**
    *  Returns the winner (only called if isFinished()==true)
    *  In case of a tie returns -1
+   *  In case of a score return s:score
    */
-  int32_t getWinner() const;
+  std::string getWinner() const;
 
   /**
    *  Returns the gameDescription.
@@ -66,8 +68,8 @@ class GameLogic {
   TotalWorldModel twm_;
   int32_t player1_;
   int32_t player2_;
-  int32_t winner_;
-  static const int32_t kNoWinner = -1;
+  std::string winner_;
+  static const std::string kNoWinner;
   bool hasFinished_;
 
 };

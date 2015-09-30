@@ -1,6 +1,8 @@
 #ifndef VIGRIDR_SERVER_GAME_LOGIC_H
 #define VIGRIDR_SERVER_GAME_LOGIC_H
 
+#include <string>
+
 #include "../thrifts/gen-cpp/Command_types.h"
 #include "../thrifts/gen-cpp/WorldModel_types.h"
 #include "../thrifts/gen-cpp/GameDescription_types.h"
@@ -38,7 +40,7 @@ class GameLogic {
   bool update(Command command, int32_t playerId);
   WorldModel getWorldModel() const;
   bool isFinished() const;
-  int32_t getWinner() const;
+  std::string getWinner() const;
   GameDescription getGameDescription(int32_t playerId) const;
   TotalWorldModel getTotalWorldModel() const;
   /**
@@ -48,7 +50,7 @@ class GameLogic {
   /**
    *  Specific function to use at GameLogicTest test suite
    */
-  void setWinner(int32_t value);
+  void setWinner(std::string value);
   /**
    *  Specific function to use at GameLogicTest test suite.
    *  Internally should use setTableCoordinate()
@@ -64,7 +66,8 @@ class GameLogic {
   
   WorldModel worldModel_;
   TotalWorldModel twm_;
-  int32_t player1_, player2_, winner_, score_;
+  int32_t player1_, player2_, score_;
+  std::string winner_;
   bool hasFinished_, wumpusAlive_, canShoot_, hasGold_;
   const size_t worldSize_ = 4;
   Direction facing_ = RIGHT;

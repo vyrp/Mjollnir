@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <utility>
+#include <string>
 
 #include "../thrifts/gen-cpp/Command_types.h"
 #include "../thrifts/gen-cpp/WorldModel_types.h"
@@ -18,7 +19,7 @@ class GameLogic {
   bool update(Command command, int32_t playerId);
   WorldModel getWorldModel();
   bool isFinished();
-  int32_t getWinner();
+  std::string getWinner();
   GameDescription getGameDescription(int32_t playerId) const;
   TotalWorldModel getTotalWorldModel() const;
 
@@ -28,7 +29,8 @@ class GameLogic {
 
   WorldModel worldModel_;
   TotalWorldModel twm_;
-  int32_t player1_, player2_, winner_;
+  int32_t player1_, player2_;
+  std::string winner_;
   static constexpr int32_t kNoWinner = -1;
   bool hasFinished_;
 
