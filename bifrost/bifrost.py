@@ -960,10 +960,8 @@ def playerXplayer(cid, uid1, uid2, rounds):
 
     if sub1 and sub2 and sub1['build_status'] == "Success" and sub2['build_status'] == "Success":
         values = {  'cid': cid,
-                    'siid1': sub1['siid'],
-                    'uid1': uid1,
-                    'siid2': sub2['siid'],
-                    'uid2': uid2 }
+                    'siids': [sub1['siid'], sub2['siid']],
+                    'uids': [uid1, uid2] }
         encoded = urllib.urlencode(values)
 
         for _ in xrange(rounds): 

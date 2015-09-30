@@ -37,21 +37,22 @@ class GamesManager(threading.Thread):
         try:
             self.logger.info('[%s] === Starting game queue ===' % (now(), ))
             while self.running:
-                siid1, siid2, uid1, uid2, cid, type = self.games_queue.get() # wait for a requested game
+                siids, uids, cid, type = self.games_queue.get() # wait for a requested game
 
                 if type == RUN:
                     pid = self.game_names[cid]
-                    self.logger.info('[%s] Starting game %s vs %s in %s' % (now(), siid1, siid2, pid))
-                    with Game(siid1, siid2, uid1, uid2, cid, pid, self.logger) as game:
+                    self.logger.info('[%s] Starting game %s in %s' % (now(), siids, pid))
+                    with Game(siids, uids, cid, pid, self.logger) as game:
                         game.download()
                         game.compile()
                         game.run()
                         game.upload()
                         self.completed_queue.put_nowait(game.result)
-                    self.logger.info('[%s] Ended game %s vs %s in %s' % (now(), siid1, siid2, pid))
+                    self.logger.info('[%s] Ended game %s in %s' % (now(), siids, pid))
                 elif type == COMPILE:
                     pid = self.game_names[cid]
-                    sid = siid1
+                    # When using the COMPILE flag, the first argument is the sid
+                    sid = siids
                     self.logger.info('[%s] Starting compilation of %s' % (now(), sid))
                     with Compiler(sid, pid, self.logger) as compiler:
                         compiler.download()
@@ -66,7 +67,7 @@ class GamesManager(threading.Thread):
             self.running = False
             self.logger.info('[%s] === Game queue interrupted ===\n%s' % (now(), str(e)))
 
-    def run_game(self, siid1, siid2, uid1, uid2, cid):
+    def run_game(self, siids, uids, cid):
         if not self.is_alive() or not self.running:
             return {
                 'status': 'error',
@@ -83,13 +84,13 @@ class GamesManager(threading.Thread):
         pid = self.game_names[cid]
 
         try:
-            self.games_queue.put((siid1, siid2, uid1, uid2, cid, RUN))
-            self.logger.info('[%s] Enqueued game %s vs %s in %s' % (now(), siid1, siid2, pid))
+            self.games_queue.put((siids, uids, cid, RUN))
+            self.logger.info('[%s] Enqueued game %s in %s' % (now(), siids, pid))
             return {
                 'status': 'ok'
             }
         except Exception as e:
-            self.logger.info('[%s] Could not enqueue %s vs %s in %s\n%s' % (now(), siid1, siid2, cid, str(e)))
+            self.logger.info('[%s] Could not enqueue %s in %s\n%s' % (now(), siids, cid, str(e)))
             return {
                 'status': 'error',
                 'error': 'Could not enqueue the requested game'
@@ -110,7 +111,7 @@ class GamesManager(threading.Thread):
             }
 
         try:
-            self.games_queue.put((sid, None, None, None, cid, COMPILE))
+            self.games_queue.put((sid, None, cid, COMPILE))
             self.logger.info('[%s] Enqueued compilation of %s' % (now(), sid))
             return {
                 'status': 'ok'
@@ -124,7 +125,7 @@ class GamesManager(threading.Thread):
 
     def kill(self):
         self.running = False
-        self.games_queue.put((None, None, None, None, None, KILL))
+        self.games_queue.put((None, None, None, KILL))
         
     def games(self):
         completed = []
@@ -139,8 +140,8 @@ class GamesManager(threading.Thread):
 manager = GamesManager()
 manager.start()
 
-def run(siid1, siid2, uid1, uid2, cid):
-    return manager.run_game(siid1, siid2, uid1, uid2, cid)
+def run(siids, uids, cid):
+    return manager.run_game(siids, uids, cid)
 
 def kill():
     manager.kill()

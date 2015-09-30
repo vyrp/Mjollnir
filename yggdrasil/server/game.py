@@ -4,6 +4,7 @@ import shutil
 import sys
 import threading
 import traceback
+import ast
 from time import sleep, time
 from uuid import uuid4
 
@@ -35,11 +36,11 @@ def execute(command):
         raise ExecutionError('Return of "%s" was %d.' % (command, result))
 
 class Game():
-    def __init__(self, siid1, siid2, uid1, uid2, cid, pid, logger):
-        self.siid1 = siid1
-        self.siid2 = siid2
-        self.uid1 = uid1
-        self.uid2 = uid2
+    def __init__(self, siids, uids, cid, pid, logger):
+        self.exts = []
+        # Transforming a string of a list back to a list
+        self.siids = ast.literal_eval(siids)
+        self.uids = ast.literal_eval(uids)
         self.pid = pid
         self.logger = logger
         self.mid = str(uuid4())
@@ -48,16 +49,18 @@ class Game():
             'cid': cid,
             'datetime': time(),
             'mid': self.mid,
-            'users': [{
-                'uid': uid1,
-                'siid': siid1,
-                'rank': -1
-            }, {
-                'uid': uid2,
-                'siid': siid2,
-                'rank': -1
-            }]
+            'users': []
         }
+
+        # I'm considering here that uids and siids won't be long lists
+        for uid, siid in zip(self.uids, self.siids):
+            self.result['users'].append(
+                {
+                    'uid': uid,
+                    'siid': siid,
+                    'rank': -1
+                }
+            )
         
     def __enter__(self):
         return self
@@ -70,9 +73,10 @@ class Game():
                 self.logger.error(line[:-1])
         return True
 
+    # TODO: download solution for computer in wumpus - ???
     def download(self):
-        self.ext1 = dbmanager.download(self.siid1)
-        self.ext2 = dbmanager.download(self.siid2)
+        for siid in self.siids:
+            self.exts.append(dbmanager.download(siid))
 
     def compile(self):
         os.chdir('/Mjollnir/vigridr/src/')
@@ -81,12 +85,12 @@ class Game():
         
         os.chdir('/Mjollnir/vigridr/')
         os.mkdir(self.game + '/')
-        for idx, siid, ext in [('1', self.siid1, self.ext1), ('2', self.siid2, self.ext2)]:
+        for idx, siid, ext in zip(range(1, len(self.siids) + 1), self.siids, self.exts):
             lang = 'csharp' if ext == 'cs' else ext
             shutil.move('/sandboxes/downloads/' + siid, 'src/client/ClientLogic.' + ext)
             self.logger.info('make client' + lang)
             execute('make client' + lang + ' 1> /dev/null 2> /dev/null')
-            shutil.copytree('bin/' + lang, self.game + '/client' + idx)
+            shutil.copytree('bin/' + lang, self.game + '/client' + str(idx))
             execute('make remove 1> /dev/null 2> /dev/null')
         
         os.mkdir(self.game + '/server/')
@@ -94,52 +98,67 @@ class Game():
 
     def run(self):
         os.chdir(self.game)
-        server = CommandThread(
-            'cd server && ./server --player1 %s --player2 %s --port1 %s --port2 %s 1> result 2> /dev/null' %
-            (self.uid1, self.uid2, '9090', '9091')
-        )
-        client1 = CommandThread('cd client1 && ./client --port %s 1> /dev/null 2> /dev/null' % ('9090',))
-        client2 = CommandThread('cd client2 && ./client --port %s 1> /dev/null 2> /dev/null' % ('9091',))
+        command = 'cd server && ./server '
+        for idx, uid in zip(range(len(self.uids)), self.uids):
+            command = command + '--player' + str(idx + 1) + ' ' + uid + ' '
+        for idx in range(len(self.uids)):
+            command = command + '--port' + str(idx + 1) + ' 909' + str(idx) + ' '
+        command = command + '1> result 2> /dev/null'
+
+        server = CommandThread(command)
+        clients = []
+
+        for idx in range(len(self.uids)):
+            clients.append( 
+                CommandThread (
+                    'cd client' + str(idx + 1) + ' && ./client --port 909' + str(idx) + ' 1> /dev/null 2> /dev/null'
+                )
+            ) 
 
         self.logger.info('Starting server')
         server.start()
         sleep(1.5)
 
-        self.logger.info('Starting client1')
-        client1.start()
+        for idx, client in zip(range(len(clients)), clients):
+            self.logger.info('Starting client' + str(idx + 1))
+            client.start()
 
-        self.logger.info('Starting client2')
-        client2.start()
-        
-        client2.join()
-        client1.join()
+        for client in clients[::-1]:
+            client.join()
+
         server.join()
         
-        if client1.result != 0 or client2.result != 0 or server.result != 0:
-            dbmanager.upload_runtime_error(self.siid1 if client1.result != 0 else self.siid2)
-            raise ExecutionError(
-                'Failed to execute: client1(%d) client2(%d) server(%d)' %
-                (client1.result, client2.result, server.result)
-            )
-        
+        # TODO: write better error message
+        for client, siid in zip(clients, self.siids):
+            if client.result != 0:
+                dbmanager.upload_runtime_error(siid)
+                raise ExecutionError(
+                    'Failed to execute: client(%d) server(%d)' %
+                    (client.result, server.result)
+                )
+
         winner = ''
         with open('server/result', 'r') as file:
             winner = file.read()
         
         if winner == '-1':
             self.logger.info('Result: tie')
-            self.result['users'][0]['rank'] = 1
-            self.result['users'][1]['rank'] = 1
-        elif winner == '9090':
-            self.logger.info('Winner: ' + self.siid1)
-            self.result['users'][0]['rank'] = 1
-            self.result['users'][1]['rank'] = 2
-        elif winner == '9091':
-            self.logger.info('Winner: ' + self.siid2)
-            self.result['users'][0]['rank'] = 2
-            self.result['users'][1]['rank'] = 1
+            for idx in range(len(self.uids)):
+                self.result['users'][idx]['rank'] = 1
+        elif winner[0:3] == '909':
+            for idx in range(len(self.uids)):
+                if idx == int(winner[3:]):
+                    self.logger.info('Winner: ' + self.siids[idx])
+                    self.result['users'][idx]['rank'] = 1
+                else:
+                    self.result['users'][idx]['rank'] = 2
+        elif winner[0:2] == 's:':
+            for idx in range(len(self.uids)):
+                self.logger.info('Score: ' + winner[2:])
+                self.result['users'][idx]['rank'] = int(winner[2:])  
         else:
             self.logger.info('Result: error')
+
 
     def upload(self):
         dbmanager.upload(dict(self.result), self.game + '/server/logs')

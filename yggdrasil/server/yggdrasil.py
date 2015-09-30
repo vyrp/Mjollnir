@@ -37,15 +37,17 @@ def run_handler():
             'status': 'error',
             'error': '403'
         }), 403
-        
-    requirements = ['siid1', 'siid2', 'uid1', 'uid2', 'cid']
+    
+
+    requirements = ['siids', 'uids', 'cid']
+    
     missing = test(requirements, request)
     if missing:
         logger.info('MISSING: ' + str(request.form))
         return missing, 400
     
     response = json.dumps(manager.run(*[request.form[item] for item in requirements]))
-    logger.info('(%s, %s, %s) => %s' % (request.form['siid1'], request.form['siid2'], request.form['cid'], response))
+    logger.info('(%s, %s) => %s' % (request.form['siids'], request.form['cid'], response))
     return response
 
 @app.route('/build', methods=['POST'])
