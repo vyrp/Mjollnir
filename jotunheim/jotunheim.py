@@ -151,6 +151,9 @@ def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=m
     suggested_matches = []
 
     for challenge in challenges.find():
+        if challenge['name'] == 'Wumpus':
+            continue
+            
         subs = list(submissions.find({'cid': challenge['cid']}))
         
         for sub in subs:
@@ -178,10 +181,8 @@ def execute_matchmaking(how_many=1, challenges=mongodb.challenges, submissions=m
     		
     for match in suggested_matches:
     	values = {'cid': match[0]['cid'],
-    			  'siid1': match[1][0]['siid'],
-    			  'uid1': match[1][0]['uid'],
-    			  'siid2': match[1][1]['siid'],
-    			  'uid2': match[1][1]['uid']}
+    			  'siids': [match[1][0]['siid'], match[1][1]['siid']],
+    			  'uids': [match[1][0]['uid'], match[1][1]['uid']] }
 
     	encoded = urllib.urlencode(values)
     	print 'Enqueueing', values
