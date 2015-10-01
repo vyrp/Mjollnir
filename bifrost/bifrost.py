@@ -89,9 +89,9 @@ class GroupDescriptionForm(Form):
     """
     name = TextField('Group name')
     description = PageDownField('Group description')
-    admin_only = BooleanField('Admin only') 
+    admin_only = BooleanField('Admin only')
 
-    # In some groups we want to maintain anonymity by showing only the usernames  
+    # In some groups we want to maintain anonymity by showing only the usernames
     users_name_type = SelectField('Choose user name type', choices = [('username', 'Username'), ('full_name', 'Full name')])
 
 
@@ -113,9 +113,9 @@ class CustomMatchForm(Form):
     WTForm to specify a custom match
     """
     rounds = IntegerField('1')
-    challenge = SelectField('Challenge') 
+    challenge = SelectField('Challenge')
     player = SelectField('Player')
-    
+
 
 
 
@@ -140,7 +140,7 @@ def latest_matches(uid = None, cid = None, limit = 8):
     # Maybe we should be using SQL :)
 
     latest = []
-    
+
     for match in matches:
         match['challenge_name'] = next( challenge['name'] for challenge in challenges if challenge['cid'] == match['cid'] )
         match['usernames'] = [ user['username'] for user in users if user['uid'] in [match_user['uid'] for match_user in match['users']] ]
@@ -307,12 +307,12 @@ def editnew():
     """
     nid = request.args.get('nid')
     existing_new = {}
-    
+
     if nid:
         existing_new = mongodb.news.find_one({ 'nid': nid })
         if not existing_new:
             abort(404)
-        
+
         date = existing_new['datetime']
     else:
         nid = str( uuid4() )
@@ -324,7 +324,7 @@ def editnew():
         if existing_new:
             form.title.data = existing_new.get('title')
             form.pagedown.data = existing_new.get('content')
-        
+
         return render_template('editnew.html', form = form)
 
 
@@ -339,7 +339,7 @@ def editnew():
             mongodb.news.update({ 'nid': nid }, document)
         else:
             mongodb.news.insert(document)
-            
+
         return redirect(url_for('.index'))
 
     else:
@@ -350,8 +350,8 @@ def editnew():
 
 @app.route('/about')
 def about():
-    """ 
-    About page. 
+    """
+    About page.
     """
     return render_template('about.html')
 
@@ -499,7 +499,7 @@ def user_page(username):
         submission['RD'] = int(round(submission['RD']))
         submission['rank'] = mongodb.submissions.find({ 'cid': submission['cid'], 'rating': { '$gt': submission['rating'] } }).count() + 1
         submission['percentile'] = round(100*float(total_submissions - submission['rank'] + 1)/total_submissions, 2)
-        
+
         if not submission.get('build_description', ""):
             if submission['build_status'] == "Success":
                 submission['build_description'] = "Your latest submission to this challenge was built successfully and is already in the queue to be executed."
@@ -556,16 +556,16 @@ def editgroup():
         group_id = str( uuid4() )
 
     form = GroupDescriptionForm(csrf_enabled = False)
-    
+
     if request.method == 'GET':
         if group:
             form.name.data = group.get('name')
             form.admin_only.data = group.get('admin_only')
             form.description.data = group.get('description')
-            form.users_name_type.data = group.get('users_name_type') 
+            form.users_name_type.data = group.get('users_name_type')
         else:
             form.admin_only.data = True
-     
+
         return render_template('editgroup.html', form = form)
 
     if form.validate_on_submit():
@@ -580,12 +580,12 @@ def editgroup():
             document['users'] = group['users']
             document['admins'] = group['admins']
             mongodb.groups.update({ 'gid': group_id }, document)
-            
+
         else:
             document['users'] = [username]
             document['admins'] = [username]
             mongodb.groups.insert(document)
-            
+
         return redirect(url_for('.group', gid = group_id))
 
     else:
@@ -603,8 +603,8 @@ def group(gid):
     group = mongodb.groups.find_one({'gid': gid})
     if not group or ( user.username not in group['admins'] and group['admin_only'] ):
         abort(404)
-    
-    form = CustomMatchForm(csrf_enabled = False)    
+
+    form = CustomMatchForm(csrf_enabled = False)
     user_id = user.custom_data['uid']
 
     group_users = list()
@@ -619,11 +619,11 @@ def group(gid):
             if 'given_name' in user_in_db and 'surname' in user_in_db:
                 name = user_in_db['given_name'] + ' ' + user_in_db['surname']
 
-        # We are considering that players can't play with themselves 
+        # We are considering that players can't play with themselves
         if uid != user_id:
             group_users.append((uid, name))
-    
-    
+
+
     if user.username in group['admins']:
         group_users.append((ALL_PLAYERS, 'All Players'))
 
@@ -649,7 +649,7 @@ def group(gid):
         error = playerXplayer(cid = cid, uid1 = user_id, uid2 = user_challenged, rounds = rounds)
         if error:
             return render_template('group.html', group = group, form = form, error = error)
-        
+
         return redirect(url_for('.matches'))
 
 
@@ -668,7 +668,7 @@ def editchallenge():
     """
     challenge_id = request.args.get('cid')
     challenge = {}
-    
+
     if challenge_id:
         challenge = mongodb.challenges.find_one({ 'cid': challenge_id })
         if not challenge:
@@ -691,7 +691,7 @@ def editchallenge():
             form.specs_py.data = challenge.get('specs_py')
         else:
             form.dev_only.data = True
-        
+
         return render_template('editchallenge.html', form = form)
 
 
@@ -711,7 +711,7 @@ def editchallenge():
             mongodb.challenges.update({ 'cid': challenge_id }, document)
         else:
             mongodb.challenges.insert(document)
-            
+
         return redirect(url_for('.challenge_by_name', challenge_name = form.name.data))
 
     else:
@@ -854,7 +854,7 @@ def submitsolution(challenge_name):
     file = request.files['sourcefile']
     if not file:
         return render_template('submitsolution.html', challenge = challenge, error = "Please select a Source File"), 400
-    
+
     # Source/Solution/Submission (you choose!) Instance ID
     siid = str(uuid4())
 
@@ -869,23 +869,14 @@ def submitsolution(challenge_name):
         # For an existing solution, we have to set the 'build_' attributes and notify
         #   the compiler service. The service is responsible for updating the database entries
         #   when it finishes compiling.
-        
+
         update_document = { '$set': { 'build_siid': siid,
                                       'build_status': "Waiting",
                                       'build_description': "" } }
-        
+
         mongodb.submissions.update(query_existing_solution, update_document)
 
-
-        data = urllib.urlencode({'sid': existing_solution['sid'], 'cid': existing_solution['cid'], 'password': app.config['YGG_PASSWORD']})
-        headers = {'Content-type': 'application/x-www-form-urlencoded', 'Accept': 'text/plain'}
-        conn = httplib.HTTPConnection(app.config['YGG_BUILD_URL'])
-        conn.request('POST', '/build', data, headers)
-        response = conn.getresponse()
-        conn.close()
-
-        if response.status >= 300:
-            raise Exception("Invalid Yggdrasil status code: " + str(response.status) + "\n" + response.read())
+        document = existing_solution
 
     else:
         # For new solutions, we just add the document blueprint
@@ -900,9 +891,19 @@ def submitsolution(challenge_name):
                      'rating': 1500,
                      'RD': 300.0,
                      'previous_submissions': [] }
-        
+
         mongodb.submissions.insert(document)
-    
+
+    # Send to build
+    data = urllib.urlencode({'sid': document['sid'], 'cid': document['cid'], 'password': app.config['YGG_PASSWORD']})
+    headers = {'Content-type': 'application/x-www-form-urlencoded', 'Accept': 'text/plain'}
+    conn = httplib.HTTPConnection(app.config['YGG_BUILD_URL'])
+    conn.request('POST', '/build', data, headers)
+    response = conn.getresponse()
+    conn.close()
+
+    if response.status >= 300:
+        raise Exception("Invalid Yggdrasil status code: " + str(response.status) + "\n" + response.read())
 
     return redirect(url_for('dashboard'))
 
@@ -920,10 +921,10 @@ def match(mid):
         abort(404)
 
     challenge = mongodb.challenges.find_one({ 'cid': match['cid'] })
-    
+
     if not challenge:
         raise "Couldn't find a challenge with cid " + match['cid']
-    
+
     users = list( mongodb.users.find({ 'uid': { '$in': [ user['uid'] for user in match['users'] ] } }) )
 
     time_delta = datetime.datetime.utcnow() - match['datetime']
@@ -954,7 +955,7 @@ def matches():
 
 # The way we match the players will change when k players can play
 def allXall(cid, rounds, group):
-    """ 
+    """
     Make all possible pairs of players in a group play
     """
     users = [mongodb.users.find_one({ 'username': username }) for username in group['users']]
@@ -965,7 +966,7 @@ def allXall(cid, rounds, group):
 
 
 def playOneplayerGame(cid, uid, rounds):
-    """ 
+    """
     Play match of game with one player or give an error message if the match is not possible.
     """
     sub = mongodb.submissions.find_one({ 'uid': uid, 'cid': cid })
@@ -976,7 +977,7 @@ def playOneplayerGame(cid, uid, rounds):
                     'uids': [uid] }
         encoded = urllib.urlencode(values)
 
-        for _ in xrange(rounds): 
+        for _ in xrange(rounds):
             response = urllib2.urlopen('http://127.0.0.1:30403/run', data=encoded)
 
         return False
@@ -990,7 +991,7 @@ def playOneplayerGame(cid, uid, rounds):
 
 
 def playerXplayer(cid, uid1, uid2, rounds):
-    """ 
+    """
     Make match between two players or give an error message if the match is not possible.
     """
     sub1 = mongodb.submissions.find_one({ 'uid': uid1, 'cid': cid })
@@ -1002,7 +1003,7 @@ def playerXplayer(cid, uid1, uid2, rounds):
                     'uids': [uid1, uid2] }
         encoded = urllib.urlencode(values)
 
-        for _ in xrange(rounds): 
+        for _ in xrange(rounds):
             response = urllib2.urlopen('http://127.0.0.1:30403/run', data=encoded)
 
         return False
