@@ -47,8 +47,7 @@ if DEBUG:
     def upload(match, log):
         match['datetime'] = datetime.fromtimestamp(match['datetime'])
         mongodb.matches.insert(match)
-        with open(S3 + 'matches/' + match['mid'], 'w') as f:
-            f.write(log)
+        shutil.copy(log, S3 + 'matches/' + match['mid'])
 else:
     import boto
     s3 = boto.connect_s3()

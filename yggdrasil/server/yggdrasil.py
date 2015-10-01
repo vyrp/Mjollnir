@@ -43,7 +43,7 @@ def run_handler():
     
     missing = test(requirements, request)
     if missing:
-        logger.info('MISSING: ' + str(request.form))
+        logger.info('MISSING SOMETHING. Given: ' + str(request.form))
         return missing, 400
     
     response = json.dumps(manager.run(*[request.form[item] for item in requirements]))
