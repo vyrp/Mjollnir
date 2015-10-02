@@ -27,6 +27,7 @@ GAMESDIR = path.join(VIGRIDRSRC, "games")
 PUBLISHED = "published"
 NUM_PLAYERS = "num_players"
 RESULT_TXT = "result.txt"
+POSIX_CHARS = "[A-Za-z0-9._-]"
 
 sys.path.append(VIGRIDRSRC)
 from cache_state import cache_state
@@ -36,7 +37,8 @@ sys.path.pop(-1)
 ## Global Variables ##
 
 languages = ("cpp", "cs", "java", "py")
-folder_regex = re.compile(path.join(SOLUTIONSDIR, r"(\w+)", r"(\w+)") + "$")
+solution_name_regex = re.compile(r"^%s+$" % POSIX_CHARS)
+folder_regex = re.compile(path.join(SOLUTIONSDIR, r"(%s+)" % POSIX_CHARS, r"(%s+)" % POSIX_CHARS) + "$")
 logger = None
 games_config = {}
 
@@ -314,7 +316,7 @@ def create(params):
 
     <game>          - The game name. One of: %s.
     <language>      - The solution language. One of: %s.
-    <solution_name> - The name of the solution. Can be any valid file name.
+    <solution_name> - The name of the solution. Must only contain characaters of the POSIX Portable Character Set (%s).
     --go            - Creates a file to easily go to created folder. Run it with '. go'.
     """
 
@@ -335,6 +337,10 @@ def create(params):
     if language not in languages:
         logger.err("%s is not an available language" % language)
         logger.info("Possible languages: " + " ".join(languages))
+        return 1
+
+    if not solution_name_regex.match(solution_name):
+        logger.err("<solution_name> must contain only characaters of the POSIX Portable Character Set (%s)" % POSIX_CHARS)
         return 1
 
     reserved_names = set(("logs", "--go"))
@@ -370,7 +376,7 @@ def create(params):
 
     return 0
 
-create.__doc__ = create.__doc__ % (" ".join(games), " ".join(languages))
+create.__doc__ = create.__doc__ % (" ".join(games), " ".join(languages), POSIX_CHARS)
 
 def help(params=[]):
     """
