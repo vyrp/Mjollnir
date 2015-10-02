@@ -12,7 +12,7 @@ GameLogic::GameLogic(int32_t playerId1, int32_t playerId2) {
   player2_ = playerId2;
   facing_ = RIGHT;
   wumpusAlive_ = true;
-  winner_ = "-1";
+  winner_ = "s:-3000";
   score_ = 0;
   playerPosition_.x = worldSize_ - 1;
   playerPosition_.y = 0;
@@ -271,6 +271,7 @@ bool GameLogic::isFinished() const {
 void GameLogic::setHasFinished(bool value) {
   hasFinished_ = value;
 }
+
   
 std::string GameLogic::getWinner() const {
   return winner_;

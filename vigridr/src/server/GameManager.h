@@ -17,6 +17,7 @@
 namespace mjollnir { namespace vigridr {
 
 const size_t kMaxPlayers = 2;
+const size_t kMaxTurns = 300; 
 
 /*
  *  Data structure with the information about the player's command in a turn
@@ -89,6 +90,8 @@ class GameManager {
 
   std::vector<std::function<void ()>> gameEndHandlers_;
   std::mutex gameEndHandlersMutex_;
+
+  size_t turn_;
 
 };
 

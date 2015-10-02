@@ -38,6 +38,7 @@ GameManager::GameManager(int32_t playerId0, int32_t playerId1)
   : idToIdx_({{playerId0, 0}, {playerId1, 1}}),
     idxToId_({{playerId0, playerId1}}),
     gameLogic_(playerId0, playerId1) {
+  turn_ = 0;
   initializeGame(playerId0, playerId1);
   updaterThread_ = std::thread([this]() {
     updaterTask();
@@ -131,6 +132,7 @@ clearCommands(std::array<PlayerTurnData, kMaxPlayers>& playerTurnData) {
 void GameManager::updaterTask() {
   while (true) {
     nextTurn();  // initialize next turn
+    turn_++;
     timer_.sleepUntilPlayerUpdateTime();
     LOG("Updating...");
     std::array<PlayerTurnData, kMaxPlayers> movements;
@@ -186,6 +188,13 @@ void GameManager::updaterTask() {
       winner = "-1";
       finished = true;
     }
+
+    if(turn_ >= kMaxTurns){
+      finished = true;
+      winner = gameLogic_.getWinner();
+      // if winner is a score, add a penalty to it      
+    }
+
     if (finished) {
 
       // we cannot print std::string on LOG, so we have to change it to a char*
