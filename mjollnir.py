@@ -7,6 +7,7 @@ Helps on the local development an agent of an AI challenge.
 
 ## Imports and Constants ##
 
+import jinja2
 import json
 import math
 import os
@@ -14,6 +15,7 @@ import re
 import shutil
 import sys
 
+from datetime import datetime
 from glob import glob
 from inspect import getdoc
 from os import path
@@ -34,13 +36,19 @@ from cache_state import cache_state
 from change_game_code import change_game_code
 sys.path.pop(-1)
 
+sys.path.append("/Mjollnir/bifrost")
+from extensions.string_building import time_since_from_seconds
+sys.path.pop(-1)
+
 ## Global Variables ##
 
 languages = ("cpp", "cs", "java", "py")
 solution_name_regex = re.compile(r"^%s+$" % POSIX_CHARS)
 folder_regex = re.compile(path.join(SOLUTIONSDIR, r"(%s+)" % POSIX_CHARS, r"(%s+)" % POSIX_CHARS) + "$")
+log_filename_regex = re.compile(r"^(\d{4})\.(\d{2})\.(\d{2})-(\d{2})h(\d{2})m(\d{2})s:((?::%s+)+)(?:::\d+)?\.log$" % POSIX_CHARS)
 logger = None
 games_config = {}
+jinja = jinja2.Environment(loader=jinja2.FileSystemLoader("/Mjollnir"), extensions=['jinja2.ext.autoescape'])
 
 # Load games configuration
 for game in os.listdir(GAMESDIR):
@@ -131,6 +139,20 @@ def _check_correct_folder():
 
     return correct_folder, solution_folder, game, solution_name, language
 
+def _cut_to_nth_appearance(string, separator, n):
+    """
+    Cuts a string up to the nth appearance of a separator
+
+    Parameters:
+        string    - the string to be cut
+        separator - a string, the symbols to find and count
+        n         - an integer
+
+    Returns:
+        the shortened string
+    """
+    return separator.join(string.split(separator)[:n])
+
 def _indent(doc_string, N):
     """
     Takes a piece of text and indents it so it displays correctly in the help message.
@@ -146,7 +168,7 @@ def _indent(doc_string, N):
     lines = [line.strip() for line in lines]
     return ("\n" + " "*(4+N+3)).join(lines) # 4 spaces for tab, and 3 characters for " - "
 
-def _move_log(game, solution_name, oponents, idx=""):
+def _move_log(game, solution_name, oponents, timestamp=strftime("%Y.%m.%d-%Hh%Mm%Ss"), idx=""):
     """
     Moves the log file of a match to the logs folder of that game.
 
@@ -154,29 +176,16 @@ def _move_log(game, solution_name, oponents, idx=""):
         game          - a string, the name of the game
         solution_name - a string, the name of the solution
         oponents      - a list of strings, the names of the oponents
-        idx           - a string or integer, used for indexing the logs of a batch of matches
+        timestamp     - a string with the current datetime
+        idx           - a string used for indexing the logs of a batch of matches
     """
     logs_folder = path.join(SOLUTIONSDIR, game, "logs")
     if not path.isdir(logs_folder):
         os.mkdir(logs_folder)
 
     if idx:
-        idx = "." + str(idx)
-    shutil.move("logs", path.join(logs_folder, "-".join([strftime("%Y.%m.%d-%Hh%Mm%Ss"), solution_name] + oponents) + idx + ".log"))
-
-def _cut_to_nth_appearance(string, separator, n):
-    """
-    Cuts a string up to the nth appearance of a separator
-
-    Parameters:
-        string    - the string to be cut
-        separator - a string, the symbols to find and count
-        n         - an integer
-
-    Returns:
-        the shortened string
-    """
-    return separator.join(string.split(separator)[:n])
+        idx = "::" + str(idx)
+    shutil.move("logs", path.join(logs_folder, timestamp + ":".join([":", solution_name] + oponents) + idx + ".log"))
 
 ## Exported Functions ##
 
@@ -419,11 +428,66 @@ def replay(params):
     Replays the specified match log. If no log is given, the latest is replayed.
     Parameters: [<match_log>]
 
-    <match_log> - If given, the log to replay.
+    <match_log> - If given, the log to replay. Must have a standard log name.
     """
-    logger.err("Not yet implemented")
-    # TODO: Implement
-    return 1
+
+    # Requirements
+
+    if len(params) > 1:
+        logger.err("Wrong number of parameters\n")
+        help(["replay"])
+        return 1
+
+    # Command execution
+
+    # Choosing match log depending on parameters
+    if len(params) == 1:
+        match_log = params[0]
+        if not path.isfile(match_log):
+            logger.err("Could not find match log '%s'" % match_log)
+            return 1
+        if not log_filename_regex.match(match_log.split(os.sep)[-1]):
+            logger.err("The given match_log doesn't match the standard name")
+            return 1
+    else:
+        match_log = max(glob(path.join(SOLUTIONSDIR, "*", "logs", "*.log")), key=path.getctime)
+        logger.info("Latest match log found: %s" % match_log)
+
+    # Generating HTML
+    if path.isfile(match_log + ".html"):
+        logger.info("Html already generated")
+    else:
+        m = log_filename_regex.match(match_log.split(os.sep)[-1])
+        if not m:
+            logger.err("Found a log with a strange name: %s" % match_log.split(os.sep)[-1])
+            return 1
+
+        logger.info("Generating html...")
+
+        # Getting parameters
+        timestamp = datetime(*map(int, m.groups()[:6]))
+        solution_names = m.group(7).split(":")[1:]
+        challenge_name = path.dirname(path.abspath(match_log)).split("/")[-2]
+
+        values = {
+            "match": {
+                "challenge_name": challenge_name[0].upper() + challenge_name[1:],
+                "solution_names": solution_names,
+                "time_since": time_since_from_seconds((datetime.now() - timestamp).total_seconds()),
+                "solutions": [{"id": "p%d" % (idx+1), "name": solution} for idx, solution in enumerate(solution_names)],
+                "visualizer": challenge_name + ".js",
+                "log_json": open(match_log, "r").read().strip(),
+            },
+        }
+
+        # Creating html from jinja template
+        with open(match_log + ".html", "w") as result:
+            result.write(jinja.get_template("replay_template.html").render(values))
+
+    logger.info("Opening firefox...")
+    Popen(["firefox", match_log + ".html"])
+
+    return 0
 
 def run(params):
     """
@@ -614,6 +678,7 @@ def run(params):
             errors = 0
             total_points = 0
 
+            timestamp = strftime("%Y.%m.%d-%Hh%Mm%Ss")
             digits = int(math.floor(math.log10(num)) + 1) # For pretty display
             for idx in xrange(num):
                 logger.info("Running game %0*d..." % (digits, idx+1), False) # No new line
@@ -687,7 +752,7 @@ def run(params):
                             logger.info("Unknown result: %s" % result)
                             errors += 1
 
-                _move_log(game, solution_name, oponents, idx + 1)
+                _move_log(game, solution_name, oponents, timestamp, "%0*d" % (digits, idx+1))
 
             # Print summary
             logger.info("\nSummary:")

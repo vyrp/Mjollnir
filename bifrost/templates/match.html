@@ -69,6 +69,10 @@
     {% else %}
       var MJOLLNIR_MATCHES = "https://s3-us-west-2.amazonaws.com/mjollnir-matches/";
     {% endif %}
+
+    function load_match_data(callback){
+        $.get(MJOLLNIR_MATCHES + bifrost_mid, callback);
+    }
   </script>
   <script src="{{ url_for('static', filename='js/match_player.js') }}"></script>
 

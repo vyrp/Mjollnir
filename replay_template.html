@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mjollnir | Match Replay</title>
+    <link rel="shortcut icon" href="file:///Mjollnir/bifrost/static/icons/favicon.ico">
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/2.2.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://vyrp.github.io/MjollnirAssets/darkstrap.min.css">
+    <link href="file:///Mjollnir/bifrost/static/css/style.css" rel="stylesheet">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand active relative" href="#"><img src="file:///Mjollnir/bifrost/static/icons/odal_rune.png" id="navbar-icon" class="absolute"/><span id="navbar-brandname">Mjollnir</span></a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="active">
+                <a href="#">Replay</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+      <div class="body-top-margin">
+        <div id="wrap">
+          <div id="main">
+            <div class="well">
+              <div class="inside-well-margin">
+                <div class="match">
+                  <div class="row">
+                    <div class="col-lg-12">
+                      <div class="height-60">
+                        <h2><a href="#">{{ match.challenge_name }}</a></h2>
+                        <div class="float-left width-400">
+                          <h3>{{ ' vs '.join(match.solution_names) }}</h3>
+                        </div>
+                        <div class="float-right margin-top-20">
+                          ({{ match.time_since }})
+                        </div>
+                      </div>
+                      <div class="margin-left-16">
+                        <div class="well margin-top-55">
+                          <div id="match-player">
+                          </div>
+
+                          <table class="margin-center">
+                            <tr>
+                              <td><button type="submit" class="btn btn-primary width-42" onclick="challenge_player.pause(); challenge_player.previous_tick();"><</button></td>
+                              <td><button type="submit" class="btn btn-primary width-42" onclick="challenge_player.play();">&#9658;</button></td>
+                              <td><button type="submit" class="btn btn-primary width-42" onclick="challenge_player.pause();">&#8214;</button></td>
+                              <td><button type="submit" class="btn btn-primary width-42" onclick="challenge_player.pause(); challenge_player.next_tick();">></button></td>
+                            </tr>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+      <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+      <script src="http://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js"></script>
+
+      <script type="text/javascript">
+        bifrost_match_users = [
+          {% for solution in match.solutions %}
+            { uid: "{{ solution.id | safe }}", username: "{{ solution.name | safe }}" },
+          {% endfor %}
+        ];
+      </script>
+
+      <script src="file:///Mjollnir/bifrost/static/js/{{ match.visualizer }}"></script>
+      <script type="text/javascript">
+        function load_match_data(callback){
+            callback('{{ match.log_json }}'); // Single quotes are needed here
+        }
+      </script>
+      <script src="file:///Mjollnir/bifrost/static/js/match_player.js"></script>
+  </body>
+</html>
