@@ -82,6 +82,10 @@ bool GameLogic::update(Command command, int32_t playerId) {
   return true;
 }
 
+bool GameLogic::shouldPrintWorldModel(int32_t playerId){
+  return true;
+}
+
 WorldModel GameLogic::getWorldModel() {
   return worldModel_;
 }

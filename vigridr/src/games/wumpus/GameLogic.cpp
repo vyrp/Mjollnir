@@ -260,6 +260,10 @@ WorldModel GameLogic::getWorldModel() const {
 }
 
 
+bool GameLogic::shouldPrintWorldModel(int32_t playerId){
+  return playerId == player1_;
+}
+
 bool GameLogic::isFinished() const {
   return hasFinished_;
 }

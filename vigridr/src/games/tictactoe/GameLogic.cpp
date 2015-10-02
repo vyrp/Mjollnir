@@ -142,6 +142,10 @@ bool GameLogic::checkDraw_(const WorldModel& wm) {
   return true;
 }
 
+bool GameLogic::shouldPrintWorldModel(int32_t playerId){
+  return true;
+}
+
 TotalWorldModel GameLogic::getTotalWorldModel() const {
   return twm_;
 }

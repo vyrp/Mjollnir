@@ -20,6 +20,12 @@ namespace mjollnir { namespace vigridr {
 class GameLogic {
  public:
   /**
+  *  Tells GameManager if it should print the world model
+  *  It should't exist if Vigridr is refactored to accept any
+  *  number of players
+  */
+  bool shouldPrintWorldModel(int32_t playerId);
+  /**
    *  Each player has an unique id
    */
   GameLogic(int32_t playerId1, int32_t playerId2);

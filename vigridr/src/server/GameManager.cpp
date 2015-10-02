@@ -96,7 +96,10 @@ void GameManager::nextTurn() {
   gameInfo_.cycle++;
   gameInfo_.gameStatus = GameStatus::RUNNING;
   gameInfo_.worldModel = gameLogic_.getWorldModel();
-  GameLogger::printWorldModel(gameInfo_.worldModel, gameLogic_.getTotalWorldModel());
+  int32_t playerOnTurn = playerTurnData_[0].isTurn() ? playerTurnData_[0].getId() : playerTurnData_[1].getId();
+  if (gameLogic_.shouldPrintWorldModel(playerOnTurn)){
+    GameLogger::printWorldModel(gameInfo_.worldModel, gameLogic_.getTotalWorldModel());
+  }
   GameLogger::logWorldModel(gameInfo_.worldModel, gameLogic_.getTotalWorldModel());
   timer_.sleepUntilWorldModelTime();
   timer_.startCycle();
@@ -171,6 +174,7 @@ void GameManager::updaterTask() {
         correctPlayer = playerMove.getId();  // valid command
       }
     }
+
     bool finished = gameLogic_.isFinished();
     std::string winner = gameLogic_.getWinner();
 
