@@ -578,7 +578,7 @@ def run(params):
                     logger.err(str(e))
                     return 1
 
-            sleep(0.1) # Let clients end
+            sleep(0.2) # Let clients end
             for process, oponent in zip(processes, oponents):
                 if process.poll() != 0:
                     logger.warn("Oponent %s had a runtime error" % oponent)
@@ -619,35 +619,39 @@ def run(params):
                 logger.info("Running game %0*d..." % (digits, idx+1), False) # No new line
                 sys.stdout.flush()
 
-                # This solution
-                port = 9090
-                this_solution_process = Popen([path.join(current_solution_folder, "bin", "client"), "--port", str(port)], stdout=dev_null_file, stderr=STDOUT)
-
-                # Oponents
-                processes = []
-                for i, oponent in enumerate(oponents):
-                    sleep(0.1) # Necessary so all oponents do not clog server by all connecting at the same time
-                    port = 9091 + i
-                    processes.append(Popen([path.join(oponent_folders[i], "bin", "client"), "--port", str(port)], stdout=dev_null_file, stderr=STDOUT))
-
-                # Game server
                 with open(RESULT_TXT, "w") as result_file:
-                    try:
-                        check_call([path.join(GAMESDIR, game, "bin", "server")], stdout=result_file, stderr=dev_null_file) # This is a blocking command
-                    except CalledProcessError as e:
-                        logger.err(str(e))
-                        return 1
+                    # Game server
+                    server_process = Popen([path.join(GAMESDIR, game, "bin", "server")], stdout=result_file, stderr=dev_null_file)
+                    sleep(0.1) # Upstart server time
 
-                sleep(0.1) # Let clients end
+                    # This solution
+                    port = 9090
+                    this_solution_process = Popen([path.join(current_solution_folder, "bin", "client"), "--port", str(port)], stdout=dev_null_file, stderr=STDOUT)
+
+                    # Oponents
+                    processes = []
+                    for i, oponent in enumerate(oponents):
+                        sleep(0.1) # Necessary so all oponents do not clog server by all connecting at the same time
+                        port = 9091 + i
+                        processes.append(Popen([path.join(oponent_folders[i], "bin", "client"), "--port", str(port)], stdout=dev_null_file, stderr=STDOUT))
+
+                    # Wait for processes
+                    server_process.wait()
+                    this_solution_process.wait()
+                    for p in processes:
+                        p.wait()
 
                 # See if any clients had a runtime error
                 was_error = False
-                if this_solution_process.poll() != 0:
+                if server_process.returncode != 0:
+                    was_error = True
+                    logger.info("Error (in server)")
+                elif this_solution_process.returncode != 0:
                     was_error = True
                     logger.info("Error (in this solution)")
                 else:
                     for process in processes:
-                        if process.poll() != 0:
+                        if process.returncode != 0:
                             logger.info("Error (in an oponent)")
                             was_error = True
                             break
