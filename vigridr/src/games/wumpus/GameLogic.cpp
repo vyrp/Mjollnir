@@ -41,7 +41,7 @@ void GameLogic::initializeWorld_(){
   // in a position different from the initial position
   for(size_t i = 0; i < worldSize_; i++) {
     for(size_t j = 0; j < worldSize_; j++) {
-      if(i != 0 || j != 0) {
+      if((int32_t)i != playerPosition_.x || (int32_t)j != playerPosition_.y) {
         if(rand() % 10 < 2){
           twm_.map[i][j].pit = true;
         }

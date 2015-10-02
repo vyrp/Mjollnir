@@ -75,7 +75,7 @@ void GameLogger::printWorldModel(const WorldModel& wm, const TotalWorldModel& tw
   oss << "Player direction: " << playerDirectionStr(twm.playerDirection);
   oss << std::endl;
   oss << "A: Adventurer  B: Breeze  G: Gold" << std::endl;
-  oss << "P: Pit  S: Stench  W: Wumpus" << std::endl;
+  oss << "P: Pit  S: Stench  W: Wumpus" << std::endl << std::endl;
   std::cerr << oss.str();
 }
 
