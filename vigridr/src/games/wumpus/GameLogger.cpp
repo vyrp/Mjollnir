@@ -22,22 +22,18 @@ std::string worldSquareStr(WorldSquare elem){
   std::string elemStr;
 
   elemStr = "";
-  if(elem.player) 
-    elemStr = elemStr + "A";
-  elemStr = elemStr + "-";
-  if(elem.breeze)
-    elemStr = elemStr + "B";
-  elemStr = elemStr + "-";
-  if(elem.gold)
-    elemStr = elemStr + "G";
-  if(elem.pit) 
-    elemStr = elemStr + "P";
-  elemStr = elemStr + "-";
-  if(elem.stench)
-    elemStr = elemStr + "S";
-  elemStr = elemStr + "-";
-  if(elem.wumpus)
-    elemStr = elemStr + "W";
+  if(elem.player) elemStr = elemStr + "A-";
+  else elemStr = elemStr + " -";
+  if(elem.breeze) elemStr = elemStr + "B-";
+  else elemStr = elemStr + " -";
+  if(elem.gold) elemStr = elemStr + "G-";
+  else elemStr = elemStr + " -";
+  if(elem.pit) elemStr = elemStr + "P-";
+  else elemStr = elemStr + " -";
+  if(elem.stench) elemStr = elemStr + "S-";
+  else elemStr = elemStr + " -";
+  if(elem.wumpus) elemStr = elemStr + "W";
+  else elemStr = elemStr + " ";
 
   return elemStr;
 }
@@ -67,15 +63,19 @@ std::string playerDirectionStr(Direction playerDirection){
 
 void GameLogger::printWorldModel(const WorldModel& wm, const TotalWorldModel& twm) {
   std::ostringstream oss;
-  
+  std::string l = " ---------------------------------------------------------";
+  oss << l << std::endl;
   for (auto line : twm.map) {
+    oss << " | ";
     for (auto elem : line) {
       oss << worldSquareStr(elem) << " | ";
     }
-    oss << std::endl;
+    oss << std::endl << l <<std::endl;
   }
-  oss << "player direction: " <<playerDirectionStr(twm.playerDirection);
+  oss << "Player direction: " << playerDirectionStr(twm.playerDirection);
   oss << std::endl;
+  oss << "A: Adventurer  B: Breeze  G: Gold" << std::endl;
+  oss << "P: Pit  S: Stench  W: Wumpus" << std::endl;
   std::cerr << oss.str();
 }
 
@@ -92,8 +92,8 @@ ptree createPt(const TotalWorldModel& twm) {
     tablePt.push_back(std::make_pair("", linePt));
   }
   
-  twmPt.push_back(std::make_pair("world map",tablePt));
-  twmPt.push_back(std::make_pair("player direction", ptree(playerDirectionStr(twm.playerDirection))));
+  twmPt.push_back(std::make_pair("table",tablePt));
+  twmPt.push_back(std::make_pair("direction", ptree(playerDirectionStr(twm.playerDirection))));
 
   return twmPt;
 }
@@ -122,12 +122,16 @@ void GameLogger::logGameDescription(const GameDescription& description1,
 
 void GameLogger::flushLog() {
   ptree twmListPt;
+  int n = 0;
 
   for (auto twm : twmList) {
-    twmListPt.push_back(std::make_pair("", createPt(twm)));
+    if(n % 2 == 0){
+      twmListPt.push_back(std::make_pair("", createPt(twm)));
+    }
+    n++;
   }
   ptree gamePt;
-  gamePt.push_back(std::make_pair("twmList", twmListPt));
+  gamePt.push_back(std::make_pair("wmList", twmListPt));
   gamePt.push_back(std::make_pair("gameDescription",
                                   createGameDescriptionPt()));
   std::ofstream file;

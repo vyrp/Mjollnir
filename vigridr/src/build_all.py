@@ -3,7 +3,7 @@ import os
 from change_game_code import change_game_code
 from cache_state import cache_state
 
-game_list = ['template', 'tron', 'tictactoe', 'guessnumber']
+game_list = ['template', 'tron', 'tictactoe', 'wumpus', 'guessnumber']
 
 def build_all():
   os.chdir('..')
