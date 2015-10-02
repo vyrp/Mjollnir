@@ -640,7 +640,8 @@ def group(gid):
         rounds = form.rounds.data
         cid = form.challenge.data
         user_challenged = form.player.data
-        if cid == '7fb1cdb8-4fc8-4412-a045-50dd6b2a8283':
+        challenge = mongodb.challenges.find_one({'cid': cid})
+        if challenge['name'] == 'Wumpus':
             playOneplayerGame(cid = cid, uid = user_id, rounds = rounds)
             return redirect(url_for('.matches'))
         if user_challenged == ALL_PLAYERS:
