@@ -5,6 +5,7 @@ import sys
 import threading
 import traceback
 import ast
+import datetime
 from time import sleep, time
 from uuid import uuid4
 
@@ -47,7 +48,7 @@ class Game():
         self.game = '/sandboxes/game-' + self.mid
         self.result = {
             'cid': cid,
-            'datetime': time(),
+            'datetime': datetime.datetime.utcnow(),
             'mid': self.mid,
             'users': []
         }
