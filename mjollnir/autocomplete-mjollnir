@@ -46,7 +46,7 @@ _mjollnir() {
         run)
             if [[ $COMP_CWORD -ge 2 ]]; then
                 if [[ $cur == -* ]]; then
-                    COMPREPLY=( $(compgen -W "--seed --num --show-oponents" -- ${cur}) )
+                    COMPREPLY=( $(compgen -W "--seed --num --show-opponents" -- ${cur}) )
                 else
                     echo $(pwd) > ~/pwd.txt
                     COMPREPLY=( $(compgen -W "$($mjollnir list --solutions 2>/dev/null)" -- ${cur}) )

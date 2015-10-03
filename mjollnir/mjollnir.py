@@ -2,7 +2,113 @@
 
 """
 The Mjollnir master script.
-Helps on the local development an agent of an AI challenge.
+Helps on the local development of an agent of an AI challenge.
+
+
+Help
+~~~~
+
+To get general help:
+
+$ mjollnir help
+
+To get help about a specific commmand, pass it as a argument to the help command.
+For example, about the 'create' command:
+
+$ mjollnir help create
+
+
+Tutorial
+~~~~~~~~
+
+1) Create a sample solution for a game, in the language of your preference.
+For example, to create a solution named my-solution in python for Tic Tac Toe:
+
+$ mjollnir create tictactoe py my-solution
+
+Now you would edit your solution.
+
+2) Build your solution.
+In the specific case of python, it does a syntatic verification.
+Note: you must be inside the solution folder.
+
+$ mjollnir build
+
+3) Run your solution.
+If the game has more than one player, then you must pass the opponents as arguments.
+Note: you must be inside the solution folder.
+
+For example, to run the solution in the current folder against the 'random' solution:
+
+$ mjollnir run random
+
+4) Replay the last match in a beautiful interface in the browser:
+
+$ mjollnir replay
+
+Summary:
+In a normal development, you would mostly alternate between editing your solution, building it and running it (steps 2 and 3).
+
+IMPORTANT: for now, the solution must consist of only one file (for any language).
+
+Also, if you quickly want to navigate to the ~/mjollnir-solutions/ folder or to one of its subfolders,
+you can use the 'mjollnir open' command. For example, to go to the tictactoe folder:
+
+$ mjollnir open tictactoe
+
+Advanced Options
+~~~~~~~~~~~~~~~~
+
+There are other options to the 'run' command that may be used.
+
+To run a game multiple times, pass it as the --num argument.
+Note: no information is passed between one run and the next (for now).
+
+For example, to run against the 'random' solution 10 times:
+
+$ mjollnir run random --num 10
+
+To pass a seed to the random generator of the server (game ambient) and the clients (agents), use the --seed option.
+Note: not yet implemented.
+
+For example:
+
+$ mjollnir run random --seed 1234
+
+Finally, to show the output of the opponents, use the --show-opponents option.
+For example, to run against the 'random' solution and show its output (besides your own):
+
+$ mjollnir run random --show-opponents
+
+(The options above can be combined.)
+
+
+Hints
+~~~~~
+
+Autocomplete:
+    Hitting TAB twice during the typing of a mjollnir command shows all possible options.
+    For example:
+
+    $ ls ~/mjollnir-solutions/
+    tictactoe  wumpus
+    $ mjollnir open [TAB][TAB]
+    tictactoe  wumpus     
+    $ mjollnir open 
+
+    Hitting TAB once after some partially written command (or game, or solution name, etc.) completes it.
+    For example:
+
+    $ mjollnir rep[TAB]
+    $ mjollnir replay 
+
+Run against yourself:
+    You can run against yourself.
+    For example, if you are in the ~/mjollnir-solutions/tictactoe/my-solution folder,
+    you can run a my-solution instance against another my-solution instance:
+    
+    $ mjollnir run my-solution
+
 """
 
 ## Imports and Constants ##
@@ -22,6 +128,8 @@ from os import path
 from subprocess import call, CalledProcessError, check_call, Popen, STDOUT
 from threading import Timer
 from time import sleep, strftime
+
+VERSION = "0.1"
 
 SOLUTIONSDIR = path.expanduser("~/mjollnir-solutions")
 VIGRIDR = "/Mjollnir/vigridr"
@@ -170,14 +278,14 @@ def _indent(doc_string, N):
     lines = [line.strip() for line in lines]
     return ("\n" + " "*(4+N+3)).join(lines) # 4 spaces for tab, and 3 characters for " - "
 
-def _move_log(game, solution_name, oponents, timestamp=strftime("%Y.%m.%d-%Hh%Mm%Ss"), idx=""):
+def _move_log(game, solution_name, opponents, timestamp=strftime("%Y.%m.%d-%Hh%Mm%Ss"), idx=""):
     """
     Moves the log file of a match to the logs folder of that game.
 
     Parameters:
         game          - a string, the name of the game
         solution_name - a string, the name of the solution
-        oponents      - a list of strings, the names of the oponents
+        opponents     - a list of strings, the names of the opponents
         timestamp     - a string with the current datetime
         idx           - a string used for indexing the logs of a batch of matches
     """
@@ -187,7 +295,7 @@ def _move_log(game, solution_name, oponents, timestamp=strftime("%Y.%m.%d-%Hh%Mm
 
     if idx:
         idx = "::" + str(idx)
-    shutil.move("logs", path.join(logs_folder, timestamp + ":".join([":", solution_name] + oponents) + idx + ".log"))
+    shutil.move("logs", path.join(logs_folder, timestamp + ":".join([":", solution_name] + opponents) + idx + ".log"))
 
 ## Exported Functions ##
 
@@ -416,7 +524,8 @@ def help(params=[]):
 
     # Command execution
 
-    logger.info("This is the master command to develop solutions to the Mjollnir platform\n")
+    logger.info("This is the master command to develop solutions to the Mjollnir platform")
+    logger.info("Version: %s\n" % VERSION)
 
     logger.info("Usage:")
     logger.info("    mjollnir <command> [<parameters>]\n")
@@ -589,16 +698,16 @@ def replay(params):
 
 def run(params):
     """
-    Runs a match against the specified oponents, if any. Must be inside a solution folder.
-    Parameters: [<solution_name>]* [--seed <NUM>] [--num <NUM>] [--show-oponents]
+    Runs a match against the specified opponents, if any. Must be inside a solution folder.
+    Parameters: [<solution_name>]* [--seed <NUM>] [--num <NUM>] [--show-opponents]
 
-    <solution_name> - Parameter passed zero or more times. Indicates the oponents. Must come first.
-    --seed <NUM>    - The seed to be used for randomness.
-    --num <NUM>     - The amount of times to play.
-    --show-oponents - Whether to show a console for each oponent. A console is always shown for the current solution.
+    <solution_name>  - Parameter passed zero or more times. Indicates the opponents. Must come first.
+    --seed <NUM>     - The seed to be used for randomness.
+    --num <NUM>      - The amount of times to play.
+    --show-opponents - Whether to show a console for each opponent. A console is always shown for the current solution.
     """
 
-    __SEED, __NUM, __SHOW_OPONENTS = "--seed", "--num", "--show-oponents"
+    __SEED, __NUM, __SHOW_OPPONENTS = "--seed", "--num", "--show-opponents"
 
     # Requirements
 
@@ -610,7 +719,7 @@ def run(params):
     num_players = games_config[game][NUM_PLAYERS]
 
     if len(params) < num_players - 1:
-        logger.err("Wrong number of parameters for this particular game. At least %d oponent%s needed\n" % (num_players - 1, " is" if num_players == 2 else "s are"))
+        logger.err("Wrong number of parameters for this particular game. At least %d opponent%s needed\n" % (num_players - 1, " is" if num_players == 2 else "s are"))
         help(["run"])
         return 1
 
@@ -623,25 +732,25 @@ def run(params):
         logger.err("This solution has not yet been built")
         return 1
 
-    oponents = params[:num_players-1]
+    opponents = params[:num_players-1]
     options = params[num_players-1:]
 
-    if not set([__SEED, __NUM, __SHOW_OPONENTS]).isdisjoint(oponents):
-        logger.err("Too few oponents. At least %d oponent%s needed\n" % (num_players - 1, " is" if num_players - 1 == 1 else "s are"))
+    if not set([__SEED, __NUM, __SHOW_OPPONENTS]).isdisjoint(opponents):
+        logger.err("Too few opponents. At least %d opponent%s needed\n" % (num_players - 1, " is" if num_players - 1 == 1 else "s are"))
         help(["run"])
         return 1
 
-    oponent_folders = []
-    for oponent in oponents:
-        oponent_folder = path.join(SOLUTIONSDIR, game, oponent)
-        if not path.isdir(oponent_folder):
-            logger.err("Cannot find the %s oponent" % oponent)
+    opponent_folders = []
+    for opponent in opponents:
+        opponent_folder = path.join(SOLUTIONSDIR, game, opponent)
+        if not path.isdir(opponent_folder):
+            logger.err("Cannot find the %s opponent" % opponent)
             return 1
 
-        if not path.isfile(path.join(oponent_folder, "bin", "client")):
-            logger.err("The %s oponent has not yet been built" % oponent)
+        if not path.isfile(path.join(opponent_folder, "bin", "client")):
+            logger.err("The %s opponent has not yet been built" % opponent)
             return 1
-        oponent_folders.append(oponent_folder)
+        opponent_folders.append(opponent_folder)
 
     # Check if game server has been built
     if not path.isfile(path.join(GAMESDIR, game, "bin", "server")):
@@ -655,7 +764,7 @@ def run(params):
 
     seed = None
     num = None
-    show_oponents = False
+    show_opponents = False
     while len(options) > 0:
         param = options.pop(0)
         if param == __SEED:
@@ -684,15 +793,15 @@ def run(params):
                 logger.err("Num argument must be positive")
                 return 1
 
-        elif param == __SHOW_OPONENTS:
-            show_oponents = True
+        elif param == __SHOW_OPPONENTS:
+            show_opponents = True
 
         else:
             logger.err("Unrecognized option: " + str(param))
             return 1
 
-    if show_oponents and (num is not None):
-        logger.warn("Both %s and %s passed. Ignoring %s." % (__SHOW_OPONENTS, __NUM, __SHOW_OPONENTS))
+    if show_opponents and (num is not None):
+        logger.warn("Both %s and %s passed. Ignoring %s." % (__SHOW_OPPONENTS, __NUM, __SHOW_OPPONENTS))
 
     ######## HACK ########
     # TODO: remove when a 1-player-game actually runs with only 1 client
@@ -701,8 +810,8 @@ def run(params):
     # Both are the user's solution, but the second client is ignored by the game server.
     if num_players == 1:
         num_players = 2
-        oponents = [solution_name]
-        oponent_folders = [current_solution_folder]
+        opponents = [solution_name]
+        opponent_folders = [current_solution_folder]
 
     # Command execution
 
@@ -723,19 +832,19 @@ def run(params):
             # Oponents
 
             # Used to capture the variables in the for below
-            def create_oponent_command(i, port):
-                return lambda: processes.append(Popen([path.join(oponent_folders[i], "bin", "client"), "--port", str(port)], stdout=dev_null_file, stderr=STDOUT))
+            def create_opponent_command(i, port):
+                return lambda: processes.append(Popen([path.join(opponent_folders[i], "bin", "client"), "--port", str(port)], stdout=dev_null_file, stderr=STDOUT))
 
             processes = []
-            for i, oponent in enumerate(oponents):
-                sleep(0.1) # Necessary so all oponents do not clog server by all connecting at the same time
+            for i, opponent in enumerate(opponents):
+                sleep(0.1) # Necessary so all opponents do not clog server by all connecting at the same time
                 port = 9091 + i
-                logger.info("Opening client%d: %s (oponent) @ %d..." % (i+2, oponent, port))
-                if show_oponents:
-                    Popen(client_command % (i+2, path.join(oponent_folders[i], "bin"), port), shell=True)
+                logger.info("Opening client%d: %s (opponent) @ %d..." % (i+2, opponent, port))
+                if show_opponents:
+                    Popen(client_command % (i+2, path.join(opponent_folders[i], "bin"), port), shell=True)
                 else:
-                    # Run this oponent only in 2s
-                    Timer(2, create_oponent_command(i, port)).start()
+                    # Run this opponent only in 2s
+                    Timer(2, create_opponent_command(i, port)).start()
 
             # Game server
             logger.info("Opening server...")
@@ -747,9 +856,9 @@ def run(params):
                     return 1
 
             sleep(0.2) # Let clients end
-            for process, oponent in zip(processes, oponents):
+            for process, opponent in zip(processes, opponents):
                 if process.poll() != 0:
-                    logger.warn("Oponent %s had a runtime error" % oponent)
+                    logger.warn("Oponent %s had a runtime error" % opponent)
 
             # Get and show results
             with open(RESULT_TXT, "r") as result_file:
@@ -763,7 +872,7 @@ def run(params):
                         logger.info("\nRESULT: Draw.\n")
                     else:
                         winner = int(result)
-                        if 9091 <= winner <= 9090 + len(oponents):
+                        if 9091 <= winner <= 9090 + len(opponents):
                             logger.info("\nRESULT: You lost...\n")
                         else:
                             logger.err("\nUnknown result: %d\n" % winner)
@@ -771,7 +880,7 @@ def run(params):
                     logger.err("\nUnknown result: %s\n" % result)
 
             logger.info("Moving log...")
-            _move_log(game, solution_name, oponents)
+            _move_log(game, solution_name, opponents)
 
         # Play NUM times
         else:
@@ -799,10 +908,10 @@ def run(params):
 
                     # Oponents
                     processes = []
-                    for i, oponent in enumerate(oponents):
-                        sleep(0.1) # Necessary so all oponents do not clog server by all connecting at the same time
+                    for i, opponent in enumerate(opponents):
+                        sleep(0.1) # Necessary so all opponents do not clog server by all connecting at the same time
                         port = 9091 + i
-                        processes.append(Popen([path.join(oponent_folders[i], "bin", "client"), "--port", str(port)], stdout=dev_null_file, stderr=STDOUT))
+                        processes.append(Popen([path.join(opponent_folders[i], "bin", "client"), "--port", str(port)], stdout=dev_null_file, stderr=STDOUT))
 
                     # Wait for processes
                     server_process.wait()
@@ -822,7 +931,7 @@ def run(params):
                 else:
                     for process in processes:
                         if process.returncode != 0:
-                            logger.info("Error (in an oponent)")
+                            logger.info("Error (in an opponent)")
                             was_error = True
                             break
 
@@ -847,7 +956,7 @@ def run(params):
                                 draws += 1
                             else:
                                 winner = int(result)
-                                if 9091 <= winner <= 9090 + len(oponents):
+                                if 9091 <= winner <= 9090 + len(opponents):
                                     logger.info("You lost")
                                     losses += 1
                                 else:
@@ -857,7 +966,7 @@ def run(params):
                             logger.info("Unknown result: %s" % result)
                             errors += 1
 
-                _move_log(game, solution_name, oponents, timestamp, "%0*d" % (digits, idx+1))
+                _move_log(game, solution_name, opponents, timestamp, "%0*d" % (digits, idx+1))
 
             # Print summary
             logger.info("\nSummary:")
@@ -919,4 +1028,6 @@ if __name__ == "__main__":
         logger.info("[Success]")
 
     exit(ret)
+
+__all__ = [func.__name__ for func in commands.values()] + ["mjollnir", "VERSION"]
 
