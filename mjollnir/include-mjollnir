@@ -1,0 +1,7 @@
+mjollnir() {
+    /Mjollnir/mjollnir/mjollnir.py $* && \
+    if [ -f ~/location ]; then
+        cd `cat ~/location`
+        rm ~/location
+    fi
+}

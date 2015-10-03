@@ -48,7 +48,7 @@ folder_regex = re.compile(path.join(SOLUTIONSDIR, r"(%s+)" % POSIX_CHARS, r"(%s+
 log_filename_regex = re.compile(r"^(\d{4})\.(\d{2})\.(\d{2})-(\d{2})h(\d{2})m(\d{2})s:((?::%s+)+)(?:::\d+)?\.log$" % POSIX_CHARS)
 logger = None
 games_config = {}
-jinja = jinja2.Environment(loader=jinja2.FileSystemLoader("/Mjollnir"), extensions=['jinja2.ext.autoescape'])
+jinja = jinja2.Environment(loader=jinja2.FileSystemLoader("/Mjollnir/mjollnir"), extensions=['jinja2.ext.autoescape'])
 
 # Load games configuration
 for game in os.listdir(GAMESDIR):
@@ -321,12 +321,11 @@ def build(params):
 def create(params):
     """
     Creates a new folder for a new game.
-    Parameters: <game> <language> <solution_name> [--go]
+    Parameters: <game> <language> <solution_name>
 
     <game>          - The game name. One of: %s.
     <language>      - The solution language. One of: %s.
     <solution_name> - The name of the solution. Must only contain characaters of the POSIX Portable Character Set (%s).
-    --go            - Creates a file to easily go to created folder. Run it with '. go'.
     """
 
     # Requirements
@@ -377,11 +376,9 @@ def create(params):
 
     logger.info("Sample solution file created in " + folder)
 
-    if go:
-        with open("go", "w") as f:
-            f.write("cd " + folder + "\n")
-            f.write("rm " + path.join(os.getcwd(), "go"))
-        logger.info("'go' help file created in the current directory. Please run '. go'")
+    # Creating file with the location so we can go there. See /Mjollnir/mjollnir/include-mjollnir
+    with open(path.expanduser("~/location"), "w") as f:
+        f.write(folder)
 
     return 0
 
@@ -422,6 +419,10 @@ def help(params=[]):
         logger.info("    %-6s - %s\n" % (command, _indent(_cut_to_nth_appearance(getdoc(commands[command]), "\n", 2), 6)))
 
     return 0
+
+def open_folder(params):
+    # TODO: Implement (now that we have figured out how to move)
+    logger.err("Not implemented")
 
 def replay(params):
     """
