@@ -12,7 +12,7 @@ boto==2.28.0
 gunicorn==18.0
 itsdangerous==0.23
 jinja2-markdown==0.0.2
-pymongo==2.6.3
+pymongo==3.0.3
 requests==2.2.1
 six==1.6.1
 stormpath==1.0.1
