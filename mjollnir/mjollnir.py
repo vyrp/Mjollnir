@@ -260,6 +260,8 @@ def build(params):
 
             elif src == VIGRIDRSRC:
                 do_copy = ["Makefile", "Makefile.inc", "client", "thrifts"]
+                if language == "cpp":
+                    do_copy.append("utils")
 
             elif src == path.join(VIGRIDRSRC, "client"):
                 do_copy = ["Makefile", "GameClient." + language]
@@ -287,6 +289,9 @@ def build(params):
 
         logger.info("Building solution...")
         os.makedirs(path.join(build_folder, "obj", "client"))
+        if language == "cpp":
+            os.makedirs(path.join(build_folder, "obj", "thrifts", "gen-cpp"))
+            os.makedirs(path.join(build_folder, "obj", "utils"))
         os.makedirs(path.join(build_folder, "bin", full_lang))
         return_value = call(["make", "client" + full_lang])
         if return_value != 0:
