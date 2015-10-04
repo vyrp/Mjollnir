@@ -11,5 +11,5 @@ enum Action {
 }
 
 struct Command {
-  1: optional Action action,
+  1: required Action action,
 }
