@@ -1,0 +1,54 @@
+_mjollnir() {
+    local cur prev mjollnir
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    mjollnir=/Mjollnir/mjollnir/mjollnir.py
+
+    if [[ $COMP_CWORD == 1 ]]; then
+        COMPREPLY=( $(compgen -W "$($mjollnir list --commands 2>/dev/null)" -- ${cur}) )
+        return 0
+    fi
+
+    case "${COMP_WORDS[1]}" in
+        build)
+            case $COMP_CWORD in
+                2) COMPREPLY=( $(compgen -W "clean" -- ${cur}) ) ;;
+            esac
+            ;;
+        create)
+            case $COMP_CWORD in
+                2) COMPREPLY=( $(compgen -W "$($mjollnir list --games 2>/dev/null)" -- ${cur}) ) ;;
+                3) COMPREPLY=( $(compgen -W "$($mjollnir list --languages 2>/dev/null)" -- ${cur}) ) ;;
+            esac
+            ;;
+        help)
+            case $COMP_CWORD in
+                2) COMPREPLY=( $(compgen -W "$($mjollnir list --commands 2>/dev/null)" -- ${cur}) ) ;;
+            esac
+            ;;
+        list)
+            case $COMP_CWORD in
+                2) COMPREPLY=( $(compgen -W "--commands --games --languages --matches --solutions" -- ${cur}) ) ;;
+            esac
+            ;;
+        replay)
+            case $COMP_CWORD in
+                2) COMPREPLY=( $(compgen -W "$($mjollnir list --matches 2>/dev/null)" -- ${cur}) ) ;;
+            esac
+            ;;
+        run)
+            if [[ $COMP_CWORD -ge 2 ]]; then
+                if [[ $cur == -* ]]; then
+                    COMPREPLY=( $(compgen -W "--seed --num --show-oponents" -- ${cur}) )
+                else
+                    echo $(pwd) > ~/pwd.txt
+                    COMPREPLY=( $(compgen -W "$($mjollnir list --solutions 2>/dev/null)" -- ${cur}) )
+                fi
+            fi
+            ;;
+    esac
+
+    return 0
+}
+complete -F _mjollnir mjollnir
+

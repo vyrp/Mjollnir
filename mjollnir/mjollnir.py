@@ -59,6 +59,7 @@ for game in os.listdir(GAMESDIR):
 
 # Only published games are available for development
 games = tuple(sorted([game for game, config in games_config.iteritems() if config[PUBLISHED]]))
+del game, config
 
 ## Classes ##
 
@@ -425,6 +426,53 @@ def help(params=[]):
 
     return 0
 
+def list_options(params):
+    """
+    List possibilities for given paramter type, in one line, separated by spaces. Mainly made for scripts.
+    Parameters: --commands | --games | --languages | --matches | --solutions
+
+    --commands         - List possible commands
+    --games            - List available games
+    --languages        - List available languages
+    --matches          - List existing match logs (for all games)
+    --solutions        - List existing solutions for the game in which you are currently located
+    """
+
+    # Requirements
+
+    if len(params) != 1:
+        logger.err("Wrong number of parameters\n")
+        help(["list"])
+        return 1
+
+    # Parsing options
+
+    if params[0] == "--commands":
+        logger.info(" ".join(sorted(commands.keys())), False)
+
+    elif params[0] == "--games":
+        logger.info(" ".join(games), False)
+
+    elif params[0] == "--languages":
+        logger.info(" ".join(languages), False)
+
+    elif params[0] == "--matches":
+        logger.info(" ".join([path.basename(log) for log in glob(path.join(SOLUTIONSDIR, "*", "logs", "*.log"))]), False)
+
+    elif params[0] == "--solutions":
+        correct_folder, _, game, _, _ = _check_correct_folder()
+        if not correct_folder:
+            logger.err("You are not in a solution folder")
+            return 1
+        logger.info(" ".join(filter(lambda s: s != "logs", os.listdir(path.join(SOLUTIONSDIR, game)))), False)
+
+    else:
+        logger.err("Unkown option: %s\n" % params[0])
+        help(["list"])
+        return 1
+
+    return 0
+
 def open_folder(params):
     # TODO: Implement (now that we have figured out how to move)
     logger.err("Not implemented")
@@ -784,6 +832,7 @@ commands = {
     "build": build,
     "create": create,
     "help": help,
+    "list": list_options,
     "replay": replay,
     "run": run,
 }
@@ -814,7 +863,7 @@ if __name__ == "__main__":
     else:
         ret = mjollnir(sys.argv[1], sys.argv[2:])
 
-    if ret == 0:
+    if ret == 0 and not (len(sys.argv) > 1 and sys.argv[1] == "list"):
         logger.info("[Success]")
 
     exit(ret)
