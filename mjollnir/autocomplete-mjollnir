@@ -3,6 +3,7 @@ _mjollnir() {
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     mjollnir=/Mjollnir/mjollnir/mjollnir.py
+    solutions=~/mjollnir-solutions
 
     if [[ $COMP_CWORD == 1 ]]; then
         COMPREPLY=( $(compgen -W "$($mjollnir list --commands 2>/dev/null)" -- ${cur}) )
@@ -29,6 +30,12 @@ _mjollnir() {
         list)
             case $COMP_CWORD in
                 2) COMPREPLY=( $(compgen -W "--commands --games --languages --matches --solutions" -- ${cur}) ) ;;
+            esac
+            ;;
+        open)
+            case $COMP_CWORD in
+                2) COMPREPLY=( $(compgen -W "$(ls $solutions)" -- ${cur}) ) ;;
+                3) COMPREPLY=( $(compgen -W "$(ls -I logs $solutions/$prev)" -- ${cur}) ) ;;
             esac
             ;;
         replay)

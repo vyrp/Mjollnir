@@ -475,8 +475,51 @@ def list_options(params):
     return 0
 
 def open_folder(params):
-    # TODO: Implement (now that we have figured out how to move)
-    logger.err("Not implemented")
+    """
+    Go to the mjollnir-solutions directory if no argument is specified, else go to the given parameters folder.
+    Parameters: [<game> [<solution_name>]]
+
+    <game>          - A game for which you have solutions
+    <solution_name> - A solution that you created for that game
+    """
+
+    # Requirements and parsing options
+
+    if len(params) > 2:
+        logger.err("Wrong number of parameters\n")
+        help(["open"])
+        return 1
+
+    game, solution_name = None, None
+    if len(params) >= 1:
+        game = params[0]
+        if game not in games:
+            logger.err("%s is not an available game" % game)
+            logger.info("Possible games: " + " ".join(games))
+            return 1
+        if not path.isdir(path.join(SOLUTIONSDIR, game)):
+            logger.err("You never created a solution in %s" % game)
+            return 1
+
+    if len(params) == 2:
+        solution_name = params[1]
+        if not path.isdir(path.join(SOLUTIONSDIR, game, solution_name)):
+            logger.err("Solution %s doesn't exist" % solution_name)
+            return 1
+
+    # Command execution
+
+    target = SOLUTIONSDIR
+    if game:
+        target = path.join(target, game)
+    if solution_name:
+        target = path.join(target, solution_name)
+
+    # Creating file with the location so we can go there. See /Mjollnir/mjollnir/include-mjollnir
+    with open(path.expanduser("~/location"), "w") as f:
+        f.write(target)
+
+    return 0
 
 def replay(params):
     """
@@ -841,6 +884,7 @@ commands = {
     "create": create,
     "help": help,
     "list": list_options,
+    "open": open_folder,
     "replay": replay,
     "run": run,
 }
