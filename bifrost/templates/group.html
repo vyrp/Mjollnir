@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block main %}
+  
   <div class="group">
     <div class="row">
       <div class="col-lg-12">
@@ -30,6 +31,9 @@
           <ul id="challenge-tabs" class="nav nav-tabs">
             <li class="active"><a href="#description" data-toggle="tab">Description</a></li>
             <li><a href="#play" data-toggle="tab">Play</a></li>
+            {% if is_active_user_in('Dev') or user.username in group.admins %}
+              <li><a href="#manage" data-toggle="tab">Manage</a></li>
+            {% endif %}
             {% if is_active_user_in('Dev') %}
               <li><a href="#group-info" data-toggle="tab">Group Info</a></li>
             {% endif %}
@@ -43,20 +47,19 @@
             <div class="tab-pane fade" id="play">
               <form method="post" action="">
                 <fieldset>
-                  <legend>Customize Matches</legend>
                   <div>
-                    <b>{{ form.challenge.label }}</b>
-                    {{ form.challenge(class="color-white") }}
+                    <b>{{ playForm.challenge.label }}</b>
+                    {{ playForm.challenge(class="color-white", id="play_challenge") }}
                   </div>
                   <br>
                   <div>
-                    <b>{{ form.player.label }}</b>
-                    {{ form.player(class="color-white") }}
+                    <b>{{ playForm.player.label }}</b>
+                    {{ playForm.player(class="color-white", id="opponent") }}
                   </div>
                   <br>
                   <div>
-                    <b>Rounds</b><br>
-                    {{ form.rounds(class="color-white") }}
+                    Rounds<br>
+                    {{ playForm.rounds(class="color-white") }}
                   </div>
                   <br>
                   <div class="col-lg-10 col-lg-offset-4">
@@ -65,15 +68,54 @@
                 </fieldset>
               </form>
             </div>
+
+            <div class="tab-pane fade" id="manage">
+              <form method="post" action="">
+                <fieldset>
+                  <div>
+                    <b>{{ tournamentForm.challenge.label }}</b>
+                    {{ tournamentForm.challenge(class="color-white", id="tournament_challenge") }}
+                  </div>
+                  <br>
+                  <div>
+                    {{ tournamentForm.all_play(class="float-left", id="all_play") }}<b>{{ tournamentForm.all_play.label }}</b>
+                  </div>
+                  <br>
+                  <div>
+                    <b>{{ tournamentForm.player1.label }}</b>
+                    {{ tournamentForm.player1(class="color-white", id="player1") }}
+                  </div>
+                  <br>
+                  <div>
+                    <b>{{ tournamentForm.player2.label }}</b>
+                    {{ tournamentForm.player2(class="color-white", id="player2") }}
+                  </div>
+                  <br>
+                  <div>
+                    Rounds<br>
+                    {{ tournamentForm.rounds(class="color-white") }}
+                  </div>
+                  <br>
+                  <div class="col-lg-10 col-lg-offset-4">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                  </div>
+                </fieldset>
+              </form>
+            </div>
+
             <div class="tab-pane fade" id="group-info">
-              Admin only? {{ group.admin_only }}
-              <br><br />
-              Admins: <br>
+              <b>Admin only?</b><br> 
+              {{ group.admin_only }}
+              <br><br>
+              <b>Users' name type:</b><br>
+              {{ group.users_name_type }}
+              <br><br>
+              <b>Admins:</b><br>
               {% for admin in group.admins %}
                 {{ admin }}<br>
               {% endfor %}
               <br />
-              Users: <br>
+              <b>Users:</b><br>
               {% for user in group.users %}
                 {{ user }}<br/>
               {% endfor %}
@@ -87,4 +129,59 @@
       </div>
     </div>
   </div>
+
+{% endblock %}
+
+{% block script %}
+
+  {{ super() }}
+
+  <script>
+    $(function() {
+        $('#play_challenge').change(function(){
+            $player = $('#opponent').parent();
+            // $br = $player.next();
+            if($('#play_challenge option:selected').text() === 'Wumpus'){
+                $player.css('opacity', '0.5');
+                // $player.hide();
+                // $br.hide();
+            } else {
+                $player.css('opacity', '1.0');
+                // $player.show();
+                // $br.show();
+            }
+        });
+    });
+
+    $(function() {
+        $('#tournament_challenge').change(function(){
+            $player2 = $('#player2').parent();
+            if($('#tournament_challenge option:selected').text() === 'Wumpus'){
+                $player2.css('opacity', '0.5');
+            } else {
+                $player2.css('opacity', '1.0');
+            }
+        });
+    });
+
+    $(function() {
+        $('#all_play').change(function(){
+            $player1 = $('#player1').parent();
+            $player2 = $('#player2').parent();
+            if($('#all_play').prop('checked')){
+              $player1.css('opacity', '0.5');
+              $player2.css('opacity', '0.5');
+            } else {
+              if($('#tournament_challenge option:selected').text() === 'Wumpus'){
+                  $player1.css('opacity', '1.0');
+              } else {
+                  $player1.css('opacity', '1.0');
+                  $player2.css('opacity', '1.0');
+              }
+            }
+        });
+    });
+
+  </script>
+
 {% endblock %}

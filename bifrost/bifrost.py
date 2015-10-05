@@ -62,7 +62,7 @@ from wtforms.fields import BooleanField
 from wtforms.fields import SelectField
 from wtforms.fields import IntegerField
 from wtforms.validators import DataRequired
-
+from wtforms.validators import NumberRange
 
 ##### Classes
 ## TODO: extract to another file
@@ -87,8 +87,8 @@ class GroupDescriptionForm(Form):
     """
     WTForm to create a group.
     """
-    name = TextField('Group name')
-    description = PageDownField('Group description')
+    name = TextField('Group name', validators=[DataRequired()])
+    description = PageDownField('Group description', validators=[DataRequired()])
     admin_only = BooleanField('Admin only')
 
     # In some groups we want to maintain anonymity by showing only the usernames
@@ -107,14 +107,26 @@ class NewDescriptionForm(Form):
 
 
 
-#TODO: Limit number of rounds
-class CustomMatchForm(Form):
+class PlayForm(Form):
     """
     WTForm to specify a custom match
     """
-    rounds = IntegerField('1')
+    rounds = IntegerField('1', validators=[NumberRange(min = 0, max = 20)])
     challenge = SelectField('Challenge')
-    player = SelectField('Player')
+    player = SelectField('Opponent')
+
+
+
+
+class TournamentForm(Form):
+    """
+    WTForm to specify a tournament
+    """
+    rounds = IntegerField('1', validators=[NumberRange(min = 0, max = 20)])
+    challenge = SelectField('Challenge')
+    player1 = SelectField('First Player')
+    player2 = SelectField('Second Player')
+    all_play = BooleanField('All play')
 
 
 
@@ -604,12 +616,13 @@ def group(gid):
     if not group or ( user.username not in group['admins'] and group['admin_only'] ):
         abort(404)
 
-    form = CustomMatchForm(csrf_enabled = False)
+    playForm = PlayForm(csrf_enabled = False, prefix = 'playForm')
+    tournamentForm = TournamentForm(csrf_enabled = False, prefix = 'tournamentForm') 
+    
     user_id = user.custom_data['uid']
 
     group_users = list()
     for player in group['users']:
-
         user_in_db = mongodb.users.find_one({ 'username': player})
         uid = user_in_db['uid']
         name = player
@@ -619,39 +632,71 @@ def group(gid):
             if 'given_name' in user_in_db and 'surname' in user_in_db:
                 name = user_in_db['given_name'] + ' ' + user_in_db['surname']
 
-        # We are considering that players can't play with themselves
+        # We are considering that players can't play against themselves
         if uid != user_id:
             group_users.append((uid, name))
 
-
-    if user.username in group['admins']:
-        group_users.append((ALL_PLAYERS, 'All Players'))
-
     challenges = mongodb.challenges.find()
     challenges_choices = [(challenge['cid'], challenge['name']) for challenge in challenges]
-    form.challenge.choices = challenges_choices
-    form.player.choices = group_users
+
+    # Populating playForm drop down lists
+    playForm.challenge.choices = challenges_choices
+    playForm.player.choices = group_users
+
+    # Populating tournamentForm drop down lists
+    tournamentForm.challenge.choices = challenges_choices
+    tournamentForm.player1.choices = group_users
+    tournamentForm.player2.choices = group_users
 
     if request.method == 'GET':
-        form.rounds.data = 1
-        return render_template('group.html', group = group, form = form)
+        playForm.rounds.data = 1
 
-    if form.validate_on_submit():
-        rounds = form.rounds.data
-        cid = form.challenge.data
-        user_challenged = form.player.data
+        tournamentForm.rounds.data = 1
+        tournamentForm.all_play.data = False
+
+        return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm)
+
+    if playForm.validate_on_submit():
+
+        rounds = playForm.rounds.data
+        cid = playForm.challenge.data
+        opponent = playForm.player.data
         challenge = mongodb.challenges.find_one({'cid': cid})
-        if challenge['name'] == 'Wumpus':
-            playOneplayerGame(cid = cid, uid = user_id, rounds = rounds)
-            return redirect(url_for('.matches'))
-        if user_challenged == ALL_PLAYERS:
-            allXall(cid = cid, rounds = rounds, group = group)
-            return redirect(url_for('.matches'))
-        error = playerXplayer(cid = cid, uid1 = user_id, uid2 = user_challenged, rounds = rounds)
-        if error:
-            return render_template('group.html', group = group, form = form, error = error)
 
-        return redirect(url_for('.matches'))
+        if challenge['name'] == 'Wumpus':
+            error = play(cid = cid, uids = [user_id], rounds = rounds)
+        else:
+            error = play(cid = cid, uids = [user_id, opponent], rounds = rounds)
+        
+        if error:
+            return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, error = error)
+
+    if tournamentForm.validate_on_submit():
+
+        rounds = tournamentForm.rounds.data
+        cid = tournamentForm.challenge.data
+        player1 = tournamentForm.player1.data
+        player2 = tournamentForm.player2.data
+        all_play = tournamentForm.all_play.data
+        challenge = mongodb.challenges.find_one({'cid': cid})
+        
+        if all_play:
+            
+            allPlay(cid = cid, rounds = rounds, group = group, challenge_name = challenge['name'])
+            
+            return redirect(url_for('.matches'))
+
+        if challenge['name'] == 'Wumpus':
+            error = play(cid = cid, uids = [player1], rounds = rounds)
+
+        else:
+            error = play(cid = cid, uids = [player1, player2], rounds = rounds)
+        
+        if error:
+            return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, error = error)
+
+
+    return redirect(url_for('.matches'))
 
 
 
@@ -954,72 +999,48 @@ def matches():
 
 
 
-# The way we match the players will change when k players can play
-def allXall(cid, rounds, group):
+def allPlay(cid, rounds, group, challenge_name):
     """
-    Make all possible pairs of players in a group play
+    Make all players play
+    Currently woring with games for one and two players
     """
     users = [mongodb.users.find_one({ 'username': username }) for username in group['users']]
-    for i in xrange(len(users) - 1):
-        for j in xrange(i + 1, len(users)):
-            playerXplayer(cid = cid, uid1 = users[i]['uid'], uid2 = users[j]['uid'], rounds = rounds)
+
+    if challenge_name == 'Wumpus':
+        for user in users:
+            play(cid = cid, uids = [user['uid']], rounds = rounds) 
+
+    else:
+        for i in xrange(len(users) - 1):
+            for j in xrange(i + 1, len(users)):
+                play(cid = cid, uids = [users[i]['uid'], users[j]['uid']], rounds = rounds)
 
 
+def play(cid, uids, rounds):
 
-def playOneplayerGame(cid, uid, rounds):
-    """
-    Play match of game with one player or give an error message if the match is not possible.
-    """
-    sub = mongodb.submissions.find_one({ 'uid': uid, 'cid': cid })
+    subs = list()
 
-    if sub and sub['build_status'] == "Success":
-        values = {  'cid': cid,
-                    'siids': [sub['siid']],
-                    'uids': [uid] }
-        encoded = urllib.urlencode(values)
+    for uid in uids:
+        sub = mongodb.submissions.find_one({ 'uid': uid, 'cid': cid })
 
-        for _ in xrange(rounds):
+        if not sub:
+            return "No submission found for one of the players"
+
+        # TODO: We should use a previous submission if we can
+        if sub['build_status'] != 'Success':
+            return "One of the submissions haven't built properly"
+
+        subs.append(sub)
+
+    values = {  'cid': cid,
+                'siids': [sub['siid'] for sub in subs],
+                'uids': uids }
+    encoded = urllib.urlencode(values)
+
+    for _ in xrange(rounds):
             response = urllib2.urlopen('http://127.0.0.1:30403/run', data=encoded)
 
-        return False
-    if not sub:
-        return "You don't have a submission for this challenge."
-    #TODO: We should use a previous successful submission if we can
-    if sub['build_status'] != "Success":
-        return "Build was not successful in your latest submission."
-    return "Some error occurred with your submission."
-
-
-
-def playerXplayer(cid, uid1, uid2, rounds):
-    """
-    Make match between two players or give an error message if the match is not possible.
-    """
-    sub1 = mongodb.submissions.find_one({ 'uid': uid1, 'cid': cid })
-    sub2 = mongodb.submissions.find_one({ 'uid': uid2, 'cid': cid })
-
-    if sub1 and sub2 and sub1['build_status'] == "Success" and sub2['build_status'] == "Success":
-        values = {  'cid': cid,
-                    'siids': [sub1['siid'], sub2['siid']],
-                    'uids': [uid1, uid2] }
-        encoded = urllib.urlencode(values)
-
-        for _ in xrange(rounds):
-            response = urllib2.urlopen('http://127.0.0.1:30403/run', data=encoded)
-
-        return False
-    if sub1 and not sub2:
-        return "Your opponent has no submission for this chalenge."
-    if not sub1 and sub2:
-        return "You don't have a submission for this challenge."
-    if not sub1 and not sub2:
-        return "You and your opponent have no submission for this challenge."
-    #TODO: We should use a previous successful submission if we can
-    if sub1['build_status'] != "Success":
-        return "Build was not successful in your latest submission."
-    if sub2['build_status'] != "Success":
-        return "Build was not successful in your opponent's latest submission."
-    return "Some error occurred with your submission or in your opponent's submission."
+    return False
 
 
 

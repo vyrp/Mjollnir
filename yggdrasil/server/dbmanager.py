@@ -45,7 +45,6 @@ if DEBUG:
         return extensions[files[0].split('.')[-1]]
 
     def upload(match, log):
-        match['datetime'] = match['datetime']
         mongodb.matches.insert(match)
         shutil.copy(log, S3 + 'matches/' + match['mid'])
 else:
@@ -69,7 +68,6 @@ else:
         return ext
 
     def upload(match, log):
-        match['datetime'] = match['datetime']
         mongodb.matches.insert(match)
         key = matches_bucket.new_key(match['mid'])
         key.set_contents_from_filename(log)
