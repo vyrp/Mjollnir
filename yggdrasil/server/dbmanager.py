@@ -16,6 +16,7 @@ extensions = {
     'cpp11': 'cpp',
     'cs40': 'cs',
     'python27': 'py',
+    'java7': 'java',
 }
 
 class SolutionNotFoundError(Exception):

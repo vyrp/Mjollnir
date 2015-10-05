@@ -167,10 +167,11 @@ def latest_matches(uid = None, cid = None, limit = 8):
 
 
 
-
+# TODO: Fix Java name 
 ACCEPTED_LANGUAGES = {'cs40': 'C# 4.0 (mono)',
                       'cpp11': 'C++11 (g++ 4.7.3)',
-                      'python27': 'Python (2.7.3)'}
+                      'python27': 'Python (2.7.3)',
+                      'java7': 'Java (1.7)'}
 ALL_PLAYERS = 'all-players-play'
 
 

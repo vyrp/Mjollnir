@@ -215,7 +215,7 @@ class Compiler():
         os.chdir('/Mjollnir/vigridr/')
         lang = 'csharp' if self.ext == 'cs' else self.ext
         
-        if self.ext == 'cs' or self.ext == 'cpp':
+        if self.ext == 'cs' or self.ext == 'cpp' or self.ext == 'java':
             shutil.move('/sandboxes/downloads/' + self.siid, 'src/client/ClientLogic.' + self.ext)
             self.logger.info('make client' + lang)
             
