@@ -661,7 +661,12 @@ def replay(params):
             logger.err("The given match_log doesn't match the standard name")
             return 1
     else:
-        match_log = max(glob(path.join(SOLUTIONSDIR, "*", "logs", "*.log")), key=path.getctime)
+        possibilities = glob(path.join(SOLUTIONSDIR, "*", "logs", "*.log"))
+        if not possibilities:
+            logger.warn("No logs found")
+            return 1
+        
+        match_log = max(possibilities, key=path.getctime)
         logger.info("Latest match log found: %s" % match_log)
 
     # Generating HTML
