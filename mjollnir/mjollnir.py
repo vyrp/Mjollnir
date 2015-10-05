@@ -689,6 +689,7 @@ def replay(params):
                 "visualizer": challenge_name + ".js",
                 "log_json": open(match_log, "r").read().strip(),
             },
+            "mjollnir_assets": "/MjollnirAssets",
         }
 
         # Creating html from jinja template
