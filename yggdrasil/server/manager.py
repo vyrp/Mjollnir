@@ -1,9 +1,11 @@
+
 __all__ = ['run', 'kill', 'games', 'compile']
 
 import json
 import logging
 import threading
 import time
+from dbmanager import get_game_names
 from game import Compiler, Game
 from logging.handlers import TimedRotatingFileHandler
 from Queue import Empty, Queue
@@ -16,12 +18,6 @@ RUN = 'RUN'
 def now():
     return time.strftime('%H:%M:%S')
 
-def setup_game_names():
-    names = {}
-    with open('/Mjollnir/vigridr/src/games/names.json', 'r') as file:
-        names = json.loads(file.read())
-    return names
-
 class GamesManager(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
@@ -31,7 +27,7 @@ class GamesManager(threading.Thread):
         self.games_queue = Queue()
         self.completed_queue = Queue()
         self.running = True
-        self.game_names = setup_game_names()
+        self.game_names = get_game_names()
 
     def run(self):
         try:

@@ -124,3 +124,9 @@ def upload_runtime_error(siid):
     }
     mongodb.submissions.update({ 'siid': siid }, update_document)
     
+def get_game_names():
+    names = {}
+    for game in mongodb.challenges.find():
+        names[game['cid']] = game['visualizer'].split(".")[0]
+    return names
+
