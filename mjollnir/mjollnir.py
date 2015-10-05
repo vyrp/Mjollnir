@@ -426,6 +426,10 @@ def build(params):
             shutil.rmtree(path.join(solution_folder, "bin"))
         shutil.copytree(path.join(build_folder, "bin", full_lang), path.join(solution_folder, "bin"))
 
+    except KeyboardInterrupt as e:
+        logger.err(repr(e))
+        return 1
+
     finally:
         logger.info("Changing game code back to normal...")
         os.chdir(VIGRIDRSRC)
@@ -833,7 +837,13 @@ def run(params):
 
             # Used to capture the variables in the for below
             def create_opponent_command(i, port):
-                return lambda: processes.append(Popen([path.join(opponent_folders[i], "bin", "client"), "--port", str(port)], stdout=dev_null_file, stderr=STDOUT))
+                def run_process():
+                    try:
+                        processes.append(Popen([path.join(opponent_folders[i], "bin", "client"), "--port", str(port)], stdout=dev_null_file, stderr=STDOUT))
+                    except ValueError as e:
+                        if e.message != "I/O operation on closed file":
+                            logger.err("Opponent %d: %s" % (i + 1, str(e)))
+                return run_process
 
             processes = []
             for i, opponent in enumerate(opponents):
@@ -978,6 +988,10 @@ def run(params):
                 logger.info("  Draws: %d" % draws)
                 logger.info("  Losses: %d" % losses)
                 logger.info("  Errors: %d" % errors)
+
+    except KeyboardInterrupt as e:
+        logger.err(repr(e))
+        return 1
 
     finally: # Clean up
         if path.isfile(RESULT_TXT):
