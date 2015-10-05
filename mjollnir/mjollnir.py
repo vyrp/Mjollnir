@@ -20,6 +20,7 @@ from glob import glob
 from inspect import getdoc
 from os import path
 from subprocess import call, CalledProcessError, check_call, Popen, STDOUT
+from threading import Timer
 from time import sleep, strftime
 
 SOLUTIONSDIR = path.expanduser("~/mjollnir-solutions")
@@ -677,6 +678,11 @@ def run(params):
             Popen(client_command % (1, path.join(current_solution_folder, "bin"), port), shell=True)
 
             # Oponents
+
+            # Used to capture the variables in the for below
+            def create_oponent_command(i, port):
+                return lambda: processes.append(Popen([path.join(oponent_folders[i], "bin", "client"), "--port", str(port)], stdout=dev_null_file, stderr=STDOUT))
+
             processes = []
             for i, oponent in enumerate(oponents):
                 sleep(0.1) # Necessary so all oponents do not clog server by all connecting at the same time
@@ -685,13 +691,14 @@ def run(params):
                 if show_oponents:
                     Popen(client_command % (i+2, path.join(oponent_folders[i], "bin"), port), shell=True)
                 else:
-                    processes.append(Popen([path.join(oponent_folders[i], "bin", "client"), "--port", str(port)], stdout=dev_null_file, stderr=STDOUT))
+                    # Run this oponent only in 2s
+                    Timer(2, create_oponent_command(i, port)).start()
 
             # Game server
             logger.info("Opening server...")
             with open(RESULT_TXT, "w") as result_file:
                 try:
-                    check_call([path.join(GAMESDIR, game, "bin", "server")], stdout=result_file) # This is a blocking command
+                    check_call([path.join(GAMESDIR, game, "bin", "server")], stdout=result_file) # This is a blocking command, therefore it must come after clients
                 except CalledProcessError as e:
                     logger.err(str(e))
                     return 1
@@ -756,6 +763,7 @@ def run(params):
 
                     # Wait for processes
                     server_process.wait()
+                    # TODO: should we really wait for the clients?
                     this_solution_process.wait()
                     for p in processes:
                         p.wait()
