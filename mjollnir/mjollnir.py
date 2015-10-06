@@ -93,20 +93,20 @@ Autocomplete:
     $ ls ~/mjollnir-solutions/
     tictactoe  wumpus
     $ mjollnir open [TAB][TAB]
-    tictactoe  wumpus     
-    $ mjollnir open 
+    tictactoe  wumpus
+    $ mjollnir open
 
     Hitting TAB once after some partially written command (or game, or solution name, etc.) completes it.
     For example:
 
     $ mjollnir rep[TAB]
-    $ mjollnir replay 
+    $ mjollnir replay
 
 Run against yourself:
     You can run against yourself.
     For example, if you are in the ~/mjollnir-solutions/tictactoe/my-solution folder,
     you can run a my-solution instance against another my-solution instance:
-    
+
     $ mjollnir run my-solution
 
 """
@@ -665,7 +665,7 @@ def replay(params):
         if not possibilities:
             logger.warn("No logs found")
             return 1
-        
+
         match_log = max(possibilities, key=path.getctime)
         logger.info("Latest match log found: %s" % match_log)
 
@@ -804,6 +804,8 @@ def run(params):
                 return 1
 
         elif param == __SHOW_OPPONENTS:
+            if num_players == 1:
+                logger.warn("Ignoring %s argument, since this game has only one player" % __SHOW_OPPONENTS)
             show_opponents = True
 
         else:
@@ -819,7 +821,6 @@ def run(params):
     # This hack makes a 1-player-game run with 2 clients.
     # Both are the user's solution, but the second client is ignored by the game server.
     if num_players == 1:
-        num_players = 2
         opponents = [solution_name]
         opponent_folders = [current_solution_folder]
 
@@ -987,7 +988,7 @@ def run(params):
             # Print summary
             logger.info("\nSummary:")
             if num_players == 1:
-                logger.info("  Average points: %d" % float(points)/num)
+                logger.info("  Average points: %.2f" % (float(total_points)/num))
                 logger.info("  Errors: %d" % errors)
             else:
                 logger.info("  Wins: %d" % wins)
