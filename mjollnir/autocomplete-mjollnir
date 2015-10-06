@@ -24,7 +24,7 @@ _mjollnir() {
             ;;
         help)
             case $COMP_CWORD in
-                2) COMPREPLY=( $(compgen -W "$($mjollnir list --commands 2>/dev/null)" -- ${cur}) ) ;;
+                2) COMPREPLY=( $(compgen -W "$($mjollnir list --commands 2>/dev/null) --tutorial" -- ${cur}) ) ;;
             esac
             ;;
         list)

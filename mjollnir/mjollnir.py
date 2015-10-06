@@ -12,7 +12,7 @@ To get general help:
 
 $ mjollnir help
 
-To get help about a specific commmand, pass it as a argument to the help command.
+To get help about a specific command, pass it as an argument to the help command.
 For example, about the 'create' command:
 
 $ mjollnir help create
@@ -29,7 +29,7 @@ $ mjollnir create tictactoe py my-solution
 Now you would edit your solution.
 
 2) Build your solution.
-In the specific case of python, it does a syntatic verification.
+In the specific case of python, it does a syntactic verification.
 Note: you must be inside the solution folder.
 
 $ mjollnir build
@@ -47,14 +47,17 @@ $ mjollnir run random
 $ mjollnir replay
 
 Summary:
-In a normal development, you would mostly alternate between editing your solution, building it and running it (steps 2 and 3).
+In a normal development, you would mostly alternate between editing your solution,
+building it and running it (steps 2 and 3).
 
 IMPORTANT: for now, the solution must consist of only one file (for any language).
 
-Also, if you quickly want to navigate to the ~/mjollnir-solutions/ folder or to one of its subfolders,
-you can use the 'mjollnir open' command. For example, to go to the tictactoe folder:
+Also, if you quickly want to navigate to the ~/mjollnir-solutions/ folder or to one of its
+subfolders, you can use the 'mjollnir open' command.
+For example, to go to the tictactoe folder:
 
 $ mjollnir open tictactoe
+
 
 Advanced Options
 ~~~~~~~~~~~~~~~~
@@ -68,7 +71,8 @@ For example, to run against the 'random' solution 10 times:
 
 $ mjollnir run random --num 10
 
-To pass a seed to the random generator of the server (game ambient) and the clients (agents), use the --seed option.
+To pass a seed to the random generator of the server (game ambient) and the clients (agents),
+use the --seed option.
 Note: not yet implemented.
 
 For example:
@@ -96,8 +100,8 @@ Autocomplete:
     tictactoe  wumpus
     $ mjollnir open
 
-    Hitting TAB once after some partially written command (or game, or solution name, etc.) completes it.
-    For example:
+    Hitting TAB once after some partially written command (or game, or solution name, etc.)
+    completes it. For example:
 
     $ mjollnir rep[TAB]
     $ mjollnir replay
@@ -225,7 +229,7 @@ def _build_game(game):
 def _check_correct_folder():
     """
     Checks if we are in a Mjollnir solution folder.
-    The curent directory must match the `folder_regex` and contain a file
+    The current directory must match the `folder_regex` and contain a file
     whose name is the name of the solution and some extension, of an available language.
 
     Returns:
@@ -249,20 +253,6 @@ def _check_correct_folder():
 
     return correct_folder, solution_folder, game, solution_name, language
 
-def _cut_to_nth_appearance(string, separator, n):
-    """
-    Cuts a string up to the nth appearance of a separator
-
-    Parameters:
-        string    - the string to be cut
-        separator - a string, the symbols to find and count
-        n         - an integer
-
-    Returns:
-        the shortened string
-    """
-    return separator.join(string.split(separator)[:n])
-
 def _indent(doc_string, N):
     """
     Takes a piece of text and indents it so it displays correctly in the help message.
@@ -274,9 +264,7 @@ def _indent(doc_string, N):
     Returns:
         a string, the indented text
     """
-    lines = doc_string.split("\n")
-    lines = [line.strip() for line in lines]
-    return ("\n" + " "*(4+N+3)).join(lines) # 4 spaces for tab, and 3 characters for " - "
+    return ("\n" + (" " * N)).join(doc_string.split("\n"))
 
 def _move_log(game, solution_name, opponents, timestamp=strftime("%Y.%m.%d-%Hh%Mm%Ss"), idx=""):
     """
@@ -444,7 +432,8 @@ def create(params):
 
     <game>          - The game name. One of: %s.
     <language>      - The solution language. One of: %s.
-    <solution_name> - The name of the solution. Must only contain characaters of the POSIX Portable Character Set (%s).
+    <solution_name> - The name of the solution. Must only contain characters of the POSIX
+                      Portable Character Set (%s).
     """
 
     # Requirements
@@ -485,7 +474,7 @@ def create(params):
 
     folder = path.join(SOLUTIONSDIR, game, solution_name)
     if path.exists(folder):
-        logger.err("A solution with that name already exists for that game and language")
+        logger.err("A solution with that name already exists for that game")
         return 1
 
     # Command execution
@@ -506,9 +495,10 @@ create.__doc__ = create.__doc__ % (" ".join(games), " ".join(languages), POSIX_C
 def help(params=[]):
     """
     Displays this help message or more help about a command.
-    Parameters: [<command>]
+    Parameters: [<command> | --tutorial]
 
-    <command> - More help about <command>.
+    <command>  - More help about <command>.
+    --tutorial - Show Mjollnir tutorial.
     """
 
     # Requirements
@@ -519,11 +509,18 @@ def help(params=[]):
         return 1
 
     if len(params) == 1:
+        if params[0].startswith("-"):
+            if params[0] != "--tutorial":
+                logger.err("Unrecognized option: %s\n" % params[0])
+                help(["help"])
+                return 1
+            print getdoc(sys.modules[__name__]) + "\n"
+            return 0
         if params[0] not in commands:
             logger.err("Unrecognized command: %s\n" % params[0])
             help()
             return 1
-        logger.info("%-6s - %s\n" % (params[0], _indent(getdoc(commands[params[0]]), 6-4)))
+        logger.info("    %s\n        %s\n" % (params[0], _indent(getdoc(commands[params[0]]), 8)))
         return 0
 
     # Command execution
@@ -536,20 +533,21 @@ def help(params=[]):
 
     logger.info("Commands:")
     for command in sorted(commands.keys()):
-        logger.info("    %-6s - %s\n" % (command, _indent(_cut_to_nth_appearance(getdoc(commands[command]), "\n", 2), 6)))
+        logger.info("    %s\n        %s\n" % (command, _indent(getdoc(commands[command]).split("\n\n")[0], 8)))
 
     return 0
 
 def list_options(params):
     """
-    List possibilities for given paramter type, in one line, separated by spaces. Mainly made for scripts.
+    List possibilities for given parameter type, in one line, separated by spaces.
+    Mainly made for other scripts.
     Parameters: --commands | --games | --languages | --matches | --solutions
 
-    --commands         - List possible commands
-    --games            - List available games
-    --languages        - List available languages
-    --matches          - List existing match logs (for all games)
-    --solutions        - List existing solutions for the game in which you are currently located
+    --commands  - List possible commands
+    --games     - List available games
+    --languages - List available languages
+    --matches   - List existing match logs (for all games)
+    --solutions - List existing solutions for the game in which you are currently located
     """
 
     # Requirements
@@ -589,7 +587,8 @@ def list_options(params):
 
 def open_folder(params):
     """
-    Go to the mjollnir-solutions directory if no argument is specified, else go to the given parameters folder.
+    Go to the mjollnir-solutions directory if no argument is specified, else go to the given
+    parameters folder.
     Parameters: [<game> [<solution_name>]]
 
     <game>          - A game for which you have solutions
@@ -711,10 +710,12 @@ def run(params):
     Runs a match against the specified opponents, if any. Must be inside a solution folder.
     Parameters: [<solution_name>]* [--seed <NUM>] [--num <NUM>] [--show-opponents]
 
-    <solution_name>  - Parameter passed zero or more times. Indicates the opponents. Must come first.
+    <solution_name>  - Parameter passed zero or more times. Indicates the opponents.
+                       Must come first.
     --seed <NUM>     - The seed to be used for randomness.
     --num <NUM>      - The amount of times to play.
-    --show-opponents - Whether to show a console for each opponent. A console is always shown for the current solution.
+    --show-opponents - Whether to show a console for each opponent.
+                       A console is always shown for the current solution.
     """
 
     __SEED, __NUM, __SHOW_OPPONENTS = "--seed", "--num", "--show-opponents"
