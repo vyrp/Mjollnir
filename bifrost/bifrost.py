@@ -78,8 +78,8 @@ class ChallengeDescriptionForm(Form):
     specs = PageDownField('General Technical Specs', validators=[DataRequired()])
     specs_cpp = PageDownField('C++ Technical Specs', validators=[DataRequired()])
     specs_cs = PageDownField('C# Technical Specs', validators=[DataRequired()])
+    specs_java = PageDownField('Java Technical Specs', validators=[DataRequired()])
     specs_py = PageDownField('Python Technical Specs', validators=[DataRequired()])
-
 
 
 
@@ -504,7 +504,7 @@ def user_page(username):
         challenge = mongodb.challenges.find_one({ 'cid': submission['cid'] })
 
         if not challenge:
-            raise "Could not find challenge " + submission['cid'] + " in the database"
+            raise Exception("Could not find challenge " + submission['cid'] + " in the database")
 
         total_submissions = mongodb.submissions.find({ 'cid': submission['cid'] }).count()
 
@@ -735,6 +735,7 @@ def editchallenge():
             form.specs.data = challenge.get('specs')
             form.specs_cpp.data = challenge.get('specs_cpp')
             form.specs_cs.data = challenge.get('specs_cs')
+            form.specs_java.data = challenge.get('specs_java')
             form.specs_py.data = challenge.get('specs_py')
         else:
             form.dev_only.data = True
@@ -751,6 +752,7 @@ def editchallenge():
                      'specs': form.specs.data,
                      'specs_cpp': form.specs_cpp.data,
                      'specs_cs': form.specs_cs.data,
+                     'specs_java': form.specs_java.data,
                      'specs_py': form.specs_py.data,
                      'dev_only': form.dev_only.data }
 
@@ -787,7 +789,7 @@ def challenge_by_name(challenge_name):
         user_from_submission = mongodb.users.find_one({ 'uid': submission['uid'] })
 
         if not user_from_submission:
-            raise "Could not find user " + submission['uid'] + " in the database"
+            raise Exception("Could not find user " + submission['uid'] + " in the database")
 
         submission['sequence'] = i
         submission['username'] = user_from_submission['username']
@@ -970,7 +972,7 @@ def match(mid):
     challenge = mongodb.challenges.find_one({ 'cid': match['cid'] })
 
     if not challenge:
-        raise "Couldn't find a challenge with cid " + match['cid']
+        raise Exception("Couldn't find a challenge with cid " + match['cid'])
 
     users = list( mongodb.users.find({ 'uid': { '$in': [ user['uid'] for user in match['users'] ] } }) )
 

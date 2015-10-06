@@ -52,6 +52,7 @@
                 <ul id="challenge-tabs" class="nav nav-tabs">
                   <li class="active"><a href="#specs-cs" data-toggle="tab">C&#9839;</a></li>
                   <li><a href="#specs-cpp" data-toggle="tab">C++</a></li>
+                  <li><a href="#specs-java" data-toggle="tab">Java</a></li>
                   <li><a href="#specs-py" data-toggle="tab">Python</a></li>
                 </ul>
                 <div class="tab-content">
@@ -62,6 +63,10 @@
 
                   <div class="tab-pane fade" id="specs-cpp">
                     {{ markdown_to_html(challenge.specs_cpp) }}
+                  </div>
+
+                  <div class="tab-pane fade" id="specs-java">
+                    {{ markdown_to_html(challenge.specs_java) }}
                   </div>
 
                   <div class="tab-pane fade" id="specs-py">
