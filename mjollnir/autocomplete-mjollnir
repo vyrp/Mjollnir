@@ -53,6 +53,9 @@ _mjollnir() {
                 fi
             fi
             ;;
+        update)
+            # No options
+            ;;
     esac
 
     return 0

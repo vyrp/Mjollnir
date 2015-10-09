@@ -129,7 +129,7 @@ from datetime import datetime
 from glob import glob
 from inspect import getdoc
 from os import path
-from subprocess import call, CalledProcessError, check_call, Popen, STDOUT
+from subprocess import call, CalledProcessError, check_call, check_output, Popen, STDOUT
 from threading import Timer
 from time import sleep, strftime
 
@@ -209,7 +209,7 @@ class _SilentLogger(_DefaultLogger):
 
 ## Local functions ##
 
-def _build_game(game):
+def _build_game(game, stdout=sys.stdout):
     """
     Builds a game, in the vigridr directory.
     It doesn't restore the original files.
@@ -219,11 +219,11 @@ def _build_game(game):
     """
     logger.info("The %s game has never been built. Building it..." % game)
     os.chdir(VIGRIDR)
-    check_call(['make', 'directories'])
-    check_call(['make', 'remove'])
+    check_call(['make', 'directories'], stdout=stdout)
+    check_call(['make', 'remove'], stdout=stdout)
     os.chdir(VIGRIDRSRC)
     change_game_code(game, copy_sample_clients=False, copy_tests=False, copy_obj=False, used_logger=_SilentLogger())
-    check_call(['make', 'server'])
+    check_call(['make', 'server'], stdout=stdout)
     cache_state(game)
 
 def _check_correct_folder():
@@ -287,7 +287,7 @@ def _move_log(game, solution_name, opponents, timestamp=strftime("%Y.%m.%d-%Hh%M
 
 ## Exported Functions ##
 
-def build(params):
+def build(params, stdout=sys.stdout):
     """
     With no parameters, builds the solution in the current folder.
     Parameters: [clean]
@@ -332,15 +332,15 @@ def build(params):
     if language == "cs":
         full_lang = "csharp"
 
-    # Check if game code has been built
-    if not path.isdir(path.join(GAMESDIR, game, "gen-" + full_lang)):
-        try:
-            _build_game(game)
-        except CalledProcessError as e:
-            logger.err(str(e))
-            return 1
-
     try:
+        # Check if game code has been built
+        if not path.isdir(path.join(GAMESDIR, game, "gen-" + full_lang)):
+            try:
+                _build_game(game)
+            except CalledProcessError as e:
+                logger.err(str(e))
+                return 1
+
         logger.info("Changing game code...")
         os.chdir(VIGRIDRSRC)
         change_game_code(game, copy_sample_clients=True, copy_tests=False, copy_obj=False, used_logger=_SilentLogger())
@@ -391,7 +391,7 @@ def build(params):
             os.makedirs(path.join(build_folder, "obj", "thrifts", "gen-cpp"))
             os.makedirs(path.join(build_folder, "obj", "utils"))
         os.makedirs(path.join(build_folder, "bin", full_lang))
-        return_value = call(["make", "client" + full_lang])
+        return_value = call(["make", "client" + full_lang], stdout=stdout)
         if return_value != 0:
             return return_value
 
@@ -1009,6 +1009,51 @@ def run(params):
 
     return 0
 
+def update(params):
+    """
+    Updates the repository and run necessary environment modifications.
+    Please run this command instead of only 'git pull'.
+    No parameters.
+    """
+
+    # Requirements
+
+    if len(params) != 0:
+        logger.err("This command receives no parameters\n")
+        help(["update"])
+        return 1
+
+    # Command execution
+
+    try:
+        # Make sure we are on master
+        os.chdir("/Mjollnir")
+        m = re.search(r"\* (.*)", check_output(["git", "branch"]))
+        if not m:
+            logger.err("Could not figure out current git branch")
+            return 1
+        if m.group(1) != "master":
+            logger.err("You are not on branch master")
+            return 1
+
+        logger.info("Running git pull...")
+        output = check_output(["git", "pull"])
+        if output == "Already up-to-date.\n":
+            print "Already up-to-date. Nothing to do."
+            return 0
+
+        # We must import only after having pulled, so we have the latest version
+        import updates
+        return updates.update(sys.modules[__name__])
+
+    except CalledProcessError as e:
+        logger.err(str(e))
+        return 1
+
+    except KeyboardInterrupt as e:
+        logger.err(repr(e))
+        return 1
+
 # Available commands. Must come after functions definition.
 commands = {
     "build": build,
@@ -1018,6 +1063,7 @@ commands = {
     "open": open_folder,
     "replay": replay,
     "run": run,
+    "update": update,
 }
 
 def mjollnir(command, params=[], logger_to_use=_DefaultLogger()):
