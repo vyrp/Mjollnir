@@ -141,6 +141,10 @@
   width: 400px;
 }
 
+.width-200 {
+  width: 200px;
+}
+
 .height-60 {
   height: 60px;
 }
@@ -163,6 +167,10 @@
 
 .margin-left-16 {
   margin-left: 16px;
+}
+
+.margin-right-16 {
+  margin-right: 16px;
 }
 
 .news-subtitle {

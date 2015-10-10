@@ -57,6 +57,7 @@ void GameLogic::initializeWorld_(){
   twm_.map[x][y].wumpus = true;
   wumpusPosition_.x = x;
   wumpusPosition_.y = y;
+  twm_.map[x][y].stench = true;
 
   // Choosing gold position different from pit and initial position
   do {

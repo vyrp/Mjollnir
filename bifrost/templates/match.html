@@ -19,14 +19,18 @@
 
         <div class="height-60">
           <h2><a href="{{ url_for('.challenge_by_name', challenge_name=match.challenge_name) }}">{{ match.challenge_name }}</a></h2>
-          <div class="float-left width-400">
+          <div class="float-left width-200">
             <h3>{{ ' vs '.join(match.usernames) }}</h3>
+            
           </div>
+          
           <div class="float-right margin-top-20">
             ({{ match.time_since }})
           </div>
+          <div id="winner" class="float-right margin-right-16">
+            <h3 id="winner">{{ match.winner }}</h3>
+          </div>
         </div>
-
           <div class="margin-left-16">
               <div class="well margin-top-55">
                   <div id="match-player">
@@ -73,7 +77,9 @@
     function load_match_data(callback){
         $.get(MJOLLNIR_MATCHES + bifrost_mid, callback);
     }
+
   </script>
   <script src="{{ url_for('static', filename='js/match_player.js') }}"></script>
+
 
 {% endblock %}

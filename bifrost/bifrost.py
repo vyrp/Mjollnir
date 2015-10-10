@@ -965,7 +965,7 @@ def match(mid):
     Page to visualize a match.
     """
     match = mongodb.matches.find_one({ 'mid': mid })
-
+    logger.info(match)
     if not match:
         abort(404)
 
@@ -982,7 +982,21 @@ def match(mid):
     match['cid'] = challenge['cid']
     match['visualizer'] = challenge['visualizer']
     match['usernames'] = [ user['username'] for user in users if user['uid'] in [match_user['uid'] for match_user in match['users']] ]
+
+    if match['challenge_name'] == 'Wumpus':
+        match['winner'] = 'Score: ' + str(match['users'][0]['rank'])
+    else:
+        if match['users'][0]['rank'] == 1 and match['users'][1]['rank'] == 2:
+            match['winner'] = 'Winner: ' + match['usernames'][0]
+        elif match['users'][0]['rank'] == 2 and match['users'][1]['rank'] == 1:
+            match['winner'] = 'Winner: ' + match['usernames'][1]
+        else: 
+            match['winner'] = 'Tie!'
+
+    
     match['users'] = users
+
+    
 
     custom_title = ' vs '.join(match['usernames']) + ' on ' + match['challenge_name']
 
