@@ -807,7 +807,8 @@ def run(params):
         elif param == __SHOW_OPPONENTS:
             if num_players == 1:
                 logger.warn("Ignoring %s argument, since this game has only one player" % __SHOW_OPPONENTS)
-            show_opponents = True
+            else:
+                show_opponents = True
 
         else:
             logger.err("Unrecognized option: " + str(param))
