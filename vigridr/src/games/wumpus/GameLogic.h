@@ -40,10 +40,13 @@ class GameLogic {
   GameLogic(int32_t playerId1, int32_t playerId2);
   bool update(Command command, int32_t playerId);
   WorldModel getWorldModel() const;
+  size_t getWorldSize() const;
   bool isFinished() const;
   std::string getWinner() const;
   GameDescription getGameDescription(int32_t playerId) const;
   TotalWorldModel getTotalWorldModel() const;
+  void initializeWorld(std::vector<std::vector<WorldSquare>>);
+  void setWumpusPosition(int32_t, int32_t);
   /**
    *  Specific function to use at GameLogicTest test suite
    */

@@ -24,6 +24,22 @@ GameLogic::GameLogic(int32_t playerId1, int32_t playerId2) {
   initializeWorld_();
 }
 
+void GameLogic::initializeWorld(std::vector<std::vector<WorldSquare>> map) {
+
+  twm_.map = map;
+
+  for(int32_t i = 0; i < (int32_t)worldSize_; i++) {
+    for(int32_t j = 0; j < (int32_t)worldSize_; j++) {
+      updateWorldSquare_(i, j);
+    }
+  }
+
+  twm_.playerDirection = facing_;
+  twm_.map[playerPosition_.x][playerPosition_.y].player = true;
+  worldModel_.sensors.stench = twm_.map[worldSize_ -1][0].stench;
+  worldModel_.sensors.breeze = twm_.map[worldSize_ -1][0].breeze;
+}
+
 void GameLogic::initializeWorld_(){
   int32_t x, y;
 
@@ -57,7 +73,6 @@ void GameLogic::initializeWorld_(){
   twm_.map[x][y].wumpus = true;
   wumpusPosition_.x = x;
   wumpusPosition_.y = y;
-  twm_.map[x][y].stench = true;
 
   // Choosing gold position different from pit and initial position
   do {
@@ -111,6 +126,9 @@ void GameLogic::updateWorldSquare_(int32_t x, int32_t y){
   if(y < (int32_t)worldSize_ - 1){
     updateSensors_(twm_.map[x][y], x, y + 1); 
   }
+  if(twm_.map[x][y].wumpus){
+    twm_.map[x][y].stench = true;
+  }
 }
 
 void GameLogic::updateSensors_(WorldSquare& ws, int32_t x, int32_t y){
@@ -144,6 +162,7 @@ void GameLogic::updateWorldModel_(Action action){
           j++;
           break;
       }
+      worldModel_.sensors.scream = false;
       bump = checkBump_(i, j);
       if(bump){
         worldModel_.sensors.bump = true;
@@ -153,10 +172,11 @@ void GameLogic::updateWorldModel_(Action action){
         playerPosition_.x = i;
         playerPosition_.y = j;
         twm_.map[playerPosition_.x][playerPosition_.y].player = true;
-        if((twm_.map[playerPosition_.x][playerPosition_.y].wumpus) || 
+
+        if((twm_.map[playerPosition_.x][playerPosition_.y].wumpus && wumpusAlive_) || 
             twm_.map[playerPosition_.x][playerPosition_.y].pit)  {
           hasFinished_ = true;
-          winner_ = "s:" + std::to_string(score_);
+          winner_ = "s:" + std::to_string(score_ - 1000);
         } else {
           if(twm_.map[playerPosition_.x][playerPosition_.y].gold){
             worldModel_.sensors.glitter = true;          
@@ -168,12 +188,16 @@ void GameLogic::updateWorldModel_(Action action){
       
       break;
     case TURNRIGHT:
+      worldModel_.sensors.scream = false;
+      worldModel_.sensors.bump = false;
       score_--;
       facing_ = (Direction)(((int32_t)facing_ + 1)%4);
       // facing_ = (facing_ + 1)%4;
       twm_.playerDirection = facing_;
       break;
     case TURNLEFT:
+      worldModel_.sensors.scream = false;
+      worldModel_.sensors.bump = false;
       score_--;
       facing_ = (Direction)((int32_t)facing_ - 1);
       // facing_ = facing_ - 1;
@@ -183,6 +207,8 @@ void GameLogic::updateWorldModel_(Action action){
       twm_.playerDirection = facing_;
       break;  
     case SHOOT:
+      worldModel_.sensors.scream = false;
+      worldModel_.sensors.bump = false;
       if(canShoot_){
         score_-=10;
         switch(facing_) {
@@ -217,18 +243,21 @@ void GameLogic::updateWorldModel_(Action action){
       }
       break;
     case GRAB:
+      worldModel_.sensors.scream = false;
+      worldModel_.sensors.bump = false;
       score_--;
       if(twm_.map[playerPosition_.x][playerPosition_.y].gold){
         hasGold_ = true;
       }
       break;
     case CLIMB:
-      if(playerPosition_.x == 0 && playerPosition_.y == 0){
+      worldModel_.sensors.scream = false;
+      worldModel_.sensors.bump = false;
+      if(playerPosition_.x == (int32_t)worldSize_ - 1 && playerPosition_.y == 0){
         if(hasGold_){
           score_ += 1000;
-        } else {
-          score_--;
-        }
+        } 
+        score_--;
         winner_ = "s:" + std::to_string(score_);
         hasFinished_ = true;
       } else {
@@ -237,6 +266,8 @@ void GameLogic::updateWorldModel_(Action action){
       break;
     default:
       score_--;
+      worldModel_.sensors.scream = false;
+      worldModel_.sensors.bump = false;
       break;
   }
 }
@@ -278,6 +309,10 @@ std::string GameLogic::getWinner() const {
   return winner_;
 }
 
+size_t GameLogic::getWorldSize() const {
+  return worldSize_;
+}
+
 void GameLogic::setWinner(std::string value) {
   winner_ = value;
 }
@@ -288,6 +323,11 @@ bool GameLogic::randomPlay_(int32_t playerId) {
 
 TotalWorldModel GameLogic::getTotalWorldModel() const {
   return twm_;
+}
+
+void GameLogic::setWumpusPosition(int32_t x, int32_t y){
+  wumpusPosition_.x = x;
+  wumpusPosition_.y = y;
 }
 
 }}  // namespaces
