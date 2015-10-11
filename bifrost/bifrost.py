@@ -63,6 +63,7 @@ from wtforms.fields import SelectField
 from wtforms.fields import IntegerField
 from wtforms.validators import DataRequired
 from wtforms.validators import NumberRange
+from wtforms.validators import Optional
 
 ##### Classes
 ## TODO: extract to another file
@@ -113,7 +114,7 @@ class PlayForm(Form):
     """
     rounds = IntegerField('1', validators=[NumberRange(min = 0, max = 20)])
     challenge = SelectField('Challenge')
-    player = SelectField('Opponent')
+    player = SelectField('Opponent', validators=[Optional()])
 
 
 
@@ -965,7 +966,6 @@ def match(mid):
     Page to visualize a match.
     """
     match = mongodb.matches.find_one({ 'mid': mid })
-    logger.info(match)
     if not match:
         abort(404)
 
