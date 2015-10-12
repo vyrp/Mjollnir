@@ -391,7 +391,7 @@ def build(params, stdout=sys.stdout):
             os.makedirs(path.join(build_folder, "obj", "thrifts", "gen-cpp"))
             os.makedirs(path.join(build_folder, "obj", "utils"))
         os.makedirs(path.join(build_folder, "bin", full_lang))
-        return_value = call(["make", "client" + full_lang], stdout=stdout)
+        return_value = call(["make", "client" + full_lang], stdout=stdout, stderr=STDOUT)
         if return_value != 0:
             return return_value
 

@@ -5,6 +5,7 @@ so that the virtual machine's environment is properly updated.
 
 ## Imports and constants ##
 
+import json
 import os
 import sys
 
@@ -52,15 +53,18 @@ def update(mjollnir):
             something_changed = True
             logger.info("   -> Rebuilding all game binaries")
             for game in glob(path.join(VIGRIDRSRC, "games", "*")):
-                if path.isdir(game):
-                    try:
-                        game_name = path.basename(game)
-                        logger.info("      Game '%s'..." % game_name)
-                        build_game(game_name, stdout=dev_null)
-                    except CalledProcessError as e:
-                        logger.warn("Failure to build game '%s'" % game_name)
-                        print str(e)
-                        # If game failed, doesn't matter. Go to next.
+                if not path.isdir(game):
+                    continue
+                if not json.load(open(path.join(game, "config.json"), "r"))["published"]:
+                    continue
+                try:
+                    game_name = path.basename(game)
+                    logger.info("      Game '%s'..." % game_name)
+                    build_game(game_name, stdout=dev_null)
+                except CalledProcessError as e:
+                    logger.warn("Failure to build game '%s'" % game_name)
+                    print str(e)
+                    # If game failed, doesn't matter. Go to next.
 
             bin_folders = glob(path.expanduser(path.join("~", "mjollnir-solutions", "*", "*", "bin")))
             if bin_folders:
@@ -68,7 +72,8 @@ def update(mjollnir):
                 for bin_folder in bin_folders:
                     solution_folder = path.dirname(bin_folder)
                     solution_name = path.basename(solution_folder)
-                    logger.info("      Solution '%s'..." % solution_name)
+                    game = path.basename(path.dirname(solution_folder))
+                    logger.info("      Solution '%s/%s'..." % (game, solution_name))
                     os.chdir(solution_folder)
                     if build_solution([], stdout=dev_null) != 0:
                         logger.warn("Failure to build solution '%s'" % solution_name)
@@ -88,7 +93,8 @@ def update(mjollnir):
         return 1
 
     finally:
-        change_game_code("template", copy_sample_clients=True, copy_tests=False, copy_obj=False, used_logger=_SilentLogger())
+        os.chdir(VIGRIDRSRC)
+        change_game_code("template", copy_sample_clients=True, copy_tests=False, copy_obj=False, used_logger=mjollnir._SilentLogger())
         mjollnir.logger = logger
         dev_null.close()
 
