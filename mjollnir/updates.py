@@ -6,6 +6,7 @@ so that the virtual machine's environment is properly updated.
 ## Imports and constants ##
 
 import os
+import sys
 
 from glob import glob
 from os import path
@@ -87,9 +88,9 @@ def update(mjollnir):
         return 1
 
     finally:
+        change_game_code("template", copy_sample_clients=True, copy_tests=False, copy_obj=False, used_logger=_SilentLogger())
         mjollnir.logger = logger
         dev_null.close()
-        change_game_code("template", copy_sample_clients=True, copy_tests=False, copy_obj=False, used_logger=_SilentLogger())
 
     return 0
 
