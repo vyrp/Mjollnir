@@ -8,7 +8,7 @@ class Solution:
     def play_turn(self, wm):
 
         command = Command(Action())
-        move = randint(0, 3)
+        move = randint(0, 2)
         
         if move == 0:
             print "FORWARD"
@@ -16,12 +16,9 @@ class Solution:
         elif move == 1:
             print "TURNRIGHT"
             command.action = Action.TURNRIGHT
-        elif move == 2:
+        else:
             print "TURNLEFT"
             command.action = Action.TURNLEFT
-        else:
-            print "STAY"
-            command.action = Action.STAY
 
         return command
 

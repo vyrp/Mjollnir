@@ -12,7 +12,7 @@ public class ClientLogic {
 
     public Command playTurn(WorldModel wm) {
         Command command = new Command();
-        int move = random.nextInt(4);
+        int move = random.nextInt(3);
         
         if(move == 0){
             System.out.println("FORWARD");
@@ -20,13 +20,10 @@ public class ClientLogic {
         } else if(move == 1) {
             System.out.println("TURNRIGHT");
             command.action = Action.TURNRIGHT;   
-        } else if(move == 2) {
+        } else {
             System.out.println("TURNLEFT");
             command.action = Action.TURNRIGHT;   
-        } else {
-            System.out.println("STAY");
-            command.action = Action.STAY;   
-        }
+        } 
         
         return command;
     }

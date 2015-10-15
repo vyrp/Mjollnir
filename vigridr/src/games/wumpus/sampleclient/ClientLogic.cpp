@@ -10,7 +10,7 @@ using ::mjollnir::vigridr::Action;
 
 Command playTurn(const WorldModel& wm) {
   Command command;
-  size_t move = rand()%4;
+  size_t move = rand()%3;
 
   if(move == 0){
     std::cout << "FORWARD" << std::endl;
@@ -18,13 +18,11 @@ Command playTurn(const WorldModel& wm) {
   } else if(move == 1){
     std::cout << "TURNRIGHT" << std::endl;
     command.action = Action::TURNRIGHT;
-  } else if(move == 2){
+  } else {
     std::cout << "TURNLEFT" << std::endl;
     command.action = Action::TURNLEFT;
-  } else {
-    std::cout << "STAY" << std::endl;
-    command.action = Action::STAY;
-  }
+  } 
+  
   return command;
 }
 
