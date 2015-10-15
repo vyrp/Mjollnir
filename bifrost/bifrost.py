@@ -1019,22 +1019,42 @@ def matches():
 def allPlay(cid, rounds, group, challenge_name):
     """
     Make all players play
-    Currently woring with games for one and two players
+    Currently working with games for one and two players
     """
+
+    tid = str( uuid4() )
+
+    playing = 0
+
     users = [mongodb.users.find_one({ 'username': username }) for username in group['users']]
 
     if challenge_name == 'Wumpus':
         for user in users:
-            play(cid = cid, uids = [user['uid']], rounds = rounds) 
+            error = play(cid = cid, uids = [user['uid']], rounds = rounds, tid = tid) 
+            if not error:
+                playing = playing + 1
 
     else:
         for i in xrange(len(users) - 1):
             for j in xrange(i + 1, len(users)):
-                play(cid = cid, uids = [users[i]['uid'], users[j]['uid']], rounds = rounds)
+                error = play(cid = cid, uids = [users[i]['uid'], users[j]['uid']], rounds = rounds, tid = tid)
+                if not error:
+                    playing = playing + 1
 
 
-def play(cid, uids, rounds):
+    total_matches = rounds * playing    
+    document = {
+        'tid': tid,
+        'cid': cid,
+        'gid': group['gid'],
+        'total_matches': total_matches,
+        'datetime_started': datetime.datetime.utcnow(),
+    }
+    mongodb.tournaments.insert(document)
 
+
+
+def play(cid, uids, rounds, tid = None):
     subs = list()
 
     for uid in uids:
@@ -1052,10 +1072,13 @@ def play(cid, uids, rounds):
     values = {  'cid': cid,
                 'siids': [sub['siid'] for sub in subs],
                 'uids': uids }
+    if tid:
+        values['tid'] = tid
+
     encoded = urllib.urlencode(values)
 
     for _ in xrange(rounds):
-            response = urllib2.urlopen('http://127.0.0.1:30403/run', data=encoded)
+        response = urllib2.urlopen('http://127.0.0.1:30403/run', data=encoded)
 
     return False
 

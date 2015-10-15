@@ -45,9 +45,16 @@ def run_handler():
     if missing:
         logger.info('MISSING SOMETHING. Given: ' + str(request.form))
         return missing, 400
-    
+
+    if 'tid' in request.form: 
+        requirements.append('tid')
+
     response = json.dumps(manager.run(*[request.form[item] for item in requirements]))
-    logger.info('(%s, %s) => %s' % (request.form['siids'], request.form['cid'], response))
+    if 'tid' in request.form:
+        logger.info('(%s, %s, %s) => %s' % (request.form['siids'], request.form['cid'], request.form['tid'], response))
+    else:
+        logger.info('(%s, %s) => %s' % (request.form['siids'], request.form['cid'], response))
+    
     return response
 
 @app.route('/build', methods=['POST'])

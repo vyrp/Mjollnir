@@ -37,14 +37,15 @@ def execute(command):
         raise ExecutionError('Return of "%s" was %d.' % (command, result))
 
 class Game():
-    def __init__(self, siids, uids, cid, pid, logger):
+    def __init__(self, siids, uids, cid, pid, tid, logger):
         self.exts = []
-        # Transforming a string of a list back to a list
+        # Transforming a string of fa list back to a list
         self.siids = ast.literal_eval(siids)
         self.uids = ast.literal_eval(uids)
         self.pid = pid
         self.logger = logger
         self.mid = str(uuid4())
+        self.tid = tid
         self.game = '/sandboxes/game-' + self.mid
         self.result = {
             'cid': cid,
@@ -53,7 +54,11 @@ class Game():
             'users': []
         }
 
+        if self.tid:
+            self.result['tid'] = tid
+
         # I'm considering here that uids and siids won't be long lists
+        # I don't believe we'll have thousands of players in a match
         for uid, siid in zip(self.uids, self.siids):
             self.result['users'].append(
                 {
