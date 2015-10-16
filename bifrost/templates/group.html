@@ -30,9 +30,11 @@
         <div>
           <ul id="challenge-tabs" class="nav nav-tabs">
             <li class="active"><a href="#description" data-toggle="tab">Description</a></li>
-            <li><a href="#play" data-toggle="tab">Play</a></li>
+            {% if user.username in group.users %}
+              <li><a href="#play" data-toggle="tab">Play</a></li>
+            {% endif %}
             {% if is_active_user_in('Dev') or user.username in group.admins %}
-              <li><a href="#manage" data-toggle="tab">Manage</a></li>
+              <li><a href="#organize" data-toggle="tab">Organize</a></li>
             {% endif %}
             {% if is_active_user_in('Dev') %}
               <li><a href="#group-info" data-toggle="tab">Group Info</a></li>
@@ -69,7 +71,7 @@
               </form>
             </div>
 
-            <div class="tab-pane fade" id="manage">
+            <div class="tab-pane fade" id="organize">
               <form method="post" action="">
                 <fieldset>
                   <div>
