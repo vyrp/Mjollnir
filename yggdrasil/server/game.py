@@ -1,3 +1,5 @@
+## Imports and Constants ##
+
 import ast
 import datetime
 import dbmanager
@@ -9,7 +11,14 @@ from subprocess import call, check_call, Popen, STDOUT
 from time import sleep, time
 from uuid import uuid4
 
-sys.path.append('/Mjollnir/vigridr/src/')
+path = os.path
+VIGRIDR_SRC = '/Mjollnir/vigridr/src'
+SANDBOXES = '/sandboxes'
+BUILD = path.join(SANDBOXES, 'build')
+DOWNLOADS = path.join(SANDBOXES, 'downloads')
+BUILD_ERR = path.join(BUILD, 'stderr')
+
+sys.path.append(VIGRIDR_SRC)
 from change_game_code import change_game_code
 sys.path.pop(-1)
 
@@ -33,7 +42,7 @@ class Game():
         self.logger = logger
         self.mid = str(uuid4())
         self.tid = tid
-        self.game = '/sandboxes/game-' + self.mid
+        self.game = path.join(SANDBOXES, 'game-' + self.mid)
         self.result = {
             'cid': cid,
             'datetime': datetime.datetime.utcnow(),
@@ -47,13 +56,11 @@ class Game():
         # I'm considering here that uids and siids won't be long lists
         # I don't believe we'll have thousands of players in a match
         for uid, siid in zip(self.uids, self.siids):
-            self.result['users'].append(
-                {
-                    'uid': uid,
-                    'siid': siid,
-                    'rank': -1
-                }
-            )
+            self.result['users'].append({
+                'uid': uid,
+                'siid': siid,
+                'rank': -1
+            })
 
         self.logger.info("mid: " + self.mid)
 
@@ -73,23 +80,23 @@ class Game():
             self.exts.append(dbmanager.download(siid))
 
     def compile(self):
-        os.chdir('/Mjollnir/vigridr/src/')
+        os.chdir(VIGRIDR_SRC)
         self.logger.info('Changing game code')
         change_game_code(self.pid, False, False, False, NullLogger())
 
-        os.chdir('/Mjollnir/vigridr/')
-        os.mkdir(self.game + '/')
+        os.chdir('..')
+        os.mkdir(self.game)
         with open(os.devnull, "w") as dev_null:
             for idx, siid, ext in zip(range(1, len(self.siids) + 1), self.siids, self.exts):
                 lang = 'csharp' if ext == 'cs' else ext
-                shutil.move('/sandboxes/downloads/' + siid, 'src/client/ClientLogic.' + ext)
+                shutil.move(path.join(DOWNLOADS, siid), path.join('src', 'client', 'ClientLogic.' + ext))
                 self.logger.info('make client' + lang)
                 check_call(['make', 'client' + lang], stdout=dev_null, stderr=STDOUT)
-                shutil.copytree('bin/' + lang, self.game + '/client' + str(idx))
+                shutil.copytree(path.join('bin', lang), path.join(self.game, 'client' + str(idx)))
                 check_call(['make', 'remove'], stdout=dev_null, stderr=STDOUT)
 
-        os.mkdir(self.game + '/server/')
-        shutil.copy('/Mjollnir/vigridr/src/games/' + self.pid + '/bin/server', self.game + '/server/server')
+        os.mkdir(path.join(self.game, 'server'))
+        shutil.copy(path.join(VIGRIDR_SRC, 'games', self.pid, 'bin', 'server'), path.join(self.game, 'server', 'server'))
 
     def run(self):
         try:
@@ -98,8 +105,8 @@ class Game():
             server_kwargs = {
                 'args': ['./server'],
                 'cwd': 'server',
-                'stdout': open('server/result', 'w'),
-                'stderr': open('server/output', 'w'),
+                'stdout': open(path.join('server', 'result'), 'w'),
+                'stderr': open(path.join('server', 'output'), 'w'),
             }
             for idx, uid in enumerate(self.uids):
                 server_kwargs['args'].append('--player' + str(idx + 1))
@@ -119,7 +126,7 @@ class Game():
                 client_kwargs.append({
                     'args': ['./client', '--port', '909' + str(idx)],
                     'cwd': 'client' + str(idx + 1),
-                    'stdout': open('client' + str(idx + 1) + '/output', 'w'),
+                    'stdout': open(path.join('client' + str(idx + 1), 'output'), 'w'),
                     'stderr': STDOUT,
                 })
 
@@ -129,7 +136,7 @@ class Game():
                 client_kwargs.append({
                     'args': ['./client', '--port', '9091'],
                     'cwd': 'client1',
-                    'stdout': open('client1/output_', 'w'),
+                    'stdout': open(path.join('client1', 'output_'), 'w'),
                     'stderr': STDOUT,
                 })
 
@@ -171,7 +178,7 @@ class Game():
             raise ExecutionError('Failed to execute: ' + ' '.join(errors))
 
         winner = ''
-        with open('server/result', 'r') as result:
+        with open(path.join('server', 'result'), 'r') as result:
             winner = result.read()
 
         self.logger.info("raw winner: " + winner)
@@ -195,10 +202,7 @@ class Game():
 
 
     def upload(self):
-        dbmanager.upload(dict(self.result), self.game + '/server/logs')
-
-BUILD = '/sandboxes/build/'
-BUILD_ERR = BUILD + 'stderr'
+        dbmanager.upload(dict(self.result), path.join(self.game, 'server', 'logs'))
 
 class Compiler():
     def __init__(self, sid, pid, logger):
@@ -225,15 +229,15 @@ class Compiler():
         self.ext = dbmanager.download(self.siid)
 
     def compile(self):
-        os.chdir('/Mjollnir/vigridr/src/')
+        os.chdir(VIGRIDR_SRC)
         self.logger.info('Changing game code')
         change_game_code(self.pid, False, False, False, NullLogger())
 
-        os.chdir('/Mjollnir/vigridr/')
+        os.chdir('..')
         lang = 'csharp' if self.ext == 'cs' else self.ext
 
         if self.ext == 'cs' or self.ext == 'cpp' or self.ext == 'java':
-            shutil.move('/sandboxes/downloads/' + self.siid, 'src/client/ClientLogic.' + self.ext)
+            shutil.move(path.join(DOWNLOADS, self.siid), path.join('src', 'client', 'ClientLogic.' + self.ext))
             self.logger.info('make client' + lang)
 
             with open(os.devnull, 'w') as dev_null:
@@ -253,7 +257,7 @@ class Compiler():
 
         elif self.ext == 'py':
             filename = BUILD + 'ClientLogic.' + self.ext
-            shutil.move('/sandboxes/downloads/' + self.siid, filename)
+            shutil.move(DOWNLOADS + self.siid, filename)
 
             try:
                 self.logger.info('compile python')
@@ -269,3 +273,4 @@ class Compiler():
 
     def upload(self):
         dbmanager.upload_compilation(self.sid, self.siid, self.result)
+
