@@ -974,14 +974,15 @@ def match(mid):
     if not challenge:
         raise Exception("Couldn't find a challenge with cid " + match['cid'])
 
-    users = list( mongodb.users.find({ 'uid': { '$in': [ user['uid'] for user in match['users'] ] } }) )
+    users = list(mongodb.users.find({'uid': {'$in': [user['uid'] for user in match['users']]}}))
+    users_dict = {user['uid']: user for user in users}
 
     time_delta = datetime.datetime.utcnow() - match['datetime']
-    match['time_since'] = time_since_from_seconds( time_delta.total_seconds() )
+    match['time_since'] = time_since_from_seconds(time_delta.total_seconds())
     match['challenge_name'] = challenge['name']
     match['cid'] = challenge['cid']
     match['visualizer'] = challenge['visualizer']
-    match['usernames'] = [ user['username'] for user in users if user['uid'] in [match_user['uid'] for match_user in match['users']] ]
+    match['usernames'] = [users_dict[user['uid']]['username'] for user in match['users']]
 
     if match['challenge_name'] == 'Wumpus':
         match['winner'] = 'Score: ' + str(match['users'][0]['rank'])
@@ -993,10 +994,7 @@ def match(mid):
         else: 
             match['winner'] = 'Tie!'
 
-    
     match['users'] = users
-
-    
 
     custom_title = ' vs '.join(match['usernames']) + ' on ' + match['challenge_name']
 
