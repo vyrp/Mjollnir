@@ -26,7 +26,7 @@ class NullLogger():
     def info(self, msg):
         pass
 
-class ExecutionError(Exception):
+class ResultError(Exception):
     pass
 
 class SiidNullError(Exception):
@@ -68,7 +68,9 @@ class Game():
         return self
 
     def __exit__(self, t, v, tr):
-        shutil.rmtree(self.game, True)
+        #shutil.rmtree(self.game, True)
+        os.chdir(VIGRIDR_SRC)
+        change_game_code('template', True, False, False, NullLogger())
         if t:
             self.logger.error('From Game.__exit__:')
             for line in traceback.format_exception(t, v, tr):
@@ -157,7 +159,7 @@ class Game():
 
             errors = []
             if server_process.wait() != 0:
-                errors.append('server(%d)' % server_process.returncode)
+                errors.append('server')
 
         finally:
             server_kwargs['stdout'].close()
@@ -166,40 +168,40 @@ class Game():
             for client_kwarg in client_kwargs:
                 client_kwarg['stdout'].close()
 
-        # TODO: write better error message
-        counter = 1
-        for client_process, siid in zip(client_processes, self.siids):
+        for client_process, siid, uid in zip(client_processes, self.siids, self.uids):
             if client_process.returncode != 0:
                 dbmanager.upload_runtime_error(siid)
-                errors.append('client%d(%d)' % (counter, client_process.returncode))
-                counter += 1
+                errors.append(uid)
+
+        # Hack for the case of just one player
+        # TODO: Fix it!
+        if client_processes[1].returncode != 0:
+            errors.append(self.uids[0])
 
         if errors:
-            raise ExecutionError('Failed to execute: ' + ' '.join(errors))
-
-        winner = ''
-        with open(path.join('server', 'result'), 'r') as result:
-            winner = result.read()
-
-        self.logger.info("raw winner: " + winner)
-        if winner == '-1':
-            self.logger.info('Result: tie')
-            for idx in range(len(self.uids)):
-                self.result['users'][idx]['rank'] = 1
-        elif winner[0:3] == '909':
-            for idx in range(len(self.uids)):
-                if idx == int(winner[3:]):
-                    self.logger.info('Winner: ' + self.siids[idx])
-                    self.result['users'][idx]['rank'] = 1
-                else:
-                    self.result['users'][idx]['rank'] = 2
-        elif winner[0:2] == 's:':
-            for idx in range(len(self.uids)):
-                self.logger.info('Score: ' + winner[2:])
-                self.result['users'][idx]['rank'] = int(winner[2:])
+            self.logger.info('Errors in: ' + ' '.join(errors))
+            self.result['errors'] = errors
         else:
-            self.logger.info('Result: error')
+            winner = open(path.join('server', 'result'), 'r').read()
 
+            self.logger.info("raw winner: " + winner)
+            if winner == '-1':
+                self.logger.info('Result: tie')
+                for user in self.result['users']:
+                    user['rank'] = 1
+            elif winner[0:3] == '909':
+                for idx in range(len(self.uids)):
+                    if idx == int(winner[3:]):
+                        self.logger.info('Winner: ' + self.siids[idx])
+                        self.result['users'][idx]['rank'] = 1
+                    else:
+                        self.result['users'][idx]['rank'] = 2
+            elif winner[0:2] == 's:':
+                for user in self.result['users']:
+                    self.logger.info('Score: ' + winner[2:])
+                    user['rank'] = int(winner[2:])
+            else:
+                raise ResultError('Unknown result: ' + winner)
 
     def upload(self):
         dbmanager.upload(dict(self.result), path.join(self.game, 'server', 'logs'))
@@ -216,6 +218,8 @@ class Compiler():
     def __exit__(self, t, v, tr):
         shutil.rmtree(BUILD, True)
         os.mkdir(BUILD)
+        os.chdir(VIGRIDR_SRC)
+        change_game_code('template', True, False, False, NullLogger())
         if t:
             self.logger.error('From Compiler.__exit__:')
             for line in traceback.format_exception(t, v, tr):
