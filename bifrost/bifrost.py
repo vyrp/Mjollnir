@@ -57,10 +57,11 @@ from stormpath.error import Error as StormpathError
 from werkzeug.utils import secure_filename
 from logging.handlers import TimedRotatingFileHandler
 
-from wtforms.fields import TextField
 from wtforms.fields import BooleanField
-from wtforms.fields import SelectField
 from wtforms.fields import IntegerField
+from wtforms.fields import HiddenField
+from wtforms.fields import SelectField
+from wtforms.fields import TextField
 from wtforms.validators import DataRequired
 from wtforms.validators import NumberRange
 from wtforms.validators import Optional
@@ -112,9 +113,10 @@ class PlayForm(Form):
     """
     WTForm to specify a custom match
     """
-    rounds = IntegerField('1', validators=[NumberRange(min = 0, max = 20)])
+    rounds = IntegerField('Rounds', validators=[NumberRange(min = 0, max = 20)])
     challenge = SelectField('Challenge')
     player = SelectField('Opponent', validators=[Optional()])
+    form_type = HiddenField('Form type')
 
 
 
@@ -123,11 +125,12 @@ class TournamentForm(Form):
     """
     WTForm to specify a tournament
     """
-    rounds = IntegerField('1', validators=[NumberRange(min = 0, max = 20)])
+    rounds = IntegerField('Rounds', validators=[NumberRange(min = 0, max = 20)])
     challenge = SelectField('Challenge')
     player1 = SelectField('First Player')
     player2 = SelectField('Second Player')
     all_play = BooleanField('All play')
+    form_type = HiddenField('Form type')
 
 
 
@@ -651,54 +654,59 @@ def group(gid):
     tournamentForm.player2.choices = group_users
 
     if request.method == 'GET':
-        playForm.rounds.data = 1
-
-        tournamentForm.rounds.data = 1
-        tournamentForm.all_play.data = False
-
         return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm)
 
-    if playForm.validate_on_submit():
+    if playForm.is_submitted() and playForm.form_type.data == "play":
+        if playForm.validate():
+            rounds = playForm.rounds.data
+            cid = playForm.challenge.data
+            opponent = playForm.player.data
+            challenge = mongodb.challenges.find_one({'cid': cid})
 
-        rounds = playForm.rounds.data
-        cid = playForm.challenge.data
-        opponent = playForm.player.data
-        challenge = mongodb.challenges.find_one({'cid': cid})
+            if challenge['name'] == 'Wumpus':
+                error = play(cid = cid, uids = [user_id], rounds = rounds)
+            else:
+                error = play(cid = cid, uids = [user_id, opponent], rounds = rounds)
 
-        if challenge['name'] == 'Wumpus':
-            error = play(cid = cid, uids = [user_id], rounds = rounds)
-        else:
-            error = play(cid = cid, uids = [user_id, opponent], rounds = rounds)
-        
-        if error:
-            return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, error = error)
+            if error:
+                return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, error = error)
 
-    if tournamentForm.validate_on_submit():
-
-        rounds = tournamentForm.rounds.data
-        cid = tournamentForm.challenge.data
-        player1 = tournamentForm.player1.data
-        player2 = tournamentForm.player2.data
-        all_play = tournamentForm.all_play.data
-        challenge = mongodb.challenges.find_one({'cid': cid})
-        
-        if all_play:
-            
-            allPlay(cid = cid, rounds = rounds, group = group, challenge_name = challenge['name'])
-            
             return redirect(url_for('.matches'))
-
-        if challenge['name'] == 'Wumpus':
-            error = play(cid = cid, uids = [player1], rounds = rounds)
-
         else:
-            error = play(cid = cid, uids = [player1, player2], rounds = rounds)
-        
-        if error:
+            field, errors = playForm.errors.items()[0]
+            error = playForm[field].label.text + ': ' + ', '.join(errors)
             return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, error = error)
 
+    if tournamentForm.is_submitted() and tournamentForm.form_type.data == "tournament":
+        if tournamentForm.validate():
+            rounds = tournamentForm.rounds.data
+            cid = tournamentForm.challenge.data
+            player1 = tournamentForm.player1.data
+            player2 = tournamentForm.player2.data
+            all_play = tournamentForm.all_play.data
+            challenge = mongodb.challenges.find_one({'cid': cid})
 
-    return redirect(url_for('.matches'))
+            if all_play:
+                allPlay(cid = cid, rounds = rounds, group = group, challenge_name = challenge['name'])
+                return redirect(url_for('.matches'))
+
+            if challenge['name'] == 'Wumpus':
+                error = play(cid = cid, uids = [player1], rounds = rounds)
+            else:
+                error = play(cid = cid, uids = [player1, player2], rounds = rounds)
+
+            if error:
+                return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, error = error)
+
+            return redirect(url_for('.matches'))
+        else:
+            field, errors = tournamentForm.errors.items()[0]
+            error = tournamentForm[field].label.text + ': ' + ', '.join(errors)
+            return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, error = error)
+
+    # Should never reach this line, since either the method is GET, either it's POST.
+    # If it's POST, then either one of the forms has been submitted.
+    raise Exception("Should never reach this line")
 
 
 

@@ -47,7 +47,7 @@
             </div>
 
             <div class="tab-pane fade" id="play">
-              <form method="post" action="">
+              <form method="post" action="#play">
                 <fieldset>
                   <div>
                     <b>{{ playForm.challenge.label }}</b>
@@ -60,10 +60,11 @@
                   </div>
                   <br>
                   <div>
-                    Rounds<br>
-                    {{ playForm.rounds(class="color-white") }}
+                    <b>{{ playForm.rounds.label }}</b>
+                    {{ playForm.rounds(class="color-white", value="1") }}
                   </div>
                   <br>
+                  {{ tournamentForm.form_type(value="play") }}
                   <div class="col-lg-10 col-lg-offset-4">
                     <button type="submit" class="btn btn-primary">Submit</button>
                   </div>
@@ -72,7 +73,7 @@
             </div>
 
             <div class="tab-pane fade" id="organize">
-              <form method="post" action="">
+              <form method="post" action="#organize">
                 <fieldset>
                   <div>
                     <b>{{ tournamentForm.challenge.label }}</b>
@@ -80,7 +81,7 @@
                   </div>
                   <br>
                   <div>
-                    {{ tournamentForm.all_play(class="float-left", id="all_play") }}<b>{{ tournamentForm.all_play.label }}</b>
+                    {{ tournamentForm.all_play(class="float-left", id="all_play", value=False) }}<b>{{ tournamentForm.all_play.label }}</b>
                   </div>
                   <br>
                   <div>
@@ -94,10 +95,11 @@
                   </div>
                   <br>
                   <div>
-                    Rounds<br>
-                    {{ tournamentForm.rounds(class="color-white") }}
+                    <b>{{ tournamentForm.rounds.label }}</b>
+                    {{ tournamentForm.rounds(class="color-white", value="1") }}
                   </div>
                   <br>
+                  {{ tournamentForm.form_type(value="tournament") }}
                   <div class="col-lg-10 col-lg-offset-4">
                     <button type="submit" class="btn btn-primary">Submit</button>
                   </div>
@@ -153,9 +155,7 @@
                 // $br.show();
             }
         });
-    });
 
-    $(function() {
         $('#tournament_challenge').change(function(){
             $player2 = $('#player2').parent();
             if($('#tournament_challenge option:selected').text() === 'Wumpus'){
@@ -164,9 +164,7 @@
                 $player2.css('opacity', '1.0');
             }
         });
-    });
 
-    $(function() {
         $('#all_play').change(function(){
             $player1 = $('#player1').parent();
             $player2 = $('#player2').parent();
@@ -182,8 +180,17 @@
               }
             }
         });
-    });
 
+        var hash = window.location.hash;
+        hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+
+        $('.nav-tabs a').click(function (e) {
+            $(this).tab('show');
+            var scrollmem = $('body').scrollTop();
+            window.location.hash = this.hash;
+            $('html,body').scrollTop(scrollmem);
+        });
+    });
   </script>
 
 {% endblock %}
