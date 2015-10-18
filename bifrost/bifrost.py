@@ -469,12 +469,7 @@ def groups_dashboard():
         abort(404)
 
     #TODO: find right groups using a decent query, common
-    groups = list( mongodb.groups.find() )
-
-    if groups:
-        for group in groups:
-            if group['admin_only'] and username not in group['admins']:
-                groups.remove(group)
+    groups = filter(lambda group: not group['admin_only'] or username in group['admins'], mongodb.groups.find())
 
     return render_template('groups.html', username = username, groups = groups)
 
