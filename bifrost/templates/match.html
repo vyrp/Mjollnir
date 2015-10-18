@@ -27,9 +27,6 @@
           <div class="float-right margin-top-20">
             ({{ match.time_since }})
           </div>
-          <div id="winner" class="float-right margin-right-16">
-            <h3 id="winner">{{ match.winner }}</h3>
-          </div>
         </div>
           <div class="margin-left-16">
               <div class="well margin-top-55">
@@ -45,6 +42,14 @@
                     </tr>
                   </table>
               </div>
+              <div class="well" style="text-align:center">
+              {% if match.error_message %}
+                <span class="label label-warning">Warning</span> {{ match.error_message }}
+              {% else %}
+                Turn <span id="turn_number">0</span>
+                <div id="match_result"></div>
+              {% endif %}
+              </div>
           </div>
 
       </div>
@@ -58,16 +63,20 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js"></script>
   
   <script type="text/javascript">
-    bifrost_mid = "{{ match.mid | safe }}";
-    bifrost_match_users = [
+    var bifrost_mid = "{{ match.mid | safe }}";
+    var bifrost_match_users = [
       {% for user in match.users %}
         { uid: "{{ user.uid | safe }}", username: "{{ user.username | safe }}" },
       {% endfor %}
     ];
-  </script>
+    var match_winner = "{{ match.winner }}";
 
-  <script src="{{ url_for('static', filename='js/' + match.visualizer) }}"></script>
-  <script type="text/javascript">
+    {% if match.error_message %}
+      var match_error = true;
+    {% else %}
+      var match_error = false;
+    {% endif %}
+
     {% if MJOLLNIR_DEBUG %}
       var MJOLLNIR_MATCHES = "http://localhost:5000/mjollnir-matches/";
     {% else %}
@@ -77,8 +86,9 @@
     function load_match_data(callback){
         $.get(MJOLLNIR_MATCHES + bifrost_mid, callback);
     }
-
   </script>
+
+  <script src="{{ url_for('static', filename='js/' + match.visualizer) }}"></script>
   <script src="{{ url_for('static', filename='js/match_player.js') }}"></script>
 
 

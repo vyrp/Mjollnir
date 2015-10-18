@@ -11,13 +11,9 @@
 
 var paper = Raphael("match-player", "100%", "100%");
 
-
-
-
 //
 // Loading bar
 //
-
 paper.customAttributes.arc = function (centerX, centerY, startAngle, endAngle, arcEdge) {
     var radians = Math.PI / 180;
     largeArc = +(endAngle - startAngle > 180);
@@ -43,9 +39,6 @@ var animRotation = Raphael.animation({ transform: 'r360,240,200' }, 2500).repeat
 loading_circle_bar.animate(animRotation);
 loading_circle_bar2.animate(animRotation);
 
-
-
-
 //
 // After the loading bar is running, we download the match info and set a completion callback.
 //
@@ -55,6 +48,8 @@ load_match_data(function (data) {
 
     challenge_player.current_tick = 0;
     challenge_player.total_ticks = challenge_player.match_data.wmList.length;
+    challenge_player.turn_number_element = $("#turn_number");
+    challenge_player.is_result_shown = false;
 
     // Setup replay control functions
     challenge_player.is_paused = true;
@@ -70,12 +65,23 @@ load_match_data(function (data) {
     challenge_player.next_tick = function () {
         if (challenge_player.current_tick + 1 < challenge_player.total_ticks) {
             challenge_player.render_tick(++challenge_player.current_tick);
+            challenge_player.turn_number_element.text(challenge_player.current_tick);
+
+            if (challenge_player.current_tick + 1 == challenge_player.total_ticks) {
+                if (!match_error && !challenge_player.is_result_shown) {
+                    $("#match_result").text(match_winner);
+                    challenge_player.is_result_shown = true;
+                }
+                challenge_player.turn_number_element.text(challenge_player.current_tick + " - END");
+                challenge_player.pause();
+            }
         }
     }
 
     challenge_player.previous_tick = function () {
         if (challenge_player.current_tick > 0) {
             challenge_player.render_tick(--challenge_player.current_tick);
+            challenge_player.turn_number_element.text(challenge_player.current_tick);
         }
     }
 
