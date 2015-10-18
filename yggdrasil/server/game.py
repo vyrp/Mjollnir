@@ -91,7 +91,7 @@ class Game():
         with open(os.devnull, "w") as dev_null:
             for idx, siid, ext in zip(range(1, len(self.siids) + 1), self.siids, self.exts):
                 lang = 'csharp' if ext == 'cs' else ext
-                shutil.move(path.join(DOWNLOADS, siid), path.join('src', 'client', 'ClientLogic.' + ext))
+                shutil.copy(path.join(DOWNLOADS, siid), path.join('src', 'client', 'ClientLogic.' + ext))
                 self.logger.info('make client' + lang)
                 check_call(['make', 'client' + lang], stdout=dev_null, stderr=STDOUT)
                 shutil.copytree(path.join('bin', lang), path.join(self.game, 'client' + str(idx)))
@@ -241,7 +241,7 @@ class Compiler():
         lang = 'csharp' if self.ext == 'cs' else self.ext
 
         if self.ext == 'cs' or self.ext == 'cpp' or self.ext == 'java':
-            shutil.move(path.join(DOWNLOADS, self.siid), path.join('src', 'client', 'ClientLogic.' + self.ext))
+            shutil.copy(path.join(DOWNLOADS, self.siid), path.join('src', 'client', 'ClientLogic.' + self.ext))
             self.logger.info('make client' + lang)
 
             with open(os.devnull, 'w') as dev_null:
@@ -261,7 +261,7 @@ class Compiler():
 
         elif self.ext == 'py':
             filename = BUILD + 'ClientLogic.' + self.ext
-            shutil.move(DOWNLOADS + self.siid, filename)
+            shutil.copy(DOWNLOADS + self.siid, filename)
 
             try:
                 self.logger.info('compile python')
