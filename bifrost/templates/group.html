@@ -142,22 +142,37 @@
 
   <script>
     $(function() {
+        var $opponent = $('#opponent').parent();
+        var $player1 = $('#player1').parent();
+        var $player2 = $('#player2').parent();
+
+        if($('#play_challenge option:selected').text() === 'Wumpus'){
+            $opponent.css('opacity', '0.5');
+        }
+
+        if($('#tournament_challenge option:selected').text() === 'Wumpus'){
+            $player2.css('opacity', '0.5');
+        }
+
+        if($('#all_play').prop('checked')){
+            $player1.css('opacity', '0.5');
+            $player2.css('opacity', '0.5');
+        }
+
         $('#play_challenge').change(function(){
-            $player = $('#opponent').parent();
-            // $br = $player.next();
+            // var $br = $opponent.next();
             if($('#play_challenge option:selected').text() === 'Wumpus'){
-                $player.css('opacity', '0.5');
-                // $player.hide();
+                $opponent.css('opacity', '0.5');
+                // $opponent.hide();
                 // $br.hide();
             } else {
-                $player.css('opacity', '1.0');
-                // $player.show();
+                $opponent.css('opacity', '1.0');
+                // $opponent.show();
                 // $br.show();
             }
         });
 
         $('#tournament_challenge').change(function(){
-            $player2 = $('#player2').parent();
             if($('#tournament_challenge option:selected').text() === 'Wumpus'){
                 $player2.css('opacity', '0.5');
             } else {
@@ -166,11 +181,9 @@
         });
 
         $('#all_play').change(function(){
-            $player1 = $('#player1').parent();
-            $player2 = $('#player2').parent();
             if($('#all_play').prop('checked')){
-              $player1.css('opacity', '0.5');
-              $player2.css('opacity', '0.5');
+                $player1.css('opacity', '0.5');
+                $player2.css('opacity', '0.5');
             } else {
               if($('#tournament_challenge option:selected').text() === 'Wumpus'){
                   $player1.css('opacity', '1.0');
