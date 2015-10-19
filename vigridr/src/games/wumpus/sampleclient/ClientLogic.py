@@ -5,11 +5,32 @@ from GameModel.ttypes import GameStatus
 from random import randint
 
 class Solution:
-    def play_turn(self, wm):
+    def __init__(self, gameInit):
+        """
+        Constructor: called at the beginning of the game.
+        You may do initialization here.
 
+        Parameter:
+            gameInit - not used for Wumpus
+        """
+        print "Python Client"
+
+    def play_turn(self, wm):
+        """
+        This method is called once for every turn.
+        This specific example solution returns a random action.
+
+        Parameter:
+            wm - an instance of the WorldModel class that contains an attribute called sensors of class Sensors.
+                 Sensors contains the boolean attributes: breeze, stench, glitter, bump and scream.
+
+        Returns:
+            A Command instance - a Command contains an attribute called action of class Action.
+                                 Action attributes: FORWARD, TURNRIGHT, TURNLEFT, STAY, SHOOT, GRAB and CLIMB.
+        """
         command = Command(Action())
         move = randint(0, 2)
-        
+
         if move == 0:
             print "FORWARD"
             command.action = Action.FORWARD
@@ -22,5 +43,3 @@ class Solution:
 
         return command
 
-    def __init__(self, gameInit):
-        print gameInit.gameDescription.playerType
