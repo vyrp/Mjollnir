@@ -21,7 +21,8 @@ GameLogic::GameLogic(int32_t playerId1, int32_t playerId2) {
   hasGold_ = false;
   srand(time(NULL));
 
-  initializeWorld_();
+  //initializeWorld_();
+  initializeWorldFromRusselBook_();
 }
 
 void GameLogic::initializeWorld(std::vector<std::vector<WorldSquare>> map) {
@@ -45,12 +46,7 @@ void GameLogic::initializeWorld_(){
 
   // Creating world map
   for(size_t i = 0; i < worldSize_; i++) {
-    std::vector<WorldSquare> row;
-    for(size_t j = 0; j < worldSize_; j++) {
-      WorldSquare ws;
-      row.push_back(ws);
-    }
-    twm_.map.push_back(row);
+    twm_.map.push_back(std::vector<WorldSquare>(worldSize_, WorldSquare()));
   }
 
   // Filling map with pits: 20% of chance of having a pit 
@@ -80,6 +76,37 @@ void GameLogic::initializeWorld_(){
     y = rand() % worldSize_;
   } while ((x == playerPosition_.x && y == playerPosition_.y) || twm_.map[x][y].pit);
   twm_.map[x][y].gold = true;
+
+  for(int32_t i = 0; i < (int32_t)worldSize_; i++) {
+    for(int32_t j = 0; j < (int32_t)worldSize_; j++) {
+      updateWorldSquare_(i, j);
+    }
+  }
+
+  twm_.playerDirection = facing_;
+  twm_.map[playerPosition_.x][playerPosition_.y].player = true;
+  worldModel_.sensors.stench = twm_.map[worldSize_ -1][0].stench;
+  worldModel_.sensors.breeze = twm_.map[worldSize_ -1][0].breeze;
+}
+
+void GameLogic::initializeWorldFromRusselBook_(){
+  // Creating world map
+  for(size_t i = 0; i < worldSize_; i++) {
+    twm_.map.push_back(std::vector<WorldSquare>(worldSize_, WorldSquare()));
+  }
+
+  // Filling map with pits
+  twm_.map[3][2].pit = true;
+  twm_.map[1][2].pit = true;
+  twm_.map[0][3].pit = true;
+
+  // Placing Wumpus
+  twm_.map[1][0].wumpus = true;
+  wumpusPosition_.x = 2;
+  wumpusPosition_.y = 0;
+
+  // Placing gold
+  twm_.map[1][1].gold = true;
 
   for(int32_t i = 0; i < (int32_t)worldSize_; i++) {
     for(int32_t j = 0; j < (int32_t)worldSize_; j++) {
@@ -331,3 +358,4 @@ void GameLogic::setWumpusPosition(int32_t x, int32_t y){
 }
 
 }}  // namespaces
+

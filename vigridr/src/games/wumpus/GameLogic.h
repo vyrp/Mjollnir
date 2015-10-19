@@ -61,6 +61,7 @@ class GameLogic {
    */
  private:
   void initializeWorld_(void);
+  void initializeWorldFromRusselBook_(void);
   bool checkBump_(int32_t x, int32_t y);
   void resetSensors_(void);
   void updateWorldSquare_(int32_t x, int32_t y);
@@ -81,3 +82,4 @@ class GameLogic {
 }}  // namespaces
 
 #endif  // VIGRIDR_SERVER_GAME_LOGIC_H
+

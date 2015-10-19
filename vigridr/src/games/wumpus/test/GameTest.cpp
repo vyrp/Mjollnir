@@ -13,12 +13,7 @@ class GameLogicTest : public ::testing::Test {
     size_t size = game1.getWorldSize();    
     std::vector<std::vector<WorldSquare>> map;
     for(size_t i = 0; i < size; i++) {
-      std::vector<WorldSquare> row;
-      for(size_t j = 0; j < size; j++) {
-        WorldSquare ws;
-        row.push_back(ws);
-      }
-      map.push_back(row);
+      map.push_back(std::vector<WorldSquare>(size, WorldSquare()));
     }
 
     return map;
