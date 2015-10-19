@@ -261,7 +261,7 @@ class Compiler():
 
         elif self.ext == 'py':
             filename = BUILD + 'ClientLogic.' + self.ext
-            shutil.copy(DOWNLOADS + self.siid, filename)
+            shutil.copy(path.join(DOWNLOADS, self.siid), filename)
 
             try:
                 self.logger.info('compile python')
