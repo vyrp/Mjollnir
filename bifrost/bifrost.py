@@ -606,6 +606,154 @@ def editgroup():
 
 
 
+@app.route('/tournament/<tid>')
+def tournament(tid):
+    """
+    Page to visualize a tournament.
+    """
+    tournament = mongodb.tournaments.find_one({ 'tid': tid })
+    if not tournament:
+        abort(404)
+
+    group = mongodb.groups.find_one({'gid': tournament['gid']})
+    if not group:
+        error = "The group where this tournament was held no longer exists"
+
+        return render_template('tournament.html', error = error)
+
+    matches = list( mongodb.matches.find({ 'tid': tid }) )
+
+    names_dict = dict()
+    for match in matches:
+
+        for idx in range(len(match['users'])):
+            
+            uid = match['users'][idx]['uid']
+            
+            if uid not in names_dict:
+                
+                user = mongodb.users.find_one({'uid': uid})
+                names_dict[uid] = dict()
+                if 'given_name' in user and 'surname' in user:
+                    names_dict[uid]['full_name'] = user['given_name'] + ' ' + user['surname']
+                else: 
+                    names_dict[uid]['full_name'] = user['username']
+                names_dict[uid]['username'] = user['username']
+
+            match['users'][idx]['username'] = names_dict[uid]['username']
+            match['users'][idx]['full_name'] = names_dict[uid]['full_name']
+
+        counter = 1
+        if 'errors' in match:
+            for error in match['errors']:
+                match['error_message'] = ''
+                if error == 'server':
+                    match['error_message'] = str(counter) + '. There was a problem in the server. '
+                    counter = counter + 1
+                else:
+                    match['error_message'] = match['error_message'] + str(counter) + '. There was a problem with ' + names_dict[error]['username'] + '\'s submission. '  
+        else:
+            if len(match['users']) == 1:
+                winner = match['users'][0]['rank']
+            else:
+                winner = dict()
+                if match['users'][0]['rank'] == 1 and match['users'][1]['rank'] == 2:
+                    winner['username'] = match['users'][0]['username']
+                    winner['full_name'] = match['users'][0]['username']
+
+                elif match['users'][1]['rank'] == 1 and match['users'][0]['rank'] == 2:
+                    winner['username'] = match['users'][1]['username']
+                    winner['full_name'] = match['users'][1]['username']
+                else:
+                    winner['username'] = 'Tie!'
+                    winner['full_name'] = 'Tie!'
+
+            match['winner'] = winner
+
+
+    if len(matches) < tournament['total_matches']:
+    
+        return render_template('tournament.html', tournament = tournament, matches = matches, names_type = group['users_name_type'])
+    
+    if 'ranking' not in tournament:
+        ranking = make_ranking(matches, tournament, group, names_dict)
+        mongodb.tournaments.update({'tid': tid}, {'$set': {'ranking': ranking}})  
+        tournament['ranking'] = ranking      
+
+    return render_template('tournament.html', tournament = tournament, matches = matches, names_type = group['users_name_type'])
+
+
+
+
+def make_ranking(matches, tournament, group, names_dict):
+
+        d = dict()
+        ranking = list()
+        for match in matches:
+            if tournament['challenge_name'] == 'Wumpus':
+                uid = match['users'][0]['uid'] 
+                score = match['users'][0]['rank']
+                if uid in d:
+                    d[uid].append(score)
+                else:
+                    d[uid] = [score]
+            else:
+                uid1 = match['users'][0]['uid']
+                uid2 = match['users'][1]['uid']
+                rank1 = match['users'][0]['rank']
+                rank2 = match['users'][1]['rank']
+                if rank1 == 1 and rank2 == 2:
+                    score1 = 3
+                    score2 = 0
+                elif rank2 == 1 and rank1 == 2:
+                    score1 = 0
+                    score2 = 3
+                else:
+                    score1 = 1
+                    score2 = 1
+                if uid1 in d:
+                    d[uid1].append(score1)
+                else:
+                    d[uid1] = [score1]
+                if uid2 in d:
+                    d[uid2].append(score2)
+                else:
+                    d[uid2] = [score2]
+
+        if tournament['challenge_name'] == 'Wumpus':
+            for uid in d:
+                total_score = 0
+                rounds = len(d[uid])
+                for score in d[uid]:
+                    total_score = total_score + score
+                total_score = total_score / rounds
+                ranking.append([uid, [total_score]])
+        else:
+           for uid in d:
+                total_score = 0
+                matches_won = 0
+                matches_tie = 0
+                for score in d[uid]:
+                    total_score = total_score + score
+                    if score == 3:
+                        matches_won = matches_won + 1
+                    elif score == 1:
+                        matches_tie = matches_tie + 1
+                ranking.append([uid, [total_score, matches_won, matches_tie]])
+
+        ranking.sort(key = lambda x: x[1][0], reverse = True)
+
+        for row in ranking:
+
+            uid = row[0]
+            row[0] = dict()
+            row[0] = names_dict[uid]
+
+        return ranking
+
+
+
+
 @app.route('/group/<gid>', methods=['GET', 'POST'])
 @login_required
 def group(gid):
@@ -636,8 +784,16 @@ def group(gid):
         if uid != user_id:
             group_users.append((uid, name))
 
-    challenges = mongodb.challenges.find()
+    limit = 5
+    tournaments = list( mongodb.tournaments.find({ 'gid': group['gid']}).sort([('datetime', -1)]).limit(limit) )
+
+    challenges = list( mongodb.challenges.find({}) )
     challenges_choices = [(challenge['cid'], challenge['name']) for challenge in challenges]
+
+    for tournament in tournaments:
+        time_delta = datetime.datetime.utcnow() - tournament['datetime_started']
+        tournament['time_since'] = time_since_from_seconds( time_delta.total_seconds() )
+
 
     # Populating playForm drop down lists
     playForm.challenge.choices = challenges_choices
@@ -649,7 +805,12 @@ def group(gid):
     tournamentForm.player2.choices = group_users
 
     if request.method == 'GET':
-        return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm)
+        playForm.rounds.data = 1
+
+        tournamentForm.rounds.data = 1
+        tournamentForm.all_play.data = False
+
+        return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, tournaments = tournaments)
 
     if playForm.is_submitted() and playForm.form_type.data == "play":
         if playForm.validate():
@@ -670,7 +831,8 @@ def group(gid):
         else:
             field, errors = playForm.errors.items()[0]
             error = playForm[field].label.text + ': ' + ', '.join(errors)
-            return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, error = error)
+            return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, tournament = tournament, error = error)
+
 
     if tournamentForm.is_submitted() and tournamentForm.form_type.data == "tournament":
         if tournamentForm.validate():
@@ -697,7 +859,7 @@ def group(gid):
         else:
             field, errors = tournamentForm.errors.items()[0]
             error = tournamentForm[field].label.text + ': ' + ', '.join(errors)
-            return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, error = error)
+            return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, tournament = tournament, error = error)
 
     # Should never reach this line, since either the method is GET, either it's POST.
     # If it's POST, then either one of the forms has been submitted.
@@ -1062,6 +1224,7 @@ def allPlay(cid, rounds, group, challenge_name):
     document = {
         'tid': tid,
         'cid': cid,
+        'challenge_name': challenge_name,
         'gid': group['gid'],
         'total_matches': total_matches,
         'datetime_started': datetime.datetime.utcnow(),

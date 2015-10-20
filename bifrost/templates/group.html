@@ -33,6 +33,7 @@
             {% if user.username in group.users %}
               <li><a href="#play" data-toggle="tab">Play</a></li>
             {% endif %}
+            <li><a href="#tournaments" data-toggle="tab">Tournaments</a></li>
             {% if is_active_user_in('Dev') or user.username in group.admins %}
               <li><a href="#organize" data-toggle="tab">Organize</a></li>
             {% endif %}
@@ -70,6 +71,29 @@
                   </div>
                 </fieldset>
               </form>
+            </div>
+
+            <div class="tab-pane fade" id="tournaments">
+              {% if tournaments %}
+                <table class="table table-submissions">
+                <thead>
+                  <tr>
+                    <th>Challenge</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for tournament in tournaments %}
+                    <tr>
+                      <td><a href="{{ url_for('.tournament', tid=tournament.tid) }}">{{ tournament.challenge_name }}</a></td>
+                      <td>{{ tournament.time_since }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+                </table>
+              {% else %}
+                No tournaments to show ;(
+              {% endif %}
             </div>
 
             <div class="tab-pane fade" id="organize">
