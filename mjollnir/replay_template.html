@@ -67,6 +67,14 @@
                             </tr>
                           </table>
                         </div>
+                        <div class="well" style="text-align:center">
+                        {% if match.error_message %}
+                          <span class="label label-warning">Warning</span> {{ match.error_message }}
+                        {% else %}
+                          Turn <span id="turn_number">0</span>
+                          <div id="match_result"></div>
+                        {% endif %}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -82,19 +90,26 @@
       <script src="file://{{ mjollnir_assets }}/js/raphael-min.js"></script>
 
       <script type="text/javascript">
-        bifrost_match_users = [
+        var bifrost_match_users = [
           {% for solution in match.solutions %}
             { uid: "{{ solution.id | safe }}", username: "{{ solution.name | safe }}" },
           {% endfor %}
         ];
-      </script>
 
-      <script src="file:///Mjollnir/bifrost/static/js/{{ match.visualizer }}"></script>
-      <script type="text/javascript">
+        var match_winner = "{{ match.winner }}";
+
+        {% if match.error_message %}
+          var match_error = true;
+        {% else %}
+          var match_error = false;
+        {% endif %}
+
         function load_match_data(callback){
             callback('{{ match.log_json }}'); // Single quotes are needed here
         }
       </script>
+
+      <script src="file:///Mjollnir/bifrost/static/js/{{ match.visualizer }}"></script>
       <script src="file:///Mjollnir/bifrost/static/js/match_player.js"></script>
   </body>
 </html>
