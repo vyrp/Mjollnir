@@ -7,10 +7,30 @@ from random import randint
 
 class Solution:
     def __init__(self, gameInit):
+        """
+        Constructor: called at the beginning of the game.
+        You may do initialization here.
+
+        Parameter:
+            gameInit - contains a field named gameDescription, which itself contains a field named myType.
+                       myType is of type int, and can have one of the Marker values: UNMARKED, X and O.
+        """
         print "Python Client"
         print "PlayerType: " + Marker._VALUES_TO_NAMES[gameInit.gameDescription.myType]
 
     def play_turn(self, wm):
+        """
+        This method is called once for every turn.
+        This specific example solution returns a random valid position.
+
+        Parameter:
+            wm - an instance of the WorldModel class that contains a field called table which is a list of lists of ints,
+                 which can have on of the Marker values.
+
+        Returns:
+            A Command instance - a Command contains a field called coordinate of class coordinate.
+                                 A Coordinate contains two fields of type int, x and y.
+        """
         command = Command(Coordinate())
         while True:
             x = randint(0,2)
