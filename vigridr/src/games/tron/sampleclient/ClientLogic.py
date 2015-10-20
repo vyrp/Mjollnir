@@ -21,6 +21,8 @@ class Solution:
                        It also contains a field called gameInfo with another field, worldModel, of type WorldModel, described below.
         """
 
+        print "Python Client"
+
         self.width = gameInit.gameDescription.field.width
         self.height = gameInit.gameDescription.field.height
         self.table = [[-1 for j in range(self.height)] for i in range(self.width)]

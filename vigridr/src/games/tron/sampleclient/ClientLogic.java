@@ -10,6 +10,7 @@ public class ClientLogic {
      *                It also contains an attribute called gameInfo with another attribute, worldModel, of type WorldModel, described below.
      */
     public ClientLogic(GameInit gameInit) {
+        System.out.println("Java Client");
     }
 
     /*
