@@ -125,6 +125,7 @@ import re
 import shutil
 import sys
 
+from contextlib import contextmanager
 from datetime import datetime
 from glob import glob
 from inspect import getdoc
@@ -225,6 +226,37 @@ def _build_game(game, stdout=sys.stdout):
     change_game_code(game, copy_sample_clients=False, copy_tests=False, copy_obj=False, used_logger=_SilentLogger())
     check_call(['make', 'server'], stdout=stdout)
     cache_state(game)
+
+@contextmanager
+def _cd(newdir):
+    """
+    A context managed version of cd.
+    It switches to newdir, and at the end of the with statement,
+    it returns to the dir where it were.
+
+    Parameter:
+        newdir - the directory to go to
+    """
+    prevdir = os.getcwd()
+    os.chdir(os.path.expanduser(newdir))
+    try:
+        yield
+    finally:
+        os.chdir(prevdir)
+
+@contextmanager
+def _silence():
+    """
+    A context manager to use the silent logger.
+    It sets the old logger again at the end.
+    """
+    global logger
+    old_logger = logger
+    logger = _SilentLogger()
+    try:
+        yield
+    finally:
+        logger = old_logger
 
 def _check_correct_folder():
     """
@@ -425,7 +457,7 @@ def build(params, stdout=sys.stdout):
 
     return 0
 
-def create(params):
+def create(params, change_directory=True):
     """
     Creates a new folder for a new game.
     Parameters: <game> <language> <solution_name>
@@ -485,8 +517,9 @@ def create(params):
     logger.info("Sample solution file created in " + folder)
 
     # Creating file with the location so we can go there. See /Mjollnir/mjollnir/include-mjollnir
-    with open(path.expanduser("~/location"), "w") as f:
-        f.write(folder)
+    if change_directory:
+        with open(path.expanduser("~/location"), "w") as f:
+            f.write(folder)
 
     return 0
 
@@ -821,10 +854,28 @@ def run(params):
     # TODO: remove when a 1-player-game actually runs with only 1 client
     #
     # This hack makes a 1-player-game run with 2 clients.
-    # Both are the user's solution, but the second client is ignored by the game server.
+    # It uses the random solution as a virtual opponent.
     if num_players == 1:
-        opponents = [solution_name]
-        opponent_folders = [current_solution_folder]
+        opponent_solution_folder = path.join(SOLUTIONSDIR, game, "random")
+
+        # Create random solution if it does not exist
+        if not path.isdir(opponent_solution_folder):
+            with _silence():
+                ret = create([game, "cs", "random"], change_directory=False) # It could be any programming language
+                if ret != 0:
+                    logger.err("Could not create random solution (for virtual opponent)")
+                    return 1
+
+        # Build random solution if it is not already built
+        if not path.isfile(path.join(opponent_solution_folder, "bin", "client")):
+            with _silence(), _cd(opponent_solution_folder), open(os.devnull, "w") as dev_null:
+                ret = build([], stdout=dev_null)
+                if ret != 0:
+                    logger.err("Could not build random solution (for virtual opponent)")
+                    return 1
+
+        opponents = ["random"]
+        opponent_folders = [opponent_solution_folder]
 
     # Command execution
 
@@ -862,7 +913,7 @@ def run(params):
                 if show_opponents:
                     Popen(client_command % (i+2, path.join(opponent_folders[i], "bin"), port), shell=True)
                 else:
-                    # Run this opponent only in 2s
+                    # Run this opponent only in 2s (client_command has a 'sleep 2' in it)
                     Timer(2, create_opponent_command(i, port)).start()
 
             # Game server
@@ -876,7 +927,7 @@ def run(params):
 
             sleep(0.2) # Let clients end
             for process, opponent in zip(processes, opponents):
-                if process.poll() != 0:
+                if process.wait() != 0:
                     logger.warn("Oponent %s had a runtime error" % opponent)
 
             # Get and show results

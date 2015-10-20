@@ -38,6 +38,7 @@ class Game():
         # Transforming a string of fa list back to a list
         self.siids = ast.literal_eval(siids)
         self.uids = ast.literal_eval(uids)
+        self.num_players = len(self.uids)
         self.pid = pid
         self.logger = logger
         self.mid = str(uuid4())
@@ -86,12 +87,23 @@ class Game():
         self.logger.info('Changing game code')
         change_game_code(self.pid, False, False, False, NullLogger())
 
+        # Hack for the case of just one player
+        # TODO: Fix it!
+        if self.num_players == 1:
+            self.num_players = 2
+            self.uids.append("COMPUTER")
+            self.siids.append("COMPUTER")
+            self.exts.append("py")
+
         os.chdir('..')
         os.mkdir(self.game)
         with open(os.devnull, "w") as dev_null:
-            for idx, siid, ext in zip(range(1, len(self.siids) + 1), self.siids, self.exts):
+            for idx, siid, ext in zip(range(1, self.num_players + 1), self.siids, self.exts):
                 lang = 'csharp' if ext == 'cs' else ext
-                shutil.copy(path.join(DOWNLOADS, siid), path.join('src', 'client', 'ClientLogic.' + ext))
+                if self.siids == "COMPUTER": # 1-player hack
+                    shutil.copy(path.join(VIGRIDR_SRC, 'games', self.pid, 'sampleclient', 'ClientLogic.py'), path.join(VIGRIDR_SRC, 'client', 'ClientLogic.' + ext))
+                else:
+                    shutil.copy(path.join(DOWNLOADS, siid), path.join(VIGRIDR_SRC, 'client', 'ClientLogic.' + ext))
                 self.logger.info('make client' + lang)
                 check_call(['make', 'client' + lang], stdout=dev_null, stderr=STDOUT)
                 shutil.copytree(path.join('bin', lang), path.join(self.game, 'client' + str(idx)))
@@ -113,32 +125,17 @@ class Game():
             for idx, uid in enumerate(self.uids):
                 server_kwargs['args'].append('--player' + str(idx + 1))
                 server_kwargs['args'].append(uid)
-            for idx in range(len(self.uids)):
+            for idx in range(self.num_players):
                 server_kwargs['args'].append('--port' + str(idx + 1))
                 server_kwargs['args'].append('909' + str(idx))
 
-            # Hack for the case of just one player
-            # TODO: Fix it!
-            if len(self.uids) == 1:
-                server_kwargs['args'] = ['./server', '--player1', self.uids[0], '--player2', self.uids[0], '--port1', '9090', '--port2', '9091']
-
             # Construction of client parameters
             client_kwargs = []
-            for idx in range(len(self.uids)):
+            for idx in range(self.num_players):
                 client_kwargs.append({
                     'args': ['./client', '--port', '909' + str(idx)],
                     'cwd': 'client' + str(idx + 1),
                     'stdout': open(path.join('client' + str(idx + 1), 'output'), 'w'),
-                    'stderr': STDOUT,
-                })
-
-            # Hack for the case of just one player
-            # TODO: Fix it!
-            if len(self.uids) == 1:
-                client_kwargs.append({
-                    'args': ['./client', '--port', '9091'],
-                    'cwd': 'client1',
-                    'stdout': open(path.join('client1', 'output_'), 'w'),
                     'stderr': STDOUT,
                 })
 
@@ -173,35 +170,30 @@ class Game():
                 dbmanager.upload_runtime_error(siid)
                 errors.append(uid)
 
-        # Hack for the case of just one player
-        # TODO: Fix it!
-        if client_processes[1].returncode != 0:
-            errors.append(self.uids[0])
-
         if errors:
             self.logger.info('Errors in: ' + ' '.join(errors))
             self.result['errors'] = errors
-        else:
-            winner = open(path.join('server', 'result'), 'r').read()
 
-            self.logger.info("raw winner: " + winner)
-            if winner == '-1':
-                self.logger.info('Result: tie')
-                for user in self.result['users']:
-                    user['rank'] = 1
-            elif winner[0:3] == '909':
-                for idx in range(len(self.uids)):
-                    if idx == int(winner[3:]):
-                        self.logger.info('Winner: ' + self.siids[idx])
-                        self.result['users'][idx]['rank'] = 1
-                    else:
-                        self.result['users'][idx]['rank'] = 2
-            elif winner[0:2] == 's:':
-                for user in self.result['users']:
-                    self.logger.info('Score: ' + winner[2:])
-                    user['rank'] = int(winner[2:])
-            else:
-                raise ResultError('Unknown result: ' + winner)
+        winner = open(path.join('server', 'result'), 'r').read()
+
+        self.logger.info("raw winner: " + winner)
+        if winner == '-1':
+            self.logger.info('Result: tie')
+            for user in self.result['users']:
+                user['rank'] = 1
+        elif winner[0:3] == '909':
+            for idx in range(self.num_players):
+                if idx == int(winner[3:]):
+                    self.logger.info('Winner: ' + self.siids[idx])
+                    self.result['users'][idx]['rank'] = 1
+                else:
+                    self.result['users'][idx]['rank'] = 2
+        elif winner[0:2] == 's:':
+            for user in self.result['users']:
+                self.logger.info('Score: ' + winner[2:])
+                user['rank'] = int(winner[2:])
+        else:
+            raise ResultError('Unknown result: ' + winner)
 
     def upload(self):
         dbmanager.upload(dict(self.result), path.join(self.game, 'server', 'logs'))
