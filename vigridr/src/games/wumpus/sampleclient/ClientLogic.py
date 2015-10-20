@@ -25,10 +25,10 @@ class Solution:
                  Sensors contains the boolean attributes: breeze, stench, glitter, bump and scream.
 
         Returns:
-            A Command instance - a Command contains an attribute called action of class Action.
-                                 Action attributes: FORWARD, TURNRIGHT, TURNLEFT, STAY, SHOOT, GRAB and CLIMB.
+            A Command instance - a Command contains an attribute called action of type int.
+                                 action must be one of the Action attributes: FORWARD, TURNRIGHT, TURNLEFT, STAY, SHOOT, GRAB and CLIMB.
         """
-        command = Command(Action())
+        command = Command()
         move = randint(0, 2)
 
         if move == 0:
