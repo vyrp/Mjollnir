@@ -1,11 +1,32 @@
-public class ClientLogic
-{
-    public ClientLogic(GameInit gameInit)
-    {
+public class ClientLogic {
+    /*
+     * Constructor: called at the beginning of the game.
+     * You may do initialization here.
+     *
+     * Parameter:
+     *     gameInit - contains an attribute named gameDescription, which itself contains attributes myIndex and field.
+     *                myIndex is an int and represents the index of the world model table of your snake.
+     *                field is an instance of the class Field, and contains the attributes width and height, of type int.
+     *                It also contains an attribute called gameInfo with another attribute, worldModel, of type WorldModel, described below.
+     */
+    public ClientLogic(GameInit gameInit) {
     }
 
-    public Command playTurn(WorldModel wm)
-    {
+    /*
+     * This method is called once for every turn.
+     * It returns an empty command. For a more interesting example, see the python sample solution.
+     *
+     * Parameter:
+     *     wm - an instance of the WorldModel class that contains an attribute called players which is a List of Players.
+     *          A Player has an attribute named body which is a List of Coordinates,
+     *          and which represent the coordinates of the body parts of the snake, in order.
+     *          A Coordinate has two attributes, x and y, of type int.
+     *
+     * Returns:
+     *     A Command instance - a Command contains an attribute called direction of type enum Direction.
+     *                          Direction values: RIGHT, UP, LEFT, DOWN.
+     */
+    public Command playTurn(WorldModel wm) {
        return null;
     }
 }
