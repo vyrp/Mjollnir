@@ -32,19 +32,19 @@ def test(requirements, request):
 
 @app.route('/run', methods=['POST'])
 def run_handler():
-    if request.remote_addr != '127.0.0.1':
-        return json.dumps({
-            'status': 'error',
-            'error': '403'
-        }), 403
-    
-
-    requirements = ['siids', 'uids', 'cid']
+    requirements = ['siids', 'uids', 'cid', 'password']
     
     missing = test(requirements, request)
     if missing:
         logger.info('MISSING SOMETHING. Given: ' + str(request.form))
         return missing, 400
+    
+    if request.form['password'] != os.environ['YGG_BUILD_PSWD']:
+        logger.info('%s => %s' % (request.form['sid'], 'Forbidden'))
+        return json.dumps({
+            'status': 'error',
+            'error': '403'
+        }), 403
 
     if 'tid' in request.form: 
         requirements.append('tid')

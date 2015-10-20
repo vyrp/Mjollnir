@@ -1250,7 +1250,8 @@ def play(cid, uids, rounds, tid = None):
 
     values = {  'cid': cid,
                 'siids': [sub['siid'] for sub in subs],
-                'uids': uids }
+                'uids': uids,
+                'password': app.config['YGG_PASSWORD'] }
     if tid:
         values['tid'] = tid
 
