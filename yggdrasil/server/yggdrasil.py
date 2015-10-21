@@ -32,7 +32,7 @@ def test(requirements, request):
 
 @app.route('/run', methods=['POST'])
 def run_handler():
-    requirements = ['siids', 'uids', 'cid', 'password']
+    requirements = ['password', 'siids', 'uids', 'cid']
     
     missing = test(requirements, request)
     if missing:
@@ -49,7 +49,7 @@ def run_handler():
     if 'tid' in request.form: 
         requirements.append('tid')
 
-    response = json.dumps(manager.run(*[request.form[item] for item in requirements]))
+    response = json.dumps(manager.run(*[request.form[item] for item in requirements[1:]]))
     if 'tid' in request.form:
         logger.info('(%s, %s, %s) => %s' % (request.form['siids'], request.form['cid'], request.form['tid'], response))
     else:

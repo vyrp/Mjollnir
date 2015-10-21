@@ -100,7 +100,7 @@ class Game():
         with open(os.devnull, "w") as dev_null:
             for idx, siid, ext in zip(range(1, self.num_players + 1), self.siids, self.exts):
                 lang = 'csharp' if ext == 'cs' else ext
-                if self.siids == "COMPUTER": # 1-player hack
+                if siid == "COMPUTER": # 1-player hack
                     shutil.copy(path.join(VIGRIDR_SRC, 'games', self.pid, 'sampleclient', 'ClientLogic.py'), path.join(VIGRIDR_SRC, 'client', 'ClientLogic.' + ext))
                 else:
                     shutil.copy(path.join(DOWNLOADS, siid), path.join(VIGRIDR_SRC, 'client', 'ClientLogic.' + ext))
