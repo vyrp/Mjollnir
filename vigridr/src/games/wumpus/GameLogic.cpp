@@ -12,7 +12,7 @@ GameLogic::GameLogic(int32_t playerId1, int32_t playerId2) {
   player2_ = playerId2;
   facing_ = RIGHT;
   wumpusAlive_ = true;
-  winner_ = "s:-3000";
+  winner_ = "s:-2000";
   score_ = 0;
   playerPosition_.x = worldSize_ - 1;
   playerPosition_.y = 0;
@@ -321,6 +321,10 @@ WorldModel GameLogic::getWorldModel() const {
 
 bool GameLogic::shouldPrintWorldModel(int32_t playerId){
   return playerId == player1_;
+}
+
+size_t GameLogic::getNumberOfPlayers() const {
+  return numberOfPlayers_;
 }
 
 bool GameLogic::isFinished() const {

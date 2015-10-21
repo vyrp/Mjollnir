@@ -23,6 +23,7 @@ class GameLogic {
   std::string getWinner();
   GameDescription getGameDescription(int32_t playerId) const;
   TotalWorldModel getTotalWorldModel() const;
+  size_t getNumberOfPlayers() const;
 
  private:
   bool isValidCoordinate(Coordinate pos);
@@ -34,6 +35,7 @@ class GameLogic {
   std::string winner_;
   static constexpr int32_t kNoWinner = -1;
   bool hasFinished_;
+  const size_t numberOfPlayers_ = 2;
 
   // Size of the field
   static constexpr int32_t kWidth = 20;

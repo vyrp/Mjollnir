@@ -46,6 +46,7 @@ class GameLogic {
   GameDescription getGameDescription(int32_t playerId) const;
   TotalWorldModel getTotalWorldModel() const;
   void initializeWorld(std::vector<std::vector<WorldSquare>>);
+  size_t getNumberOfPlayers() const;
   void setWumpusPosition(int32_t, int32_t);
   /**
    *  Specific function to use at GameLogicTest test suite
@@ -75,6 +76,7 @@ class GameLogic {
   std::string winner_;
   bool hasFinished_, wumpusAlive_, canShoot_, hasGold_;
   const size_t worldSize_ = 4;
+  const size_t numberOfPlayers_ = 1;
   Direction facing_ = RIGHT;
   Coordinate playerPosition_, wumpusPosition_;
 };

@@ -106,6 +106,10 @@ GameDescription GameLogic::getGameDescription(int32_t playerId) const {
   return gameDescription;
 }
 
+size_t GameLogic::getNumberOfPlayers() const {
+  return numberOfPlayers_;
+}
+
 TotalWorldModel GameLogic::getTotalWorldModel() const {
   return twm_;
 }

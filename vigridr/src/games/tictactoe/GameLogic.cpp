@@ -146,6 +146,10 @@ bool GameLogic::shouldPrintWorldModel(int32_t playerId){
   return true;
 }
 
+size_t GameLogic::getNumberOfPlayers() const {
+  return numberOfPlayers_;
+}
+
 TotalWorldModel GameLogic::getTotalWorldModel() const {
   return twm_;
 }

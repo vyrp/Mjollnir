@@ -67,6 +67,10 @@ class GameLogic {
    *  Should provide initialization info
    */
   GameDescription getGameDescription(int32_t playerId) const;
+  /**
+   * Returns the number of players for the game
+   */
+  size_t getNumberOfPlayers() const;  
 
 
  private:
@@ -77,6 +81,7 @@ class GameLogic {
   std::string winner_;
   static const std::string kNoWinner;
   bool hasFinished_;
+  const size_t numberOfPlayers_ = 2;
 
 };
 

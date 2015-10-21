@@ -145,7 +145,11 @@ void GameManager::updaterTask() {
       int32_t correctPlayer;
       bool errorHappened = !checkCommands(playerTurnData_, correctPlayer);
       if (errorHappened) {
-        std::cout << correctPlayer;
+        if(gameLogic_.getNumberOfPlayers() == 1) {
+          std::cout << gameLogic_.getWinner();
+        } else {
+          std::cout << correctPlayer;
+        }
         break;
       }
       movements = playerTurnData_;  // copy assignment operation
@@ -180,19 +184,30 @@ void GameManager::updaterTask() {
     bool finished = gameLogic_.isFinished();
     std::string winner = gameLogic_.getWinner();
 
-    // if one player sent an invalid command the other one wins
-    if(countWrongPlayers == 1) {
-      winner = std::to_string(correctPlayer);
-      finished = true;
-    } else if (countWrongPlayers == 2) {
-      winner = "-1";
-      finished = true;
+    if(gameLogic_.getNumberOfPlayers() == 1) {
+      if(countWrongPlayers > 0) {
+        winner = gameLogic_.getWinner();
+        finished = true;
+      }
+    } else {
+      // if one player sent an invalid command the other one wins
+      if(countWrongPlayers == 1) {
+          winner = std::to_string(correctPlayer);
+          finished = true;
+        
+        } else if (countWrongPlayers == 2) {
+        winner = "-1";
+        finished = true;
+      }
     }
+    
 
     if(turn_ >= kMaxTurns){
       finished = true;
+      // This only works for wumpus
+      // TODO: implement for 2 players game
+      // TODO: get kMaxTurns from game logic so it can be different for each game
       winner = gameLogic_.getWinner();
-      // if winner is a score, add a penalty to it      
     }
 
     if (finished) {

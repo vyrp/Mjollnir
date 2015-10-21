@@ -20,6 +20,7 @@ class GameLogic {
   std::string getWinner() const;
   GameDescription getGameDescription(int32_t playerId) const;
   TotalWorldModel getTotalWorldModel() const;
+  size_t getNumberOfPlayers() const;
   /**
    *  Specific function to use at GameLogicTest test suite
    */
@@ -48,6 +49,7 @@ class GameLogic {
   std::string winner_;
   bool hasFinished_;
   const size_t boardSize_ = 3;
+  const size_t numberOfPlayers_ = 2;
 };
 
 }}  // namespaces
