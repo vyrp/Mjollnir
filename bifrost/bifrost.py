@@ -16,6 +16,7 @@ import os
 import shutil
 import traceback
 import logging
+import pymongo
 from os import environ
 from uuid import uuid4
 from itertools import chain
@@ -127,8 +128,8 @@ class TournamentForm(Form):
     """
     rounds = IntegerField('Rounds', validators=[NumberRange(min = 0, max = 20)])
     challenge = SelectField('Challenge')
-    player1 = SelectField('First Player')
-    player2 = SelectField('Second Player')
+    player1 = SelectField('First Player', validators=[Optional()])
+    player2 = SelectField('Second Player', validators=[Optional()])
     all_play = BooleanField('All play')
     form_type = HiddenField('Form type')
 
@@ -787,7 +788,7 @@ def group(gid):
             group_users.append((uid, name))
 
     limit = 5
-    tournaments = list( mongodb.tournaments.find({ 'gid': group['gid']}).sort('datetime_started', -1).limit(limit) )
+    tournaments = list( mongodb.tournaments.find({ 'gid': group['gid']}).sort('datetime_started', pymongo.DESCENDING).limit(limit) )
 
     challenges = list( mongodb.challenges.find({}) )
     challenges_choices = [(challenge['cid'], challenge['name']) for challenge in challenges]
@@ -795,7 +796,6 @@ def group(gid):
     for tournament in tournaments:
         time_delta = datetime.datetime.utcnow() - tournament['datetime_started']
         tournament['time_since'] = time_since_from_seconds( time_delta.total_seconds() )
-
 
     # Populating playForm drop down lists
     playForm.challenge.choices = challenges_choices
@@ -833,7 +833,7 @@ def group(gid):
         else:
             field, errors = playForm.errors.items()[0]
             error = playForm[field].label.text + ': ' + ', '.join(errors)
-            return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, tournament = tournament, error = error)
+            return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, tournaments = tournament, error = error)
 
 
     if tournamentForm.is_submitted() and tournamentForm.form_type.data == "tournament":
@@ -861,7 +861,7 @@ def group(gid):
         else:
             field, errors = tournamentForm.errors.items()[0]
             error = tournamentForm[field].label.text + ': ' + ', '.join(errors)
-            return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, tournament = tournament, error = error)
+            return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, tournaments = tournaments, error = error)
 
     # Should never reach this line, since either the method is GET, either it's POST.
     # If it's POST, then either one of the forms has been submitted.
