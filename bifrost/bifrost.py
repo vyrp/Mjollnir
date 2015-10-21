@@ -836,7 +836,7 @@ def group(gid):
             return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, tournaments = tournament, error = error)
 
 
-    if tournamentForm.is_submitted() and tournamentForm.form_type.data == "tournament":
+    if tournamentForm.is_submitted() and tournamentForm.form_type.data == 'tournament':
         if tournamentForm.validate():
             rounds = tournamentForm.rounds.data
             cid = tournamentForm.challenge.data
@@ -846,6 +846,11 @@ def group(gid):
             challenge = mongodb.challenges.find_one({'cid': cid})
 
             if all_play:
+
+                if challenge['name'] != 'Wumpus' and len(group['users']) < 2:
+                    error = 'This group needs at least one more user to held a tournament with this challenge'
+                    return render_template('group.html', group = group, playForm = playForm, tournamentForm = tournamentForm, error = error)
+
                 allPlay(cid = cid, rounds = rounds, group = group, challenge_name = challenge['name'])
                 return redirect(url_for('.matches'))
 
