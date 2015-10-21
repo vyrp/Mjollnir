@@ -785,7 +785,7 @@ def group(gid):
             group_users.append((uid, name))
 
     limit = 5
-    tournaments = list( mongodb.tournaments.find({ 'gid': group['gid']}).sort([('datetime', -1)]).limit(limit) )
+    tournaments = list( mongodb.tournaments.find({ 'gid': group['gid']}).sort('datetime_started', -1).limit(limit) )
 
     challenges = list( mongodb.challenges.find({}) )
     challenges_choices = [(challenge['cid'], challenge['name']) for challenge in challenges]
