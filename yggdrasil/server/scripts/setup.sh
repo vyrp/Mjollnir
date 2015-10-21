@@ -20,3 +20,7 @@ echo "=== Linking daemon files and logs folder ==="
 sudo ln -s /Mjollnir/yggdrasil/server/scripts/yggdrasil.init /etc/init.d/yggdrasil
 sudo ln -s /Mjollnir/jotunheim/jotunheim.init /etc/init.d/jotunheim
 mkdir -p /Mjollnir/yggdrasil/server/logs
+sudo update-rc.d yggdrasil defaults
+
+echo "=== Pymongo ==="
+sudo pip install pymongo==3.0.3
