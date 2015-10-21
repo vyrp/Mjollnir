@@ -275,6 +275,8 @@ void GameLogic::updateWorldModel_(Action action){
       score_--;
       if(twm_.map[playerPosition_.x][playerPosition_.y].gold){
         hasGold_ = true;
+        twm_.map[playerPosition_.x][playerPosition_.y].gold = false;
+        worldModel_.sensors.glitter = false;
       }
       break;
     case CLIMB:

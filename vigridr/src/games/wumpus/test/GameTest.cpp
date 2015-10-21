@@ -291,6 +291,8 @@ TEST_F(GameLogicTest, TestingLeaveCaveWithGold) {
   ASSERT_TRUE(game1.update(command, 9090));
   ASSERT_TRUE(game1.update(command, 9091));
 
+  ASSERT_FALSE(game1.getWorldModel().sensors.glitter);
+
   command.action = Action::TURNLEFT;
   ASSERT_TRUE(game1.update(command, 9090));
   ASSERT_TRUE(game1.update(command, 9091));
