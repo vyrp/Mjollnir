@@ -27,7 +27,7 @@ public class Solution
      *            and which represent the coordinates of the body parts of the snake, in order.
      *            A Coordinate has two properties, X and Y, of type int.
      *     turn - the index of the turn.
-     *            If you receive twice the same number, then it means that you still have some time to think and send another command.
+     *            If you receive twice the same number, don't worry, just ignore it.
      *
      * Returns:
      *     A Command instance - a Command contains a property called Direction of type enum Direction.

@@ -45,7 +45,7 @@ class Solution:
                    and which represent the coordinates of the body parts of the snake, in order.
                    A Coordinate has two fields, x and y, of type int.
             turn - an integer, the index of the turn.
-                   If you receive twice the same number, then it means that you still have some time to think and send another command.
+                   If you receive twice the same number, don't worry, just ignore it.
 
         Returns:
             A Command instance - a Command contains a field called direction of type int,

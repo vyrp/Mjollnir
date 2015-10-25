@@ -26,7 +26,7 @@ public class ClientLogic {
      * Parameters:
      *     wm   - an instance of the WorldModel class that contains an attribute called table which is a List of Lists of Markers.
      *     turn - the index of the turn.
-     *            If you receive twice the same number, then it means that you still have some time to think and send another command.
+     *            If you receive twice the same number, don't worry, just ignore it.
      *
      * Returns:
      *     A Command instance - a Command contains an attribute called coordinate of class coordinate.

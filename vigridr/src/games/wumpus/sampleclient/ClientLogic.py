@@ -24,7 +24,7 @@ class Solution:
             wm -   an instance of the WorldModel class that contains an attribute called sensors of class Sensors.
                    Sensors contains the boolean attributes: breeze, stench, glitter, bump and scream.
             turn - an integer, the index of the turn.
-                   If you receive twice the same number, then it means that you still have some time to think and send another command.
+                   If you receive twice the same number, don't worry, just ignore it.
         Returns:
             A Command instance - a Command contains an attribute called action of type int.
                                  action must be one of the Action attributes: FORWARD, TURNRIGHT, TURNLEFT, STAY, SHOOT, GRAB and CLIMB.

@@ -28,7 +28,7 @@ public class Solution
      *     wm   - an instance of the WorldModel class that contains a property called Sensors of class Sensors.
      *            Sensors contains the boolean properties: Breeze, Stench, Glitter, Bump and Scream.
      *     turn - the index of the turn.
-     *            If you receive twice the same number, then it means that you still have some time to think and send another command.
+     *            If you receive twice the same number, don't worry, just ignore it.
      *
      * Returns:
      *     A Command instance - a Command contains a property called Action of enum Action.

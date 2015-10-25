@@ -39,7 +39,7 @@ void init(const GameInit& gameInit) {
  * Parameters:
  *     wm   - an instance of the WorldModel class that contains a field called table which is a vector of vectors of Markers.
  *     turn - the index of the turn.
- *            If you receive twice the same number, then it means that you still have some time to think and send another command.
+ *            If you receive twice the same number, don't worry, just ignore it.
  *
  * Returns:
  *     A Command instance - a Command contains a field called coordinate of class Coordinate.

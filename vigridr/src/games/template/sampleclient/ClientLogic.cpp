@@ -19,7 +19,7 @@ void init(const GameInit& gameInit) {
  * Parameters:
  *     wm   - depends on the game. It will contain the observable part of the world model.
  *     turn - the index of the turn.
- *            If you receive twice the same number, then it means that you still have some time to think and send another command.
+ *            If you receive twice the same number, don't worry, just ignore it.
  *
  * Returns:
  *     A Command instance - depends on the game. It's your command for this turn.
