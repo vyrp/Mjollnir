@@ -7,12 +7,14 @@ so that the virtual machine's environment is properly updated.
 
 import json
 import os
+import shutil
 import sys
 
 from glob import glob
 from os import path
 from subprocess import CalledProcessError, check_output
 
+MJOLLNIR_SOLUTIONS = path.expanduser("~/mjollnir-solutions")
 MJOLLNIR = "/Mjollnir/mjollnir/"
 BIFROST = "/Mjollnir/bifrost/"
 VIGRIDRSRC = "/Mjollnir/vigridr/src/"
@@ -33,6 +35,20 @@ def _changed(filename_or_foldername):
     """
     return check_output(["git", "diff", "--name-only", "master@{1}", "master", filename_or_foldername]) != ""
 
+def _mjollnir_solutions_folder_changed(mjollnir):
+    if mjollnir.VERSION == "0.1":
+        target_hash = 282429717669259069 # Calculated from the uploaded VM image
+
+        text = ""
+        for solution in sorted(glob(path.join(MJOLLNIR_SOLUTIONS, "*", "*", "*.*"))):
+            text += open(solution).read()
+
+        if hash(text) == target_hash:
+            shutil.rmtree(MJOLLNIR_SOLUTIONS)
+            mjollnir.create(["tictactoe", "cpp", "random"], False)
+            mjollnir.create(["tron", "cs", "random"], False)
+            mjollnir.create(["wumpus", "py", "random"], False)
+
 ## Exported functions ##
 
 def update(mjollnir):
@@ -47,6 +63,8 @@ def update(mjollnir):
         logger.info("Checking for configuration changes...")
         something_changed = False
         dev_null = open(os.devnull, "w")
+
+        _mjollnir_solutions_folder_changed(mjollnir)
 
         if _changed(VIGRIDRSRC):
             logger.info(" * Source code for games changed")
