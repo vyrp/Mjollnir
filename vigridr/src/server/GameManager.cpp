@@ -94,10 +94,12 @@ void GameManager::nextTurn() {
         playerTurnData_[i].setIsTurn(!playerTurnData_[i].isTurn());
     }
   }
-  gameInfo_.cycle++;
   gameInfo_.gameStatus = GameStatus::RUNNING;
   gameInfo_.worldModel = gameLogic_.getWorldModel();
   int32_t playerOnTurn = playerTurnData_[0].isTurn() ? playerTurnData_[0].getId() : playerTurnData_[1].getId();
+  if (gameLogic_.shouldIncrementCycle(playerOnTurn)) {
+    gameInfo_.cycle++;
+  }
   if (gameLogic_.shouldPrintWorldModel(playerOnTurn)){
     GameLogger::printWorldModel(gameInfo_.worldModel, gameLogic_.getTotalWorldModel());
   }

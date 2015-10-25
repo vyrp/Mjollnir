@@ -320,8 +320,11 @@ WorldModel GameLogic::getWorldModel() const {
   return worldModel_;
 }
 
-
 bool GameLogic::shouldPrintWorldModel(int32_t playerId){
+  return playerId == player1_;
+}
+
+bool GameLogic::shouldIncrementCycle(int32_t playerId){
   return playerId == player1_;
 }
 

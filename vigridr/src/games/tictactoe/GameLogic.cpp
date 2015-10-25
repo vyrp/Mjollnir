@@ -146,6 +146,10 @@ bool GameLogic::shouldPrintWorldModel(int32_t playerId){
   return true;
 }
 
+bool GameLogic::shouldIncrementCycle(int32_t playerId){
+  return true;
+}
+
 size_t GameLogic::getNumberOfPlayers() const {
   return numberOfPlayers_;
 }

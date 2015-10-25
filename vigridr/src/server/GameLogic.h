@@ -25,6 +25,12 @@ class GameLogic {
   *  number of players
   */
   bool shouldPrintWorldModel(int32_t playerId);
+
+  /**
+  *  Tells GameManager if it should increment the cycle counter
+  */
+  bool shouldIncrementCycle(int32_t playerId);
+
   /**
    *  Each player has an unique id
    */
