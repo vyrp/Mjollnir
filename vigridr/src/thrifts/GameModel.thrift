@@ -1,5 +1,6 @@
 include "WorldModel.thrift"
 include "GameDescription.thrift"
+include "GameResult.thrift"
 
 namespace cpp mjollnir.vigridr
 
@@ -20,7 +21,8 @@ struct GameInfo {
   3: required i32 cycle,
   4: required i32 updateTimeLimitMs,
   5: required i32 nextWorldModelTimeEstimateMs,
-  6: required bool isMyTurn
+  6: required bool isMyTurn,
+  7: required GameResult.GameResult gameResult
 }
 
 struct GameInit {
