@@ -24,18 +24,21 @@ public class Solution
      * This method is called once for every turn.
      * This specific example solution returns a random action.
      *
-     * Parameter:
-     *     wm - an instance of the WorldModel class that contains a property called Sensors of class Sensors.
-     *          Sensors contains the boolean properties: Breeze, Stench, Glitter, Bump and Scream.
+     * Parameters:
+     *     wm   - an instance of the WorldModel class that contains a property called Sensors of class Sensors.
+     *            Sensors contains the boolean properties: Breeze, Stench, Glitter, Bump and Scream.
+     *     turn - the index of the turn.
+     *            If you receive twice the same number, then it means that you still have some time to think and send another command.
      *
      * Returns:
      *     A Command instance - a Command contains a property called Action of enum Action.
      *                          Action fields: FORWARD, TURNRIGHT, TURNLEFT, STAY, SHOOT, GRAB and CLIMB.
      */
-    public Command playTurn(WorldModel wm) {
+    public Command playTurn(WorldModel wm, int turn) {
         Command command = new Command();
         int move = random.Next(3);
 
+        Console.Write(turn + ": ");
         if (move == 0)
         {
             Console.WriteLine("FORWARD");

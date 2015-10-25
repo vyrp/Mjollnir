@@ -25,18 +25,21 @@ void init(const GameInit& gameInit) {
  * This function is called once for every turn.
  * This specific example solution returns a random action.
  *
- * Parameter:
- *     wm - an instance of the WorldModel class that contains a field called sensors of class Sensors.
- *          Sensors contains the boolean fields: breeze, stench, glitter, bump and scream.
+ * Parameters:
+ *     wm   - an instance of the WorldModel class that contains a field called sensors of class Sensors.
+ *            Sensors contains the boolean fields: breeze, stench, glitter, bump and scream.
+ *     turn - the index of the turn.
+ *            If you receive twice the same number, then it means that you still have some time to think and send another command.
  *
  * Returns:
  *     A Command instance - a Command contains a field called action of enum Action.
  *                          Action fields: FORWARD, TURNRIGHT, TURNLEFT, STAY, SHOOT, GRAB and CLIMB.
  */
-Command playTurn(const WorldModel& wm) {
+Command playTurn(const WorldModel& wm, int32_t turn) {
   Command command;
   int move = rand()%3;
 
+  std::cout << turn << ": ";
   if(move == 0){
     std::cout << "FORWARD" << std::endl;
     command.action = Action::FORWARD;
