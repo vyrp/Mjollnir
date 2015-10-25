@@ -33,17 +33,19 @@ class Solution:
 
         self.me = gameInit.gameDescription.myIndex
 
-    def play_turn(self, wm):
+    def play_turn(self, wm, turn):
         """
         This method is called once for every turn.
         This specific example solution stores a matrix with the snakes bodies (as 0 or 1, with -1 as empty cell)
         and returns a random valid direction.
 
-        Parameter:
-            wm - an instance of the WorldModel class that contains a field called players which is a list of Players.
-                 A Player has a field named body which is a list of Coordinates,
-                 and which represent the coordinates of the body parts of the snake, in order.
-                 A Coordinate has two fields, x and y, of type int.
+        Parameters:
+            wm   - an instance of the WorldModel class that contains a field called players which is a list of Players.
+                   A Player has a field named body which is a list of Coordinates,
+                   and which represent the coordinates of the body parts of the snake, in order.
+                   A Coordinate has two fields, x and y, of type int.
+            turn - an integer, the index of the turn.
+                   If you receive twice the same number, then it means that you still have some time to think and send another command.
 
         Returns:
             A Command instance - a Command contains a field called direction of type int,
@@ -56,6 +58,7 @@ class Solution:
         self.table[wm.players[1].body[-1].x][wm.players[1].body[-1].y] = 1
 
         # Print the board
+        print "Turn", turn
         for i in range(self.width):
             for j in range(self.height):
                 if self.table[i][j] == self.me:

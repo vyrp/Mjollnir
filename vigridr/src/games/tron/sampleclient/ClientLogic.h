@@ -4,7 +4,8 @@
 #include "../thrifts/gen-cpp/Game.h"
 
 mjollnir::vigridr::Command playTurn(
-  const mjollnir::vigridr::WorldModel& wm);
+  const mjollnir::vigridr::WorldModel& wm,
+  int32_t turn);
 
 void init(const mjollnir::vigridr::GameInit& gameInit);
 

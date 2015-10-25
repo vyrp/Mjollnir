@@ -21,17 +21,19 @@ public class Solution
      * This method is called once for every turn.
      * It returns an empty command. For a more interesting example, see the python sample solution.
      *
-     * Parameter:
-     *     wm - an instance of the WorldModel class that contains a property called Players which is a List of Players.
-     *          A Player has a property named Body which is a List of Coordinates,
-     *          and which represent the coordinates of the body parts of the snake, in order.
-     *          A Coordinate has two properties, X and Y, of type int.
+     * Parameters:
+     *     wm   - an instance of the WorldModel class that contains a property called Players which is a List of Players.
+     *            A Player has a property named Body which is a List of Coordinates,
+     *            and which represent the coordinates of the body parts of the snake, in order.
+     *            A Coordinate has two properties, X and Y, of type int.
+     *     turn - the index of the turn.
+     *            If you receive twice the same number, then it means that you still have some time to think and send another command.
      *
      * Returns:
      *     A Command instance - a Command contains a property called Direction of type enum Direction.
      *                          Direction values: RIGHT, UP, LEFT, DOWN.
      */
-    public Command playTurn(WorldModel wm)
+    public Command playTurn(WorldModel wm, int turn)
     {
        return null;
     }
