@@ -23,14 +23,16 @@ public class ClientLogic {
      * This method is called once for every turn.
      * This specific example solution returns a random valid position.
      *
-     * Parameter:
-     *     wm - an instance of the WorldModel class that contains an attribute called table which is a List of Lists of Markers.
+     * Parameters:
+     *     wm   - an instance of the WorldModel class that contains an attribute called table which is a List of Lists of Markers.
+     *     turn - the index of the turn.
+     *            If you receive twice the same number, then it means that you still have some time to think and send another command.
      *
      * Returns:
      *     A Command instance - a Command contains an attribute called coordinate of class coordinate.
      *                          A Coordinate contains two attributes of type int, x and y.
      */
-    public Command playTurn(WorldModel wm) {
+    public Command playTurn(WorldModel wm, int turn) {
         Command command = new Command(new Coordinate());
 
         Marker[][] table = toMatrix(wm.table);
@@ -45,7 +47,7 @@ public class ClientLogic {
             }
         }
 
-        System.out.println(command.coordinate.toString());
+        System.out.println(turn + ": " + command.coordinate.toString());
         return command;
     }
 

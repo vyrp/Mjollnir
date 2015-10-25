@@ -18,14 +18,16 @@ class Solution:
         print "Python Client"
         print "PlayerType: " + Marker._VALUES_TO_NAMES[gameInit.gameDescription.myType]
 
-    def play_turn(self, wm):
+    def play_turn(self, wm, turn):
         """
         This method is called once for every turn.
         This specific example solution returns a random valid position.
 
-        Parameter:
-            wm - an instance of the WorldModel class that contains a field called table which is a list of lists of ints,
-                 which can have on of the Marker values.
+        Parameters:
+            wm   - an instance of the WorldModel class that contains a field called table which is a list of lists of ints,
+                   which can have on of the Marker values.
+            turn - an integer, the index of the turn.
+                   If you receive twice the same number, then it means that you still have some time to think and send another command.
 
         Returns:
             A Command instance - a Command contains a field called coordinate of class coordinate.
@@ -39,7 +41,7 @@ class Solution:
                 command.coordinate.x = x
                 command.coordinate.y = y
                 break
-        print repr(command.coordinate)
+        print "%d: %s" % (turn, repr(command.coordinate))
 
         return command
 
