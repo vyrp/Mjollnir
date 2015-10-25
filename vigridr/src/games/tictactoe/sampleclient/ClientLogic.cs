@@ -52,5 +52,16 @@ public class Solution
         Console.WriteLine(turn + ": " + command.Coordinate.ToString());
         return command;
     }
+
+    /*
+     * This method is called at the end of the game.
+     *
+     * Parameters:
+     *     result - an instance of the GameResult enum, which can be GameResult.WON, GameResult.TIED or GameResult.LOST.
+     */
+    public void EndOfGame(GameResult result)
+    {
+        Console.WriteLine("End of game - " + result.ToString());
+    }
 }
 

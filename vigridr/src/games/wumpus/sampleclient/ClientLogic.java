@@ -49,5 +49,15 @@ public class ClientLogic {
 
         return command;
     }
+
+    /*
+     * This method is called at the end of the game.
+     *
+     * Parameters:
+     *     result - an instance of the GameResult class, that has only one int attribute, score.
+     */
+    public void endOfGame(GameResult result) {
+        System.out.println("End of game - Score: " + result.score);
+    }
 }
 

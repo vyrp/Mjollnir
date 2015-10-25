@@ -24,4 +24,13 @@ public class ClientLogic {
     public Command playTurn(WorldModel wm, int turn) {
        return null;
     }
+
+    /*
+     * This method is called at the end of the game.
+     *
+     * Parameters:
+     *     result - depends on the game. It will contain the result of the game.
+     */
+    void endOfGame(GameResult result) {
+    }
 }

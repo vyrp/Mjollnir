@@ -57,6 +57,7 @@ void playGame(GameClient& client) {
     client.getGameInfo(gameInfo);
     startTime = high_resolution_clock::now();
     if (gameInfo.gameStatus == GameStatus::FINISHED) {
+      endOfGame(gameInfo.gameResult);
       break;
     }
     if (gameInfo.isMyTurn) {

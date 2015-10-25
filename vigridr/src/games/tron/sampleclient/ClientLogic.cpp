@@ -38,3 +38,13 @@ Command playTurn(const WorldModel& wm, int32_t turn) {
   Command command;
   return command;
 }
+
+/*
+ * This function is called at the end of the game.
+ *
+ * Parameters:
+ *     result - an instance of the GameResult enum, which can be GameResult::WON, GameResult::TIED or GameResult::LOST.
+ */
+void endOfGame(const GameResult& result) {
+  std::cout << "End of game - " << _GameResult_VALUES_TO_NAMES.at(result) << std::endl;
+}

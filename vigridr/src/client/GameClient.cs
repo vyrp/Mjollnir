@@ -27,6 +27,7 @@ public class CSharpClient
             stopwatch.Start ();
             if (gameInfo.GameStatus == GameStatus.FINISHED)
             {
+                solution.EndOfGame(gameInfo.GameResult);
                 break;
             }
             if (gameInfo.IsMyTurn)

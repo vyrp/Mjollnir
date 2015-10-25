@@ -9,4 +9,6 @@ mjollnir::vigridr::Command playTurn(
   const mjollnir::vigridr::WorldModel& wm,
   int32_t cycle);
 
+void endOfGame(const mjollnir::vigridr::GameResult& result);
+
 #endif  // VIGRIDR_CLIENT_CLIENT_LOGIC_H

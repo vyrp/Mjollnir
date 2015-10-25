@@ -32,4 +32,14 @@ public class ClientLogic {
     public Command playTurn(WorldModel wm, int turn) {
        return null;
     }
+
+    /*
+     * This method is called at the end of the game.
+     *
+     * Parameters:
+     *     result - an instance of the GameResult enum, which can be GameResult.WON, GameResult.TIED or GameResult.LOST.
+     */
+    public void endOfGame(GameResult result) {
+        System.out.println("End of game - " + result.toString());
+    }
 }

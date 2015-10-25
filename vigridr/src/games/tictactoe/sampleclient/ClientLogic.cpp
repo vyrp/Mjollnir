@@ -8,6 +8,8 @@ using ::mjollnir::vigridr::Command;
 using ::mjollnir::vigridr::Coordinate;
 using ::mjollnir::vigridr::WorldModel;
 using ::mjollnir::vigridr::GameInit;
+using ::mjollnir::vigridr::GameResult;
+using ::mjollnir::vigridr::_GameResult_VALUES_TO_NAMES;
 using ::mjollnir::vigridr::Marker;
 
 /*
@@ -62,3 +64,12 @@ Command playTurn(const WorldModel& wm, int32_t turn) {
   return command;
 }
 
+/*
+ * This function is called at the end of the game.
+ *
+ * Parameters:
+ *     result - an instance of the GameResult enum, which can be GameResult::WON, GameResult::TIED or GameResult::LOST.
+ */
+void endOfGame(const GameResult& result) {
+  std::cout << "End of game - " << _GameResult_VALUES_TO_NAMES.at(result) << std::endl;
+}

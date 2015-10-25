@@ -2,6 +2,7 @@ from WorldModel.ttypes import Marker
 from Command.ttypes import Command
 from Command.ttypes import Coordinate
 from GameModel.ttypes import GameStatus
+from GameResult.ttypes import GameResult
 
 from random import randint
 
@@ -45,3 +46,11 @@ class Solution:
 
         return command
 
+    def end_of_game(self, result):
+        """
+        This method is called at the end of the game.
+
+        Parameters:
+            result - an integer, which can be GameResult.WON, GameResult.TIED or GameResult.LOST.
+        """
+        print "End of game - " + GameResult._VALUES_TO_NAMES[result]

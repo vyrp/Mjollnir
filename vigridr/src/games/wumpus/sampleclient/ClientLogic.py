@@ -45,3 +45,11 @@ class Solution:
 
         return command
 
+    def end_of_game(self, result):
+        """
+        This method is called at the end of the game.
+
+        Parameters:
+            result - an instance of the GameResult class, that has only one int field, score.
+        """
+        print "End of game - Score: " + str(result.score)

@@ -57,5 +57,16 @@ public class Solution
 
         return command;
     }
+
+    /*
+     * This method is called at the end of the game.
+     *
+     * Parameters:
+     *     result - an instance of the GameResult class, that has only one int property, Score.
+     */
+    public void EndOfGame(GameResult result)
+    {
+        Console.WriteLine("End of game - Score: " + result.Score);
+    }
 }
 

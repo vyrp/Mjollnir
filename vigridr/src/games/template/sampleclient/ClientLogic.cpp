@@ -27,3 +27,12 @@ void init(const GameInit& gameInit) {
 Command playTurn(const WorldModel& wm, int32_t turn) {
   return Command();
 }
+
+/*
+ * This function is called at the end of the game.
+ *
+ * Parameters:
+ *     result - depends on the game. It will contain the result of the game.
+ */
+void endOfGame(const GameResult& result) {
+}

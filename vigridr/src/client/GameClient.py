@@ -44,6 +44,7 @@ def play_game(client):
         gameInfo = client.getGameInfo()
         start_time = time.time();
         if gameInfo.gameStatus == GameStatus.FINISHED:
+            solution.end_of_game(gameInfo.gameResult);
             break
         if gameInfo.isMyTurn:
             command = solution.play_turn(gameInfo.worldModel, gameInfo.cycle)

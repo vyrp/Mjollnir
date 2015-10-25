@@ -30,6 +30,7 @@ public class GameClient
             gameInfo = client.getGameInfo();
             start = System.nanoTime();
             if (GameStatus.FINISHED.equals(gameInfo.getGameStatus())) {
+                solution.endOfGame(gameInfo.gameResult);
                 break;
             }
             if (gameInfo.isIsMyTurn()) {

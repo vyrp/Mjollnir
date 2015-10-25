@@ -2,6 +2,8 @@ from Command.ttypes import Command
 from Command.ttypes import Direction
 from WorldModel.ttypes import Coordinate
 from GameModel.ttypes import GameStatus
+from GameResult.ttypes import GameResult
+
 from random import randint, shuffle
 
 dx = [1, 0 , -1, 0]
@@ -84,6 +86,15 @@ class Solution:
                 break
 
         return command
+
+    def end_of_game(self, result):
+        """
+        This method is called at the end of the game.
+
+        Parameters:
+            result - an integer, which can be GameResult.WON, GameResult.TIED or GameResult.LOST.
+        """
+        print "End of game - " + GameResult._VALUES_TO_NAMES[result]
 
     def isValid(self, x, y):
         return x < self.width and y < self.height and x >= 0 and y >= 0

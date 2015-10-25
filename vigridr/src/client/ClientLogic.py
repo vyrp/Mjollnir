@@ -27,3 +27,11 @@ class Solution:
         """
         return None
 
+    def end_of_game(self, result)
+        """
+        This method is called at the end of the game.
+
+        Parameters:
+            result - depends on the game. It will contain the result of the game.
+        """
+        pass

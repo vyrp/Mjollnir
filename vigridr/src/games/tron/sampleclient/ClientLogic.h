@@ -9,4 +9,6 @@ mjollnir::vigridr::Command playTurn(
 
 void init(const mjollnir::vigridr::GameInit& gameInit);
 
+void endOfGame(const mjollnir::vigridr::GameResult& result);
+
 #endif  // VIGRIDR_CLIENT_CLIENT_LOGIC_H

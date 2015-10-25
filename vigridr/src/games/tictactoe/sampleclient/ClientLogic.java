@@ -52,6 +52,16 @@ public class ClientLogic {
     }
 
     /*
+     * This method is called at the end of the game.
+     *
+     * Parameters:
+     *     result - an instance of the GameResult enum, which can be GameResult.WON, GameResult.TIED or GameResult.LOST.
+     */
+    public void endOfGame(GameResult result) {
+        System.out.println("End of game - " + result.toString());
+    }
+
+    /*
      * Helper function to conver a List of List of Markers to an array of arrays of Markers
      * (aka matrix of Markers).
      */

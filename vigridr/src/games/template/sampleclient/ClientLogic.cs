@@ -29,4 +29,14 @@ public class Solution
     {
        return null;
     }
+
+    /*
+     * This method is called at the end of the game.
+     *
+     * Parameters:
+     *     result - depends on the game. It will contain the result of the game.
+     */
+    void EndOfGame(GameResult result)
+    {
+    }
 }
