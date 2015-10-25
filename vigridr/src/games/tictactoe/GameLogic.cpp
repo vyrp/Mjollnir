@@ -158,4 +158,14 @@ TotalWorldModel GameLogic::getTotalWorldModel() const {
   return twm_;
 }
 
+GameResult GameLogic::createGameResult(std::string result, int32_t id) {
+  if (result == std::to_string(id)) {
+    return GameResult::WON;
+  }
+  if (result == "-1") {
+    return GameResult::TIED;
+  }
+  return GameResult::LOST;
+}
+
 }}  // namespaces

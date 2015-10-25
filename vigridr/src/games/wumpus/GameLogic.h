@@ -6,6 +6,7 @@
 #include "../thrifts/gen-cpp/Command_types.h"
 #include "../thrifts/gen-cpp/WorldModel_types.h"
 #include "../thrifts/gen-cpp/GameDescription_types.h"
+#include "../thrifts/gen-cpp/GameResult_types.h"
 
 namespace mjollnir { namespace vigridr {
 
@@ -49,6 +50,8 @@ class GameLogic {
   void initializeWorld(std::vector<std::vector<WorldSquare>>);
   size_t getNumberOfPlayers() const;
   void setWumpusPosition(int32_t, int32_t);
+  GameResult createGameResult(std::string result, int32_t id);
+
   /**
    *  Specific function to use at GameLogicTest test suite
    */

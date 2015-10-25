@@ -366,5 +366,15 @@ void GameLogic::setWumpusPosition(int32_t x, int32_t y){
   wumpusPosition_.y = y;
 }
 
+GameResult GameLogic::createGameResult(std::string result, int32_t id) {
+  GameResult gr;
+  if (result[0] == 's' && result[1] == ':') {
+    gr.score = std::stoi(result.substr(2));
+  } else {
+    gr.score = -3000;
+  }
+  return gr;
+}
+
 }}  // namespaces
 

@@ -13,6 +13,7 @@
 #include "../thrifts/gen-cpp/Command_types.h"
 #include "../thrifts/gen-cpp/WorldModel_types.h"
 #include "../thrifts/gen-cpp/GameModel_types.h"
+#include "../thrifts/gen-cpp/GameResult_types.h"
 
 namespace mjollnir { namespace vigridr {
 
@@ -28,12 +29,14 @@ class PlayerTurnData {
   void setCommand(Command command, time_point time);
   void clearCommand();
   void setIsTurn(bool isTurn);
+  void setGameResult(GameResult result);
 
   Command getCommand() const { return command_; }
   bool isCommandSet() const { return isCommandSet_; }
-  time_point getLastUpdatedTime() const { return lastUpdateTime_; };
+  time_point getLastUpdatedTime() const { return lastUpdateTime_; }
   bool isTurn() const { return isTurn_; }
   int32_t getId() const { return id_; }
+  GameResult getGameResult() const { return result_; }
  private:
   void setId(int32_t id) { id_ = id; }
 
@@ -42,6 +45,7 @@ class PlayerTurnData {
   bool isCommandSet_;
   time_point lastUpdateTime_;
   bool isTurn_;
+  GameResult result_;
 };
 
 /**

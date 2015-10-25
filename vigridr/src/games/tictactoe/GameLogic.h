@@ -4,6 +4,7 @@
 #include "../thrifts/gen-cpp/Command_types.h"
 #include "../thrifts/gen-cpp/WorldModel_types.h"
 #include "../thrifts/gen-cpp/GameDescription_types.h"
+#include "../thrifts/gen-cpp/GameResult_types.h"
 #include <string>
 
 namespace mjollnir { namespace vigridr {
@@ -35,6 +36,11 @@ class GameLogic {
    *  Internally should use setTableCoordinate()
    */
   void setTableCoordinate(const Coordinate& coordinate, Marker marker);
+  /**
+   * Returns the game result for player with id 'id'
+   */
+  GameResult createGameResult(std::string result, int32_t id);
+
  private:
   bool checkLines_(const WorldModel& wm, Marker player);
   bool checkColumns_(const WorldModel& wm, Marker player);

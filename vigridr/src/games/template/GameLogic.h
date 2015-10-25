@@ -8,6 +8,7 @@
 #include "../thrifts/gen-cpp/Command_types.h"
 #include "../thrifts/gen-cpp/WorldModel_types.h"
 #include "../thrifts/gen-cpp/GameDescription_types.h"
+#include "../thrifts/gen-cpp/GameResult_types.h"
 
 namespace mjollnir { namespace vigridr {
 
@@ -73,11 +74,16 @@ class GameLogic {
    *  Should provide initialization info
    */
   GameDescription getGameDescription(int32_t playerId) const;
+
   /**
    * Returns the number of players for the game
    */
-  size_t getNumberOfPlayers() const;  
+  size_t getNumberOfPlayers() const;
 
+  /**
+   * Returns the game result for player with id 'id'
+   */
+  GameResult createGameResult(std::string result, int32_t id);
 
  private:
   WorldModel worldModel_;

@@ -34,6 +34,10 @@ void PlayerTurnData::setIsTurn(bool isTurn) {
   isTurn_ = isTurn;
 }
 
+void PlayerTurnData::setGameResult(GameResult result) {
+  result_ = result;
+}
+
 GameManager::GameManager(int32_t playerId0, int32_t playerId1)
   : idToIdx_({{playerId0, 0}, {playerId1, 1}}),
     idxToId_({{playerId0, playerId1}}),
@@ -149,8 +153,12 @@ void GameManager::updaterTask() {
       if (errorHappened) {
         if(gameLogic_.getNumberOfPlayers() == 1) {
           std::cout << gameLogic_.getWinner();
+          playerTurnData_[0].setGameResult(gameLogic_.createGameResult(gameLogic_.getWinner(), idxToId_[0]));
         } else {
           std::cout << correctPlayer;
+          for (size_t idx = 0; idx < playerTurnData_.size(); ++idx) {
+            playerTurnData_[idx].setGameResult(gameLogic_.createGameResult(std::to_string(correctPlayer), idxToId_[idx]));
+          }
         }
         break;
       }
@@ -194,10 +202,10 @@ void GameManager::updaterTask() {
     } else {
       // if one player sent an invalid command the other one wins
       if(countWrongPlayers == 1) {
-          winner = std::to_string(correctPlayer);
-          finished = true;
-        
-        } else if (countWrongPlayers == 2) {
+        winner = std::to_string(correctPlayer);
+        finished = true;
+
+      } else if (countWrongPlayers == 2) {
         winner = "-1";
         finished = true;
       }
@@ -213,17 +221,13 @@ void GameManager::updaterTask() {
     }
 
     if (finished) {
-
-      // we cannot print std::string on LOG, so we have to change it to a char*
-      char * writable = new char[winner.size() + 1];
-      std::copy(winner.begin(), winner.end(), writable);
-      writable[winner.size()] = '\0';
-
-      LOG("Winner is %s", writable);
-      delete[] writable;
+      LOG("Winner is %s", winner.c_str());
 
       // print winner so that the caller knows how game ended
       std::cout << winner;
+      for (size_t idx = 0; idx < playerTurnData_.size(); ++idx) {
+        playerTurnData_[idx].setGameResult(gameLogic_.createGameResult(winner, idxToId_[idx]));
+      }
       break;
     }
   }
@@ -255,6 +259,7 @@ void GameManager::getGameInfo(GameInfo& gameInfo, int32_t playerId) {
     CHECK(idx != kInvalid, "Unknown player with id %d.", idx);
     std::unique_lock<std::mutex> lock(playerMutex_[idx]);
     gameInfo.isMyTurn = playerTurnData_[idx].isTurn();
+    gameInfo.gameResult = playerTurnData_[idx].getGameResult();
   }
   // LOG("%d %d", gameInfo.updateTimeLimitMs, gameInfo.nextWorldModelTimeEstimateMs);
 }

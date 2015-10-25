@@ -8,6 +8,7 @@
 #include "../thrifts/gen-cpp/Command_types.h"
 #include "../thrifts/gen-cpp/WorldModel_types.h"
 #include "../thrifts/gen-cpp/GameDescription_types.h"
+#include "../thrifts/gen-cpp/GameResult_types.h"
 
 namespace mjollnir { namespace vigridr {
 
@@ -25,6 +26,7 @@ class GameLogic {
   GameDescription getGameDescription(int32_t playerId) const;
   TotalWorldModel getTotalWorldModel() const;
   size_t getNumberOfPlayers() const;
+  GameResult createGameResult(std::string result, int32_t id);
 
  private:
   bool isValidCoordinate(Coordinate pos);

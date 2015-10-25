@@ -52,4 +52,8 @@ size_t GameLogic::getNumberOfPlayers() const {
   return numberOfPlayers_;
 }
 
+GameResult GameLogic::createGameResult(std::string result, int32_t id) {
+  return GameResult();
+}
+
 }}  // namespaces
