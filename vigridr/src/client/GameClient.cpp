@@ -56,12 +56,11 @@ void playGame(GameClient& client) {
     synchronize(gameInfo.nextWorldModelTimeEstimateMs - processingTimeMs);
     client.getGameInfo(gameInfo);
     startTime = high_resolution_clock::now();
-    const WorldModel& wm = gameInfo.worldModel;
     if (gameInfo.gameStatus == GameStatus::FINISHED) {
       break;
     }
     if (gameInfo.isMyTurn) {
-      Command command = playTurn(wm);
+      Command command = playTurn(gameInfo.worldModel, gameInfo.cycle);
       client.sendCommand(command);
     }
   }

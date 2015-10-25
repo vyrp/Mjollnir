@@ -43,11 +43,10 @@ def play_game(client):
         synchronize(gameInfo.nextWorldModelTimeEstimateMs - processing_time_ms)
         gameInfo = client.getGameInfo()
         start_time = time.time();
-        wm = gameInfo.worldModel
         if gameInfo.gameStatus == GameStatus.FINISHED:
             break
         if gameInfo.isMyTurn:
-            command = solution.play_turn(wm)
+            command = solution.play_turn(gameInfo.worldModel, gameInfo.cycle)
             client.sendCommand(command)
         
 

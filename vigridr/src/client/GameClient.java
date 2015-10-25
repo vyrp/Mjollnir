@@ -29,12 +29,11 @@ public class GameClient
             synchronize(gameInfo.getNextWorldModelTimeEstimateMs() - (end - start)/1000000);
             gameInfo = client.getGameInfo();
             start = System.nanoTime();
-            WorldModel wm = gameInfo.getWorldModel();
             if (GameStatus.FINISHED.equals(gameInfo.getGameStatus())) {
                 break;
             }
             if (gameInfo.isIsMyTurn()) {
-                Command command = solution.playTurn(wm);
+                Command command = solution.playTurn(gameInfo.worldModel, gameInfo.cycle);
                 client.sendCommand(command);
             }
         }

@@ -21,19 +21,17 @@ public class CSharpClient
         stopwatch.Start();
         while (true) {
             stopwatch.Stop();
-            synchronize(
-                gameInfo.NextWorldModelTimeEstimateMs - stopwatch.Elapsed.Milliseconds);
+            synchronize(gameInfo.NextWorldModelTimeEstimateMs - stopwatch.Elapsed.Milliseconds);
             gameInfo = client.getGameInfo();
             stopwatch.Reset();
             stopwatch.Start ();
-            WorldModel wm = gameInfo.WorldModel;
             if (gameInfo.GameStatus == GameStatus.FINISHED)
             {
                 break;
             }
             if (gameInfo.IsMyTurn)
             {
-                Command command = solution.playTurn(wm);
+                Command command = solution.playTurn(gameInfo.WorldModel, gameInfo.Cycle);
                 client.sendCommand(command);
             }
         }
