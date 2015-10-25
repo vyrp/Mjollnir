@@ -1,6 +1,8 @@
 #include "GameManager.h"
 
 #include <stdexcept>
+#include <cstdlib>
+#include <ctime>
 
 #include <gflags/gflags.h>
 
@@ -43,6 +45,7 @@ GameManager::GameManager(int32_t playerId0, int32_t playerId1)
     idxToId_({{playerId0, playerId1}}),
     gameLogic_(playerId0, playerId1) {
   turn_ = 0;
+  srand(time(NULL));
   initializeGame(playerId0, playerId1);
   updaterThread_ = std::thread([this]() {
     updaterTask();
@@ -80,7 +83,7 @@ void GameManager::initializeGame(int32_t playerId0, int32_t playerId1) {
   playerTurnData_[0].setIsTurn(true);
   playerTurnData_[1].setIsTurn(true);
   if (config::gameType == GameType::TURN) {
-    playerTurnData_[1].setIsTurn(false);
+    playerTurnData_[rand() % 2].setIsTurn(false);
   }
   gameInfo_.cycle = 0;
   gameInfo_.gameStatus = GameStatus::WAITING;
