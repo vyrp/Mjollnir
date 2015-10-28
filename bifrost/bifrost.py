@@ -471,8 +471,7 @@ def groups_dashboard():
     if not user_in_db:
         abort(404)
 
-    #TODO: find right groups using a decent query, common
-    groups = filter(lambda group: not group['admin_only'] or username in group['admins'], mongodb.groups.find())
+    groups = filter(lambda group: not group['admin_only'] or username in group['admins'] or is_active_user_in('Dev'), mongodb.groups.find())
 
     return render_template('groups.html', username = username, groups = groups)
 
