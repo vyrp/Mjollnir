@@ -1943,6 +1943,73 @@ TEST_F(GameLogic_Functions_Test, PossibleCommandsTest_BearingOff_OnlyOneInBoard)
   ASSERT_EQ(expected, possible_commands_set);
 }
 
+TEST_F(GameLogic_Functions_Test, PossibleCommandsTest_BearingOff_Optional1) {
+  // Setup
+  WorldModel wm;
+  wm.board = EMPTY_BOARD;
+  wm.board[5][WHITE] = 1;
+  wm.board[1][WHITE] = 1;
+  wm.bar = {0, 0};
+  wm.borne_off = {0, 0};
+  wm.dice = {2, 3};
+
+  std::vector<Command> possible_commands_vector = calculate_possibilities_(wm, Command(), WHITE);
+  std::unordered_set<Command> possible_commands_set(possible_commands_vector.begin(), possible_commands_vector.end());
+  std::unordered_set<Command> expected = {
+    make_command({}),
+      make_command({{5, 3}}),
+        make_command({{5, 3}, {3, 0}}),
+      make_command({{1, BEAR_OFF}}),
+        make_command({{1, BEAR_OFF}, {5, 2}}),
+  };
+
+  ASSERT_EQ(expected, possible_commands_set);
+}
+
+TEST_F(GameLogic_Functions_Test, PossibleCommandsTest_BearingOff_Optional2) {
+  // Setup
+  WorldModel wm;
+  wm.board = EMPTY_BOARD;
+  wm.board[5][WHITE] = 1;
+  wm.board[1][WHITE] = 1;
+  wm.bar = {0, 0};
+  wm.borne_off = {0, 0};
+  wm.dice = {3, 2};
+
+  std::vector<Command> possible_commands_vector = calculate_possibilities_(wm, Command(), WHITE);
+  std::unordered_set<Command> possible_commands_set(possible_commands_vector.begin(), possible_commands_vector.end());
+  std::unordered_set<Command> expected = {
+    make_command({}),
+      make_command({{5, 2}}),
+        make_command({{5, 2}, {2, 0}}),
+        make_command({{5, 2}, {1, BEAR_OFF}}),
+  };
+
+  ASSERT_EQ(expected, possible_commands_set);
+}
+
+TEST_F(GameLogic_Functions_Test, PossibleCommandsTest_BearingOff_Optional3) {
+  // Setup
+  WorldModel wm;
+  wm.board = EMPTY_BOARD;
+  wm.board[5][WHITE] = 1;
+  wm.board[1][WHITE] = 1;
+  wm.bar = {0, 0};
+  wm.borne_off = {0, 0};
+  wm.dice = {3, 3, 3, 3};
+
+  std::vector<Command> possible_commands_vector = calculate_possibilities_(wm, Command(), WHITE);
+  std::unordered_set<Command> possible_commands_set(possible_commands_vector.begin(), possible_commands_vector.end());
+  std::unordered_set<Command> expected = {
+    make_command({}),
+      make_command({{5, 2}}),
+        make_command({{5, 2}, {2, BEAR_OFF}}),
+        make_command({{5, 2}, {2, BEAR_OFF}, {1, BEAR_OFF}}),
+  };
+
+  ASSERT_EQ(expected, possible_commands_set);
+}
+
 TEST_F(GameLogic_Functions_Test, PossibleCommandsTest_BlockedBar) {
   // Setup
   WorldModel wm;
