@@ -36,6 +36,10 @@ def _changed(filename_or_foldername):
     return check_output(["git", "diff", "--name-only", "master@{1}", "master", filename_or_foldername]) != ""
 
 def _mjollnir_solutions_folder_changed(mjollnir):
+    guessnumber = "/Mjollnir/vigridr/src/games/guessnumber/"
+    if path.isdir(guessnumber):
+      shutil.rmtree(guessnumber)
+      
     if mjollnir.VERSION == "0.1":
         target_hash = 282429717669259069 # Calculated from the uploaded VM image
 
