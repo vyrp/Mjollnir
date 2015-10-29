@@ -134,7 +134,7 @@ from subprocess import call, CalledProcessError, check_call, check_output, Popen
 from threading import Timer
 from time import sleep, strftime
 
-VERSION = "0.2"
+VERSION = "0.3"
 
 SOLUTIONSDIR = path.expanduser("~/mjollnir-solutions")
 VIGRIDR = "/Mjollnir/vigridr"
