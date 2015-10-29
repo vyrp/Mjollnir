@@ -1264,7 +1264,11 @@ def play(cid, uids, rounds, tid = None):
     encoded = urllib.urlencode(values)
 
     for _ in xrange(rounds):
-        response = urllib2.urlopen('http://127.0.0.1:30403/run', data=encoded)
+        headers = {'Content-type': 'application/x-www-form-urlencoded', 'Accept': 'text/plain'}
+        conn = httplib.HTTPConnection(app.config['YGG_BUILD_URL'])
+        conn.request('POST', '/run', encoded, headers)
+        response = conn.getresponse()
+        conn.close()
 
     return False
 
