@@ -49,6 +49,10 @@
     height: 100px;
 }
 
+.thumbnail {
+    margin-bottom: 6px;
+}
+
 .register, .login, .table-submissions .challenges {
   margin: auto;
   width: 450px;
