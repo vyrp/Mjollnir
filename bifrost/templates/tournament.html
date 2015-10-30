@@ -81,10 +81,12 @@
                     <tr>
                       <th>Rank</th>
                       <th>Player</th>
-                      <th>Average Score</th>
+                      <th>Score</th>
                       {% if tournament.challenge_name != "Wumpus" %}
                         <th>Won</th>
-                        <th>Tie</th>
+                        {% if tournament.challenge_name != "Backgammon" %}
+                          <th>Tie</th>
+                        {% endif %}
                       {% endif %}
                     </tr>
                   </thead>
@@ -100,7 +102,9 @@
                       <td>{{ row[1][0] }}</td>
                       {% if tournament.challenge_name != "Wumpus" %}
                         <td>{{ row[1][1] }}</td>
-                        <td>{{ row[1][2] }}</td>
+                        {% if tournament.challenge_name != "Backgammon" %}
+                          <td>{{ row[1][2] }}</td>
+                        {% endif %}
                       {% endif %}
                     </tr>
                     {% endfor %}

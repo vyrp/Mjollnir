@@ -704,15 +704,23 @@ def make_ranking(matches, tournament, group, names_dict):
                 uid2 = match['users'][1]['uid']
                 rank1 = match['users'][0]['rank']
                 rank2 = match['users'][1]['rank']
-                if rank1 == 1 and rank2 == 2:
-                    score1 = 3
-                    score2 = 0
-                elif rank2 == 1 and rank1 == 2:
-                    score1 = 0
-                    score2 = 3
+                if tournament['challenge_name'] == 'Backgammon':
+                    if rank1 == 1 and rank2 == 2:
+                        score1 = 1
+                        score2 = 0
+                    else:
+                        score1 = 0
+                        score2 = 1
                 else:
-                    score1 = 1
-                    score2 = 1
+                    if rank1 == 1 and rank2 == 2:
+                        score1 = 3
+                        score2 = 0
+                    elif rank2 == 1 and rank1 == 2:
+                        score1 = 0
+                        score2 = 3
+                    else:
+                        score1 = 1
+                        score2 = 1
                 if uid1 in d:
                     d[uid1].append(score1)
                 else:
@@ -737,10 +745,14 @@ def make_ranking(matches, tournament, group, names_dict):
                 matches_tie = 0
                 for score in d[uid]:
                     total_score = total_score + score
-                    if score == 3:
-                        matches_won = matches_won + 1
-                    elif score == 1:
-                        matches_tie = matches_tie + 1
+                    if tournament['challenge_name'] == 'Backgammon':
+                        if score == 1:
+                            matches_won = matches_won + 1
+                    else:
+                        if score == 3:
+                            matches_won = matches_won + 1
+                        elif score == 1:
+                            matches_tie = matches_tie + 1
                 ranking.append([uid, [total_score, matches_won, matches_tie]])
 
         ranking.sort(key = lambda x: x[1][0], reverse = True)
