@@ -9,6 +9,7 @@ import sys
 import traceback
 from subprocess import call, check_call, Popen, STDOUT
 from time import sleep, time
+from threading import Timer
 from uuid import uuid4
 
 path = os.path
@@ -151,11 +152,16 @@ class Game():
                 client_processes.append(Popen(**client_kwarg))
                 sleep(0.5)
 
-            for client_process in client_processes:
-                client_process.wait()
+            def kill_server():
+                server_process.kill()
+                self.logger.info("Killed server")
+            server_timer = Timer(5 * 60, kill_server) # 5 minutes
+            server_timer.start()
+            server_process.wait()
+            server_timer.cancel()
 
             errors = []
-            if server_process.wait() != 0:
+            if server_process.returncode != 0:
                 errors.append('server')
 
         finally:
@@ -165,7 +171,10 @@ class Game():
             for client_kwarg in client_kwargs:
                 client_kwarg['stdout'].close()
 
+        sleep(0.1)
         for client_process, siid, uid in zip(client_processes, self.siids, self.uids):
+            if client_process.poll() is None:
+                client_process.kill()
             if client_process.returncode != 0:
                 dbmanager.upload_runtime_error(siid)
                 errors.append(uid)

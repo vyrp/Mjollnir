@@ -645,15 +645,13 @@ def tournament(tid):
             match['users'][idx]['username'] = names_dict[uid]['username']
             match['users'][idx]['full_name'] = names_dict[uid]['full_name']
 
-        counter = 1
         if 'errors' in match:
-            for error in match['errors']:
-                match['error_message'] = ''
+            match['error_message'] = ''
+            for counter, error in enumerate(match['errors']):
                 if error == 'server':
-                    match['error_message'] = str(counter) + '. There was a problem in the server. '
-                    counter = counter + 1
+                    match['error_message'] += '%d) There was a problem in the server. ' % (counter + 1)
                 else:
-                    match['error_message'] = match['error_message'] + str(counter) + '. There was a problem with ' + names_dict[error]['username'] + '\'s submission. '  
+                    match['error_message'] += '%d) There was a problem with %s\'s submission. ' % (counter + 1, names_dict[error]['username'])
         else:
             if len(match['users']) == 1:
                 winner = match['users'][0]['rank']
