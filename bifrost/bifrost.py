@@ -7,16 +7,17 @@
 """
 
 import boto
-import httplib
 import urllib
-import urllib2
 import datetime
+import json
 import markdown
 import os
 import shutil
 import traceback
 import logging
 import pymongo
+import requests
+import time
 from os import environ
 from uuid import uuid4
 from itertools import chain
@@ -211,7 +212,7 @@ app.config['STORMPATH_API_KEY_SECRET'] = environ.get('STORMPATH_API_KEY_SECRET')
 app.config['STORMPATH_APPLICATION'] = environ.get('STORMPATH_APPLICATION')
 app.config['MONGOLAB_URI'] = environ.get('MONGOLAB_URI')
 app.config['MAX_CONTENT_LENGTH'] = 512 * 1024 # 512kB
-app.config['YGG_BUILD_URL'] = environ.get('YGG_BUILD_URL')
+app.config['YGG_URL'] = environ.get('YGG_BUILD_URL')
 app.config['YGG_PASSWORD'] = environ.get('YGG_PASSWORD')
 
 # Export handy functions to jinja
@@ -1125,16 +1126,18 @@ def submitsolution(challenge_name):
 
         mongodb.submissions.insert(document)
 
-    # Send to build
-    data = urllib.urlencode({'sid': document['sid'], 'cid': document['cid'], 'password': app.config['YGG_PASSWORD']})
-    headers = {'Content-type': 'application/x-www-form-urlencoded', 'Accept': 'text/plain'}
-    conn = httplib.HTTPConnection(app.config['YGG_BUILD_URL'])
-    conn.request('POST', '/build', data, headers)
-    response = conn.getresponse()
-    conn.close()
+    error = ''
+    try:
+        r = requests.post('http://' + app.config['YGG_URL'] + '/build', data={'sid': document['sid'], 'cid': document['cid'], 'password': app.config['YGG_PASSWORD']})
+        if r.status_code != 200:
+            error = 'Could not send solution to build. Please notify system administrators.'
+            logger.warn('[%s] Error %d in /build: %s' % (time.strftime('%Y-%m-%d %H:%M:%S'), r.status_code, r.text))
+    except requests.exceptions.ConnectionError as e:
+        error = 'Connection refused. Yggdrasil may be down. Please notify system administrators.'
+        logger.warn('[%s] Exception in /build: %s' % (time.strftime('%Y-%m-%d %H:%M:%S'), e.message))
 
-    if response.status >= 300:
-        raise Exception("Invalid Yggdrasil status code: " + str(response.status) + "\n" + response.read())
+    if error:
+        return render_template('submitsolution.html', challenge = challenge, error = error), 400
 
     return redirect(url_for('dashboard'))
 
@@ -1265,20 +1268,25 @@ def play(cid, uids, rounds, tid = None):
         subs.append(sub)
 
     values = {  'cid': cid,
-                'siids': [sub['siid'] for sub in subs],
-                'uids': uids,
+                'siids': json.dumps([sub['siid'] for sub in subs]),
+                'uids': json.dumps(uids),
                 'password': app.config['YGG_PASSWORD'] }
     if tid:
         values['tid'] = tid
 
-    encoded = urllib.urlencode(values)
-
     for _ in xrange(rounds):
-        headers = {'Content-type': 'application/x-www-form-urlencoded', 'Accept': 'text/plain'}
-        conn = httplib.HTTPConnection(app.config['YGG_BUILD_URL'])
-        conn.request('POST', '/run', encoded, headers)
-        response = conn.getresponse()
-        conn.close()
+        error = ''
+        try:
+            r = requests.post('http://' + app.config['YGG_URL'] + '/run', data=values)
+            if r.status_code != 200:
+                error = 'Could not send match request. Please notify system administrators.'
+                logger.warn('[%s] Error %d in /run: %s' % (time.strftime('%Y-%m-%d %H:%M:%S'), r.status_code, r.text))
+        except requests.exceptions.ConnectionError as e:
+            error = 'Connection refused. Yggdrasil may be down. Please notify system administrators.'
+            logger.warn('[%s] Exception in /run: %s' % (time.strftime('%Y-%m-%d %H:%M:%S'), e.message))
+
+        if error:
+            return error
 
     return False
 

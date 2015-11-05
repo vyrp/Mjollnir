@@ -1,8 +1,6 @@
-## Imports and Constants ##
-
-import ast
 import datetime
 import dbmanager
+import json
 import os
 import shutil
 import sys
@@ -35,13 +33,13 @@ class SiidNullError(Exception):
 
 class Game():
     def __init__(self, siids, uids, cid, pid, tid, logger):
+        self.logger = logger
         self.exts = []
         # Transforming a string of fa list back to a list
-        self.siids = ast.literal_eval(siids)
-        self.uids = ast.literal_eval(uids)
+        self.siids = json.loads(siids)
+        self.uids = json.loads(uids)
         self.num_players = len(self.uids)
         self.pid = pid
-        self.logger = logger
         self.mid = str(uuid4())
         self.tid = tid
         self.game = path.join(SANDBOXES, 'game-' + self.mid)
