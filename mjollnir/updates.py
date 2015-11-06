@@ -49,9 +49,10 @@ def _mjollnir_solutions_folder_changed(mjollnir):
 
         if hash(text) == target_hash:
             shutil.rmtree(MJOLLNIR_SOLUTIONS)
-            mjollnir.create(["tictactoe", "cpp", "random"], False)
-            mjollnir.create(["tron", "cs", "random"], False)
-            mjollnir.create(["wumpus", "py", "random"], False)
+            mjollnir.create(["tictactoe", "cpp", "random"])
+            mjollnir.create(["tron", "cs", "random"])
+            mjollnir.create(["wumpus", "py", "random"])
+            os.remove(path.expanduser("~/location"))
 
 ## Exported functions ##
 
