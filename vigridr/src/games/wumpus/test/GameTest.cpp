@@ -503,6 +503,293 @@ TEST_F(GameLogicTest, TestingNotDyingOnWumpusAfterShootingIt) {
 }
 
 
+TEST_F(GameLogicTest, TestingNotDyingOnWumpusAfterShootingItFromAdjacentSquareUnder) {
+
+  std::vector<std::vector<WorldSquare>> map = CreateMap();
+  map[0][0].wumpus = true;
+  game1.setWumpusPosition(0, 0);
+  map[3][2].pit = true;
+  map[1][2].gold = true;
+
+  game1.initializeWorld(map);
+
+  Command command; command.action = Action::TURNLEFT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+  
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::SHOOT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  ASSERT_TRUE(game1.getWorldModel().sensors.scream);
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  ASSERT_TRUE(game1.getWorldModel().sensors.stench);
+
+  command.action = Action::TURNRIGHT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::TURNRIGHT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::CLIMB;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_FALSE(game1.update(command, 9091));
+
+  ASSERT_EQ("s:-20", game1.getWinner());
+
+}
+
+
+TEST_F(GameLogicTest, TestingNotDyingOnWumpusAfterShootingItFromAdjacentSquareRight) {
+
+  std::vector<std::vector<WorldSquare>> map = CreateMap();
+  map[0][0].wumpus = true;
+  game1.setWumpusPosition(0, 0);
+  map[3][2].pit = true;
+  map[1][2].gold = true;
+
+  game1.initializeWorld(map);
+
+  Command command; command.action = Action::TURNLEFT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+  
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::TURNRIGHT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::TURNLEFT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::TURNLEFT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  ASSERT_EQ(game1.getTotalWorldModel().playerDirection, Direction::LEFT);
+
+  command.action = Action::SHOOT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  ASSERT_TRUE(game1.getWorldModel().sensors.scream);
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  ASSERT_TRUE(game1.getWorldModel().sensors.stench);
+
+  command.action = Action::TURNLEFT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::CLIMB;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_FALSE(game1.update(command, 9091));
+
+  ASSERT_EQ("s:-24", game1.getWinner());
+
+}
+
+
+TEST_F(GameLogicTest, TestingNotDyingOnWumpusAfterShootingItFromAdjacentSquareLeft) {
+
+  std::vector<std::vector<WorldSquare>> map = CreateMap();
+  map[3][1].wumpus = true;
+  game1.setWumpusPosition(3, 1);
+  map[3][2].pit = true;
+  map[1][2].gold = true;
+
+  game1.initializeWorld(map);
+
+  ASSERT_EQ(game1.getTotalWorldModel().playerDirection, Direction::RIGHT);
+
+  Command command; command.action = Action::SHOOT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+  
+  ASSERT_TRUE(game1.getWorldModel().sensors.scream);
+
+  command.action = Action::CLIMB;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_FALSE(game1.update(command, 9091));
+
+  ASSERT_EQ("s:-11", game1.getWinner());
+
+}
+
+
+TEST_F(GameLogicTest, TestingNotDyingOnWumpusAfterShootingRussel) {
+
+  // std::vector<std::vector<WorldSquare>> map = CreateMap();
+  // map[3][1].wumpus = true;
+  // game1.setWumpusPosition(3, 1);
+  // map[3][2].pit = true;
+  // map[1][2].gold = true;
+
+  // game1.initializeWorld(map);
+
+  ASSERT_EQ(game1.getTotalWorldModel().playerDirection, Direction::RIGHT);
+
+  Command command; 
+
+  command.action = Action::TURNLEFT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+  
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  ASSERT_TRUE(game1.getWorldModel().sensors.stench);
+
+  command.action = Action::SHOOT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  ASSERT_TRUE(game1.getWorldModel().sensors.scream);
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::TURNRIGHT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::TURNRIGHT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::CLIMB;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_FALSE(game1.update(command, 9091));
+
+  ASSERT_EQ("s:-18", game1.getWinner());
+
+}
+
+
+TEST_F(GameLogicTest, TestingNotDyingOnWumpusAfterShootingItFromAdjacentSquareAbove) {
+
+  std::vector<std::vector<WorldSquare>> map = CreateMap();
+  map[3][1].wumpus = true;
+  game1.setWumpusPosition(3, 1);
+  map[3][2].pit = true;
+  map[1][2].gold = true;
+
+  game1.initializeWorld(map);
+
+  Command command; command.action = Action::TURNLEFT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::TURNRIGHT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::TURNRIGHT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::SHOOT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+  
+  ASSERT_TRUE(game1.getWorldModel().sensors.scream);
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::TURNRIGHT;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::FORWARD;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_TRUE(game1.update(command, 9091));
+
+  command.action = Action::CLIMB;
+  ASSERT_TRUE(game1.update(command, 9090));
+  ASSERT_FALSE(game1.update(command, 9091));
+
+  ASSERT_EQ("s:-19", game1.getWinner());
+
+}
+
+
 TEST_F(GameLogicTest, TestingGettingGoldOnWumpusSquare) {
 
   std::vector<std::vector<WorldSquare>> map = CreateMap();

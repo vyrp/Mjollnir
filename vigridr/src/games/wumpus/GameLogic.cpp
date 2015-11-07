@@ -102,7 +102,7 @@ void GameLogic::initializeWorldFromRusselBook_(){
 
   // Placing Wumpus
   twm_.map[1][0].wumpus = true;
-  wumpusPosition_.x = 2;
+  wumpusPosition_.x = 1;
   wumpusPosition_.y = 0;
 
   // Placing gold
