@@ -2,6 +2,9 @@ using System;
 using System.Threading;
 using System.Diagnostics;
 
+// To avoid conflicts
+using ActionDelegate = System.Action;
+
 public class Solution
 {
     public Random random;
