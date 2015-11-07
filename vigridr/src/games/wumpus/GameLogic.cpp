@@ -264,6 +264,9 @@ void GameLogic::updateWorldModel_(Action action){
             }
             break;
         }
+        if (!wumpusAlive_) {
+          twm_.map[wumpusPosition_.x][wumpusPosition_.y].wumpus = false;
+        }
         canShoot_ = false;
       } else {
         score_--;

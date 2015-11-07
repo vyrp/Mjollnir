@@ -130,6 +130,7 @@ void GameLogger::flushLog() {
     }
     n++;
   }
+  twmListPt.push_back(std::make_pair("", createPt(twmList.back())));
   ptree gamePt;
   gamePt.push_back(std::make_pair("wmList", twmListPt));
   gamePt.push_back(std::make_pair("gameDescription",
