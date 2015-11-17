@@ -691,6 +691,34 @@ TEST_F(GameLogic_ExpectedTrue_Test, EndOfGame) {
   ASSERT_EQ("9091", getWinner());
 }
 
+TEST_F(GameLogic_ExpectedTrue_Test, EndOfGame_Only1Checker) {
+  // Setup
+  vector<Point> board(EMPTY_BOARD);
+  board[10][RED] = 1;
+  board[2][WHITE] = 1;
+  setBoard_forTest(board);
+
+  // Initial state
+  auto game_wm = getWorldModel();
+  ASSERT_EQ((Point{1, 0}), game_wm.board[10]);
+  ASSERT_EQ((Point{0, 1}), game_wm.board[2]);
+  ASSERT_EQ((Point{0, 0}), game_wm.bar);
+  ASSERT_EQ((Point{14, 14}), game_wm.borne_off);
+
+  // White move
+  setDice_forTest({3, 4});
+  ASSERT_TRUE(update(make_command({{2, BEAR_OFF}}), 9091));
+
+  game_wm = getWorldModel();
+  ASSERT_EQ((Point{1, 0}), game_wm.board[10]);
+  ASSERT_EQ((Point{0, 0}), game_wm.board[2]);
+  ASSERT_EQ((Point{0, 0}), game_wm.bar);
+  ASSERT_EQ((Point{14, 15}), game_wm.borne_off);
+
+  ASSERT_TRUE(isFinished());
+  ASSERT_EQ("9091", getWinner());
+}
+
 TEST_F(GameLogic_ExpectedTrue_Test, EndOfGameDoubleDice) {
   // Setup
   vector<Point> board(EMPTY_BOARD);
@@ -718,6 +746,34 @@ TEST_F(GameLogic_ExpectedTrue_Test, EndOfGameDoubleDice) {
   ASSERT_EQ((Point{0, 0}), game_wm.board[4]);
   ASSERT_EQ((Point{0, 0}), game_wm.board[3]);
   ASSERT_EQ((Point{0, 0}), game_wm.board[2]);
+  ASSERT_EQ((Point{0, 0}), game_wm.bar);
+  ASSERT_EQ((Point{12, 15}), game_wm.borne_off);
+
+  ASSERT_TRUE(isFinished());
+  ASSERT_EQ(getWinner(), "9091");
+}
+
+TEST_F(GameLogic_ExpectedTrue_Test, EndOfGameDoubleDice_Only1Checker) {
+  // Setup
+  vector<Point> board(EMPTY_BOARD);
+  board[10][RED] = 3;
+  board[4][WHITE] = 1;
+  setBoard_forTest(board);
+
+  // Initial state
+  auto game_wm = getWorldModel();
+  ASSERT_EQ((Point{3, 0}), game_wm.board[10]);
+  ASSERT_EQ((Point{0, 1}), game_wm.board[4]);
+  ASSERT_EQ((Point{0, 0}), game_wm.bar);
+  ASSERT_EQ((Point{12, 14}), game_wm.borne_off);
+
+  // White move
+  setDice_forTest({5, 5});
+  ASSERT_TRUE(update(make_command({{4, BEAR_OFF}}), 9091));
+
+  game_wm = getWorldModel();
+  ASSERT_EQ((Point{3, 0}), game_wm.board[10]);
+  ASSERT_EQ((Point{0, 0}), game_wm.board[4]);
   ASSERT_EQ((Point{0, 0}), game_wm.bar);
   ASSERT_EQ((Point{12, 15}), game_wm.borne_off);
 
@@ -1838,6 +1894,48 @@ TEST_F(GameLogic_Functions_Test, PossibleCommandsTest_BearingOff) {
   ASSERT_EQ(expected, possible_commands_set);
 }
 
+TEST_F(GameLogic_Functions_Test, PossibleCommandsTest_BearingOff_Only1Checker) {
+  // Setup
+  WorldModel wm;
+  wm.board = EMPTY_BOARD;
+  wm.board[15][RED] = 1;
+  wm.board[10][RED] = 1;
+  wm.board[0][WHITE] = 1;
+  wm.bar = {0, 0};
+  wm.borne_off = {13, 14};
+  wm.dice = {5, 3};
+
+  std::vector<Command> possible_commands_vector = calculate_possibilities_(wm, Command(), WHITE);
+  std::unordered_set<Command> possible_commands_set(possible_commands_vector.begin(), possible_commands_vector.end());
+  std::unordered_set<Command> expected = {
+    make_command({}),
+      make_command({{0, BEAR_OFF}}),
+  };
+
+  ASSERT_EQ(expected, possible_commands_set);
+}
+
+TEST_F(GameLogic_Functions_Test, PossibleCommandsTest_BearingOff_DoubleDie_Only1Checker) {
+  // Setup
+  WorldModel wm;
+  wm.board = EMPTY_BOARD;
+  wm.board[15][RED] = 1;
+  wm.board[10][RED] = 1;
+  wm.board[0][WHITE] = 1;
+  wm.bar = {0, 0};
+  wm.borne_off = {13, 14};
+  wm.dice = {3, 3};
+
+  std::vector<Command> possible_commands_vector = calculate_possibilities_(wm, Command(), WHITE);
+  std::unordered_set<Command> possible_commands_set(possible_commands_vector.begin(), possible_commands_vector.end());
+  std::unordered_set<Command> expected = {
+    make_command({}),
+      make_command({{0, BEAR_OFF}}),
+  };
+
+  ASSERT_EQ(expected, possible_commands_set);
+}
+
 TEST_F(GameLogic_Functions_Test, PossibleCommandsTest_BearingOff_MustOnlyHigher) {
   // Setup
   WorldModel wm;
@@ -2056,6 +2154,36 @@ TEST_F(GameLogic_Functions_Test, FilterCommandsTest_BlockedBar) {
   std::unordered_set<Command> filtered_commands(commands.begin(), commands.end());
 
   std::unordered_set<Command> expected_commands = { make_command({{FROM_BAR, 2}}), };
+
+  ASSERT_EQ(expected_commands, filtered_commands);
+}
+
+TEST_F(GameLogic_Functions_Test, FilterCommandsTest_BearOff) {
+  worldModel_.dice = {1, 2};
+  std::vector<Command> commands = filter_commands_({ make_command({}), make_command({{0, BEAR_OFF}}), }, RED);
+  std::unordered_set<Command> filtered_commands(commands.begin(), commands.end());
+
+  std::unordered_set<Command> expected_commands = { make_command({{0, BEAR_OFF}}), };
+
+  ASSERT_EQ(expected_commands, filtered_commands);
+}
+
+TEST_F(GameLogic_Functions_Test, FilterCommandsTest_BearOffDoubleDie) {
+  worldModel_.dice = {1, 1};
+  std::vector<Command> commands = filter_commands_({ make_command({}), make_command({{0, BEAR_OFF}}), }, RED);
+  std::unordered_set<Command> filtered_commands(commands.begin(), commands.end());
+
+  std::unordered_set<Command> expected_commands = { make_command({{0, BEAR_OFF}}), };
+
+  ASSERT_EQ(expected_commands, filtered_commands);
+}
+
+TEST_F(GameLogic_Functions_Test, FilterCommandsTest_BearOffDoubleDie2) {
+  worldModel_.dice = {1, 1};
+  std::vector<Command> commands = filter_commands_({ make_command({}), make_command({{0, BEAR_OFF}}), make_command({{0, BEAR_OFF}, {0, BEAR_OFF}}), }, RED);
+  std::unordered_set<Command> filtered_commands(commands.begin(), commands.end());
+
+  std::unordered_set<Command> expected_commands = { make_command({{0, BEAR_OFF}, {0, BEAR_OFF}}), };
 
   ASSERT_EQ(expected_commands, filtered_commands);
 }

@@ -272,13 +272,15 @@ vector<Command> GameLogic::filter_commands_(const vector<Command>& possible_comm
   filtered_commands.resize(filtered_end - filtered_commands.begin());
 
   // Filtering, so we keep only those commands with the highest dice roll
-  if (max_size == 1) {
+  if (worldModel_.dice[0] != worldModel_.dice[1] && max_size == 1) {
     int32_t max_die = 0;
 
     vector<Command> filtered_commands2;
+    vector<Command> bearoff_commands;
     for (const Command& cmd : filtered_commands) {
       const Move& move = cmd.moves[0];
       if (move.dst == BEAR_OFF) {
+        bearoff_commands.push_back(cmd);
         continue;
       }
 
@@ -300,6 +302,10 @@ vector<Command> GameLogic::filter_commands_(const vector<Command>& possible_comm
     }
 
     filtered_commands = std::move(filtered_commands2);
+
+    for (const Command& cmd : bearoff_commands) {
+      filtered_commands.push_back(cmd);
+    }
   }
 
   return filtered_commands;
