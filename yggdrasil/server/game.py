@@ -183,7 +183,7 @@ class Game():
             self.logger.info('Errors in: ' + ' '.join(errors))
             self.result['errors'] = errors
 
-        if not kiled:
+        if not killed:
             winner = open(path.join('server', 'result'), 'r').read()
 
             self.logger.info("raw winner: " + winner)
