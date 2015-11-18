@@ -150,10 +150,12 @@ class Game():
                 client_processes.append(Popen(**client_kwarg))
                 sleep(0.5)
 
+            killed = False
             def kill_server():
+                killed = True
                 server_process.kill()
                 self.logger.info("Killed server")
-            server_timer = Timer(5 * 60, kill_server) # 5 minutes
+            server_timer = Timer(6 * 60, kill_server) # 6 minutes
             server_timer.start()
             server_process.wait()
             server_timer.cancel()
@@ -181,26 +183,27 @@ class Game():
             self.logger.info('Errors in: ' + ' '.join(errors))
             self.result['errors'] = errors
 
-        winner = open(path.join('server', 'result'), 'r').read()
+        if not kiled:
+            winner = open(path.join('server', 'result'), 'r').read()
 
-        self.logger.info("raw winner: " + winner)
-        if winner == '-1':
-            self.logger.info('Result: tie')
-            for user in self.result['users']:
-                user['rank'] = 1
-        elif winner[0:3] == '909':
-            for idx in range(self.num_players):
-                if idx == int(winner[3:]):
-                    self.logger.info('Winner: ' + self.siids[idx])
-                    self.result['users'][idx]['rank'] = 1
-                else:
-                    self.result['users'][idx]['rank'] = 2
-        elif winner[0:2] == 's:':
-            for user in self.result['users']:
-                self.logger.info('Score: ' + winner[2:])
-                user['rank'] = int(winner[2:])
-        else:
-            raise ResultError('Unknown result: ' + winner)
+            self.logger.info("raw winner: " + winner)
+            if winner == '-1':
+                self.logger.info('Result: tie')
+                for user in self.result['users']:
+                    user['rank'] = 1
+            elif winner[0:3] == '909':
+                for idx in range(self.num_players):
+                    if idx == int(winner[3:]):
+                        self.logger.info('Winner: ' + self.siids[idx])
+                        self.result['users'][idx]['rank'] = 1
+                    else:
+                        self.result['users'][idx]['rank'] = 2
+            elif winner[0:2] == 's:':
+                for user in self.result['users']:
+                    self.logger.info('Score: ' + winner[2:])
+                    user['rank'] = int(winner[2:])
+            else:
+                raise ResultError('Unknown result: ' + winner)
 
     def upload(self):
         dbmanager.upload(dict(self.result), path.join(self.game, 'server', 'logs'))
